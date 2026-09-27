@@ -1,86 +1,24 @@
 {
-  "schema_version": 1,
-  "flow_id": "FLOW-COMMAND",
-  "title": "Remote command authorization flow",
-  "purpose": "Verify each remote command, enforce local policy, execute only approved capabilities, and report bounded results.",
-  "critical": true,
-  "entry_condition": "A paired device receives a command request.",
-  "authority": "The local PC agent policy engine is the final execution authority.",
-  "states": [
-    "requested",
-    "verified",
-    "policy_checked",
-    "approved_or_denied",
-    "executed_or_rejected",
-    "reported"
+  "schema_version":1,
+  "flow_id":"FLOW-COMMAND",
+  "title":"Remote command authorization flow",
+  "purpose":"Verify each command, enforce local policy, execute only automatically allowed or separately trusted-approved capabilities, and report bounded results.",
+  "critical":true,
+  "entry_condition":"A structured capability request reaches the local agent after transport authentication.",
+  "authority":"The local PC agent policy engine is the final execution authority.",
+  "states":["requested","verified","policy_checked","approval_required_or_allowed_or_denied","executed_or_rejected","reported"],
+  "transitions":[
+    {"from":"requested","to":"verified","action":"verify envelope signature freshness and nonce","side_effects":["record accepted nonce after successful verification"]},
+    {"from":"verified","to":"policy_checked","action":"evaluate local capability policy","side_effects":[]},
+    {"from":"policy_checked","to":"approval_required_or_allowed_or_denied","action":"resolve automatic allow approval-required or deny","side_effects":[]},
+    {"from":"approval_required_or_allowed_or_denied","to":"executed_or_rejected","action":"Phase 1 automatic dispatcher executes only read list status and diff; privileged tools stop before side effects","side_effects":["read-only local resource access for automatically allowed tools"]},
+    {"from":"executed_or_rejected","to":"reported","action":"return bounded result or policy error","side_effects":[]}
   ],
-  "transitions": [
-    {
-      "from": "requested",
-      "to": "verified",
-      "action": "verify envelope signature, freshness, and nonce",
-      "side_effects": [
-        "record accepted nonce after successful verification"
-      ]
-    },
-    {
-      "from": "verified",
-      "to": "policy_checked",
-      "action": "evaluate local device policy",
-      "side_effects": []
-    },
-    {
-      "from": "policy_checked",
-      "to": "approved_or_denied",
-      "action": "resolve allow, deny, or explicit user approval",
-      "side_effects": [
-        "may request local user approval"
-      ]
-    },
-    {
-      "from": "approved_or_denied",
-      "to": "executed_or_rejected",
-      "action": "execute only an approved structured capability",
-      "side_effects": [
-        "may access locally authorized resources"
-      ]
-    },
-    {
-      "from": "executed_or_rejected",
-      "to": "reported",
-      "action": "return bounded result and audit metadata",
-      "side_effects": [
-        "append audit event when audit subsystem exists"
-      ]
-    }
-  ],
-  "invariants": [
-    "verification precedes execution",
-    "policy decision is local authority",
-    "denied command has no execution side effect"
-  ],
-  "failure_behavior": [
-    "fail closed on invalid envelope",
-    "fail closed on workspace escape",
-    "return a bounded error result without executing denied commands"
-  ],
-  "restart_behavior": [
-    "reconnect outbound session",
-    "discard expired queued commands",
-    "restart-safe nonce replay protection remains OPEN until durable replay state or per-start session rotation is implemented"
-  ],
-  "rollback_behavior": [
-    "disable affected capability",
-    "revert candidate commit if acceptance regression is confirmed"
-  ],
-  "source_owners": [
-    "internal/protocol",
-    "internal/policy",
-    "future internal/executor"
-  ],
-  "tests": [
-    "internal/protocol/envelope_test.go",
-    "internal/policy/pathguard_test.go"
-  ],
-  "sequence_session": "docs/sequence/phase-0.session.json"
+  "invariants":["verification precedes future remote execution","local policy is final execution authority","remote payload cannot self-assert trusted approval","approval-required automatic requests have no privileged side effect","raw shell and unknown capabilities deny by default"],
+  "failure_behavior":["fail closed on invalid envelope","fail closed on filesystem escape","fail closed on unknown or shell capability","return approval-required without executing privileged automatic requests"],
+  "restart_behavior":["discard expired queued commands after future reconnect","restart-safe nonce replay remains OPEN until durable state or per-start session rotation"],
+  "rollback_behavior":["disable affected capability","revert candidate commit if acceptance regression is confirmed"],
+  "source_owners":["internal/protocol","internal/policy","internal/executor"],
+  "tests":["internal/protocol/envelope_test.go","internal/executor/filesystem_test.go","internal/executor/process_test.go","internal/executor/git_test.go","internal/policy/capability_test.go","internal/executor/dispatcher_test.go"],
+  "sequence_session":"docs/sequence/phase-1.session.json"
 }

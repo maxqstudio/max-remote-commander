@@ -62,15 +62,10 @@ jobs:
       - name: Generate Go-aware DURING actual sequence evidence
         shell: bash
         run: |
-          python .workflow/tools/generate_sequence_actual.py \
-            --root "$GITHUB_WORKSPACE" \
-            --output-json docs/sequence/generated/phase-0.actual.json \
-            --output-mermaid docs/sequence/generated/phase-0.actual.mmd \
-            --entry "internal/protocol/envelope.go::CommandEnvelope.Verify" \
-            --entry "internal/policy/pathguard.go::Workspace.Resolve"
+          python .workflow/tools/generate_sequence_actual.py             --root "$GITHUB_WORKSPACE"             --output-json docs/sequence/generated/phase-1.actual.json             --output-mermaid docs/sequence/generated/phase-1.actual.mmd             --entry "internal/executor/dispatcher.go::Dispatcher.Dispatch"             --entry "internal/policy/capability.go::AuthorizeAutomatic"
       - name: Validate sequence contract
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-0.session.json
+        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-1.session.json
       - name: Validate generated docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"

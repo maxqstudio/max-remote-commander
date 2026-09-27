@@ -1,0 +1,44 @@
+name: Governance Sync
+
+on:
+  push:
+    branches: ['sync/**']
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Synchronize deterministic Project Truth
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Guard sync branch
+        shell: bash
+        run: |
+          case "$GITHUB_REF_NAME" in
+            sync/*) ;;
+            *) echo "Refusing write-enabled governance sync outside sync/**"; exit 1 ;;
+          esac
+      - name: Checkout pinned Skill_Workflow
+        shell: bash
+        run: |
+          git clone https://github.com/maxqstudio/Skill_Workflow.git "$RUNNER_TEMP/Skill_Workflow"
+          git -C "$RUNNER_TEMP/Skill_Workflow" checkout 9e22feddb8f94e8c0f1af6a33e14b64de5068f8f
+      - name: Synchronize Project Truth
+        shell: bash
+        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/sync_project_truth.py" --root "$GITHUB_WORKSPACE"
+      - name: Commit deterministic tracked outputs
+        shell: bash
+        run: |
+          git add .workflow/acceptance.json .workflow/generated docs
+          if git diff --cached --quiet; then
+            echo "No deterministic governance changes"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: sync Phase 1 project truth"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi

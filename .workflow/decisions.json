@@ -1,26 +1,10 @@
 {
-  "schema_version": 1,
-  "decisions": [
-    {
-      "id": "DEC-001",
-      "title": "Go for agent and relay core",
-      "status": "ACCEPTED",
-      "decision": "Use Go for the device agent and relay-server core.",
-      "rationale": "Single-binary cross-platform distribution, straightforward concurrency, and a small runtime dependency surface."
-    },
-    {
-      "id": "DEC-002",
-      "title": "Structured capabilities before raw shell",
-      "status": "ACCEPTED",
-      "decision": "Structured capabilities are the default execution interface; raw shell is privileged.",
-      "rationale": "Reduce prompt-injection blast radius and keep local policy decisions explicit and auditable."
-    },
-    {
-      "id": "DEC-003",
-      "title": "Outbound-only device networking",
-      "status": "ACCEPTED",
-      "decision": "Normal device connectivity originates outbound from the user PC.",
-      "rationale": "Avoid exposing inbound services on user machines and work across NAT/firewalls more safely."
-    }
+  "schema_version":1,
+  "decisions":[
+    {"id":"DEC-001","title":"Go for agent and relay core","status":"ACCEPTED","decision":"Use Go for the device agent and relay-server core.","rationale":"Single-binary cross-platform distribution, straightforward concurrency, and a small runtime dependency surface."},
+    {"id":"DEC-002","title":"Structured capabilities before raw shell","status":"ACCEPTED","decision":"Structured capabilities are the default execution interface; raw shell is denied by default.","rationale":"Reduce prompt-injection blast radius and keep local policy explicit."},
+    {"id":"DEC-003","title":"Outbound-only device networking","status":"ACCEPTED","decision":"Normal device connectivity originates outbound from the user PC.","rationale":"Avoid exposing inbound services on user machines and work across NAT and firewalls."},
+    {"id":"DEC-004","title":"Go 1.24 minimum for traversal-resistant filesystem execution","status":"ACCEPTED","decision":"Raise the project minimum to Go 1.24 and use os.Root for filesystem executor operations.","rationale":"The project is new and security-sensitive; os.Root provides traversal-resistant operations without a check-then-use authorization race."},
+    {"id":"DEC-005","title":"Remote payload cannot grant privileged approval","status":"ACCEPTED","decision":"CapabilityRequest contains no trusted approval boolean or token in Phase 1; privileged capabilities stop at APPROVAL_REQUIRED.","rationale":"An LLM or compromised relay must not self-authorize mutation process execution or network clone."}
   ]
 }

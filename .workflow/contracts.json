@@ -1,85 +1,22 @@
 {
-  "schema_version": 1,
-  "api_contracts": [
-    {
-      "method": "VERIFY",
-      "path": "CommandEnvelope",
-      "purpose": "Authenticate and freshness-check a typed remote command before local policy evaluation.",
-      "authority": "PC agent protocol verifier",
-      "mutation": "Records nonce in replay store only after signature and time checks pass.",
-      "error_behavior": "Fail closed on malformed, expired, future-issued, overlong, invalid-signature, or replayed envelopes."
-    }
+  "schema_version":1,
+  "api_contracts":[
+    {"method":"VERIFY","path":"CommandEnvelope","purpose":"Authenticate and freshness-check a typed remote command before local policy evaluation.","authority":"PC agent protocol verifier","mutation":"Records nonce only after signature and time checks pass.","error_behavior":"Fail closed on malformed expired future-issued overlong invalid-signature or replayed envelopes."},
+    {"method":"DISPATCH","path":"CapabilityRequest","purpose":"Route automatically allowed structured capabilities to bounded local executors.","authority":"Local capability policy","mutation":"Automatic dispatch is read-only in Phase 1; mutating or execution capabilities stop at approval-required.","error_behavior":"Unknown and shell capabilities deny; write patch process and clone return approval-required before side effects."}
   ],
-  "data_contracts": [
-    {
-      "name": "Workspace roots",
-      "source_of_truth": "Local PC agent policy configuration",
-      "mutability": "User-controlled configuration",
-      "legal_writes": [
-        "Explicit local policy configuration"
-      ],
-      "retention": "Until user changes configuration",
-      "invariants": [
-        "Resolved filesystem targets remain within a canonical configured root at authorization time."
-      ]
-    },
-    {
-      "name": "Active-process nonce replay cache",
-      "source_of_truth": "PC agent process memory",
-      "mutability": "Ephemeral runtime state",
-      "legal_writes": [
-        "Successful command-envelope verification"
-      ],
-      "retention": "Until command expiry or agent process exit",
-      "invariants": [
-        "A deviceID+nonce pair is accepted at most once within one active process before expiry.",
-        "Restart-safe replay prevention is not yet implemented."
-      ]
-    }
+  "data_contracts":[
+    {"name":"Workspace root","source_of_truth":"Local PC agent configuration","mutability":"User-controlled configuration","legal_writes":["Explicit local configuration"],"retention":"Until user changes configuration","invariants":["Filesystem operations are relative to os.Root and cannot resolve outside it through lexical or symlink traversal.","Process working directory is the trusted workspace root."]},
+    {"name":"Process execution policy","source_of_truth":"Local PC agent configuration","mutability":"User-controlled configuration","legal_writes":["Explicit executable allowlist and environment configuration"],"retention":"Until user changes configuration","invariants":["No shell string interpretation is used by ProcessRunner.","Executable must be allowlisted.","Timeout and captured stdout stderr are bounded.","Environment is explicit and is not implicitly inherited when configuration is empty."]},
+    {"name":"Capability authorization","source_of_truth":"internal/policy/capability.go","mutability":"Source-controlled policy","legal_writes":["Reviewed source changes"],"retention":"Versioned with source","invariants":["filesystem.read filesystem.list git.status and git.diff may auto-execute.","filesystem.write filesystem.patch process.run and git.clone require trusted local approval.","shell.exec powershell.exec bash.exec and unknown capabilities deny by default.","Remote request payloads cannot self-assert trusted approval."]},
+    {"name":"Active-process nonce replay cache","source_of_truth":"PC agent process memory","mutability":"Ephemeral runtime state","legal_writes":["Successful command-envelope verification"],"retention":"Until command expiry or process exit","invariants":["A deviceID+nonce pair is accepted at most once within one active process before expiry.","Restart-safe replay prevention is not yet implemented."]}
   ],
-  "ui_surfaces": [
-    {
-      "name": "Chat client",
-      "status": "PLANNED",
-      "backend_authority": "Future authenticated relay and local PC-agent policy result",
-      "visible_data": [
-        "paired devices",
-        "chat messages",
-        "tool requests",
-        "approval decisions",
-        "bounded execution results"
-      ],
-      "actions": [
-        "select a paired device",
-        "submit a chat request",
-        "approve or deny privileged capability requests"
-      ],
-      "forbidden_actions": [
-        "silently approve privileged shell execution",
-        "represent an unverified runtime result as successful"
-      ]
-    }
+  "ui_surfaces":[
+    {"name":"Chat client","status":"PLANNED","backend_authority":"Future authenticated relay plus local PC-agent policy result","visible_data":["paired devices","chat messages","tool requests","approval decisions","bounded execution results"],"actions":["select a paired device","submit a chat request","approve or deny privileged capability requests"],"forbidden_actions":["silently approve privileged execution","represent an unverified runtime result as successful"]}
   ],
-  "runbook_steps": [
-    {
-      "name": "Run unit tests",
-      "command": "go test ./... -count=1",
-      "expected": "all Go packages pass"
-    },
-    {
-      "name": "Run race tests",
-      "command": "go test -race ./... -count=1",
-      "expected": "all Go packages pass without detected data races"
-    },
-    {
-      "name": "Run static vet",
-      "command": "go vet ./...",
-      "expected": "no vet diagnostics"
-    },
-    {
-      "name": "Build agent",
-      "command": "go build ./cmd/max-agent",
-      "expected": "cross-platform agent binary builds on the current runner OS"
-    }
+  "runbook_steps":[
+    {"name":"Run unit tests","command":"go test ./... -count=1","expected":"all Go packages pass"},
+    {"name":"Run race tests","command":"go test -race ./... -count=1","expected":"all Go packages pass without detected data races"},
+    {"name":"Run static vet","command":"go vet ./...","expected":"no vet diagnostics"},
+    {"name":"Build agent","command":"go build ./cmd/max-agent","expected":"agent builds on current runner OS"}
   ]
 }

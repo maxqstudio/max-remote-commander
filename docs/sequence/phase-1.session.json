@@ -1,0 +1,16 @@
+{
+  "schema_version":1,
+  "session_id":"phase-1-local-executor",
+  "phase":"Phase 1 - local capability executor",
+  "mode":"DURING",
+  "scope":"CURRENT",
+  "critical":true,
+  "status":"ACTIVE",
+  "implementation_base_sha":"4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7",
+  "plan":{"required":false,"contract":"","frozen":false,"frozen_commit":"","sha256":"","diagram":""},
+  "actual":{"graph":"docs/sequence/generated/phase-1.actual.json","diagram":"docs/sequence/generated/phase-1.actual.mmd","source_digest":"","entries":["internal/executor/dispatcher.go::Dispatcher.Dispatch","internal/policy/capability.go::AuthorizeAutomatic"]},
+  "test_traceability_required":true,
+  "tests":["internal/executor/dispatcher_test.go","internal/policy/capability_test.go","internal/executor/filesystem_test.go","internal/executor/process_test.go","internal/executor/git_test.go"],
+  "runtime_trace":{"required":false,"graph":""},
+  "acceptance_report":"artifacts/sequence/phase-1.acceptance.json"
+}
