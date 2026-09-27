@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "authorities": [
+    {
+      "concern": "source",
+      "authority": "GitHub main after accepted phase merge",
+      "meaning": "Canonical source history and releases",
+      "mutable": true
+    },
+    {
+      "concern": "working_candidate",
+      "authority": "work/phase-0-foundation until Phase 0 acceptance",
+      "meaning": "Current unaccepted candidate",
+      "mutable": true
+    },
+    {
+      "concern": "governance",
+      "authority": "maxqstudio/Skill_Workflow@9e22feddb8f94e8c0f1af6a33e14b64de5068f8f",
+      "meaning": "Pinned project workflow rules and deterministic documentation compiler",
+      "mutable": false
+    },
+    {
+      "concern": "cross_platform_acceptance",
+      "authority": "GitHub Actions matrix",
+      "meaning": "Linux Windows and macOS build/test evidence for GitHub-hosted execution",
+      "mutable": false
+    },
+    {
+      "concern": "user_device_runtime",
+      "authority": "future physical/runtime acceptance on explicitly paired devices",
+      "meaning": "Real remote-device behavior; not implied by CI",
+      "mutable": false
+    }
+  ],
+  "invariants": [
+    "An LLM request never bypasses the local policy engine.",
+    "A command envelope is rejected after expiry or nonce replay.",
+    "Filesystem capabilities cannot escape configured workspace roots through lexical traversal or symlink ancestors.",
+    "No user PC needs an inbound listening port for normal operation."
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "claims": [
+    {
+      "id": "TRUTH-PROTOCOL-SIGNED-001",
+      "claim": "Command requests are signed with Ed25519 and signature verification covers all authority-bearing envelope fields.",
+      "status": "PASS",
+      "docs": [
+        "API_CONTRACTS.md"
+      ],
+      "sources": [
+        "internal/protocol/envelope.go::CommandEnvelope.Sign",
+        "internal/protocol/envelope.go::CommandEnvelope.Verify"
+      ],
+      "tests": [
+        "internal/protocol/envelope_test.go"
+      ],
+      "runtime": "NOT_PROVEN"
+    },
+    {
+      "id": "TRUTH-PROTOCOL-REPLAY-001",
+      "claim": "A valid command nonce cannot be accepted twice for the same device before expiry.",
+      "status": "PASS",
+      "docs": [
+        "DATA_CONTRACTS.md"
+      ],
+      "sources": [
+        "internal/protocol/envelope.go::MemoryReplayStore"
+      ],
+      "tests": [
+        "internal/protocol/envelope_test.go"
+      ],
+      "runtime": "NOT_PROVEN"
+    },
+    {
+      "id": "TRUTH-PATH-BOUNDARY-001",
+      "claim": "Workspace path resolution rejects lexical traversal and symlink-ancestor escapes, including missing descendant targets.",
+      "status": "PASS",
+      "docs": [
+        "DATA_CONTRACTS.md"
+      ],
+      "sources": [
+        "internal/policy/pathguard.go::Workspace.Resolve"
+      ],
+      "tests": [
+        "internal/policy/pathguard_test.go"
+      ],
+      "runtime": "NOT_PROVEN"
+    }
+  ],
+  "relations": []
+}

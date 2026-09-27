@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "evidence_boundary": "Phase 0 source-level security primitives and cross-platform CI only; relay, real devices, UI, providers, MCP and production runtime remain NOT_PROVEN.",
+  "runtime_status": "NOT_PROVEN",
+  "human_comprehension_status": "NOT_PROVEN",
+  "human_comprehension_questions": {},
+  "sequence_mode": "DURING",
+  "sequence_session": "docs/sequence/phase-0.session.json",
+  "sequence_sync_status": "NOT_PROVEN",
+  "truth_gates": {
+    "SOURCE_TESTS": "NOT_PROVEN",
+    "RUNTIME_E2E": "NOT_PROVEN",
+    "PROVENANCE_SYNC": "NOT_PROVEN",
+    "REFERENCE_SYNC": "NOT_PROVEN",
+    "STRUCTURAL_SYNC": "NOT_PROVEN",
+    "SEMANTIC_SYNC": "NOT_PROVEN",
+    "BEHAVIORAL_SYNC": "NOT_PROVEN",
+    "CROSS_DOCUMENT_CONSISTENCY": "NOT_PROVEN",
+    "HUMAN_COMPREHENSION": "NOT_PROVEN",
+    "SEQUENCE_SYNC": "NOT_PROVEN",
+    "DOC_SOURCE_TRACEABILITY": "NOT_PROVEN",
+    "DOC_TEST_TRACEABILITY": "NOT_PROVEN",
+    "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN",
+    "PROJECT_STATE_SYNC": "NOT_PROVEN",
+    "PROJECT_DOCS_SYNC": "NOT_PROVEN",
+    "DOC_LAYOUT": "NOT_PROVEN",
+    "PROJECT_DOCS_NORMALIZED": "NOT_PROVEN",
+    "DOC_READABILITY": "NOT_PROVEN"
+  },
+  "requirements": [
+    {
+      "id": "P0-SEC-001",
+      "requirement": "tampered expired future-issued and replayed envelopes fail closed",
+      "status": "LOCAL_PASS"
+    },
+    {
+      "id": "P0-PATH-001",
+      "requirement": "workspace escape through traversal or symlink fails closed",
+      "status": "LOCAL_PASS"
+    },
+    {
+      "id": "P0-XOS-001",
+      "requirement": "tests and build pass on Linux Windows macOS GitHub runners",
+      "status": "NOT_PROVEN"
+    }
+  ],
+  "test_commands": [
+    "go test ./... -count=1",
+    "go test -race ./... -count=1",
+    "go vet ./..."
+  ],
+  "runtime_checks": []
+}

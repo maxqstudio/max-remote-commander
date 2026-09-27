@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "session_id": "phase-0-foundation",
+  "phase": "Phase 0 - security and governance foundation",
+  "mode": "DURING",
+  "scope": "CURRENT",
+  "critical": true,
+  "status": "ACTIVE",
+  "implementation_base_sha": "ba02ae3beb61c7aea97e870cb267a5ceb61fabe0",
+  "plan": {
+    "required": false,
+    "contract": "",
+    "frozen": false,
+    "frozen_commit": "",
+    "sha256": "",
+    "diagram": ""
+  },
+  "actual": {
+    "graph": "docs/sequence/generated/phase-0.actual.json",
+    "diagram": "docs/sequence/generated/phase-0.actual.mmd",
+    "source_digest": "",
+    "entries": []
+  },
+  "test_traceability_required": true,
+  "tests": [
+    "internal/protocol/envelope_test.go",
+    "internal/policy/pathguard_test.go"
+  ],
+  "runtime_trace": {
+    "required": false,
+    "graph": ""
+  },
+  "acceptance_report": "artifacts/sequence/phase-0.acceptance.json"
+}

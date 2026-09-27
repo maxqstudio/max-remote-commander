@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "phase": "Phase 0 - security and governance foundation",
+  "status": "ACTIVE_CANDIDATE",
+  "working_branch": "work/phase-0-foundation",
+  "last_accepted_sha": "ba02ae3beb61c7aea97e870cb267a5ceb61fabe0",
+  "last_accepted_branch": "main",
+  "proven": [
+    "local Go unit tests pass",
+    "local Go race tests pass",
+    "local go vet passes",
+    "local cross-compilation for representative Windows Linux macOS targets passes"
+  ],
+  "not_proven": [
+    "GitHub Actions cross-OS result for current candidate",
+    "real remote relay behavior",
+    "physical user-device runtime",
+    "chat client",
+    "MCP adapter"
+  ],
+  "blockers": [
+    "Phase 0 cannot be accepted until GitHub Actions and governed documentation gates pass on the exact candidate SHA"
+  ],
+  "next_authorized_actions": [
+    "commit Phase 0 candidate",
+    "run GitHub Actions",
+    "repair failures",
+    "merge Phase 0 after evidence passes"
+  ],
+  "blocked_actions": [
+    "claim project complete",
+    "enable unrestricted shell by default",
+    "claim physical runtime proven from CI"
+  ]
+}

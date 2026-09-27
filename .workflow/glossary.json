@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "terms": [
+    {
+      "term": "capability",
+      "definition": "A typed operation exposed to an LLM, such as filesystem.read, with local policy enforcement."
+    },
+    {
+      "term": "command envelope",
+      "definition": "Signed short-lived transport object containing device session nonce tool and arguments."
+    },
+    {
+      "term": "workspace root",
+      "definition": "Canonical local directory boundary within which filesystem operations may be authorized."
+    }
+  ]
+}

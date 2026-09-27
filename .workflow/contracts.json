@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "api_contracts": [
+    {
+      "name": "CommandEnvelope",
+      "purpose": "Authenticated command transport",
+      "input": "typed command arguments",
+      "output": "signed envelope verified on device",
+      "errors": [
+        "invalid envelope",
+        "expired",
+        "future-issued",
+        "invalid signature",
+        "replay"
+      ]
+    }
+  ],
+  "data_contracts": [
+    {
+      "name": "workspace roots",
+      "meaning": "canonical local directories a capability may access",
+      "mutability": "user-controlled policy configuration"
+    },
+    {
+      "name": "nonce replay cache",
+      "meaning": "used device nonce pairs retained through command expiry",
+      "mutability": "ephemeral runtime state"
+    }
+  ],
+  "ui_surfaces": [
+    {
+      "name": "future chat client",
+      "authority": "relay/device state",
+      "forbidden_actions": [
+        "silently grant privileged shell",
+        "claim execution before device result"
+      ]
+    }
+  ],
+  "runbook_steps": [
+    {
+      "name": "local test",
+      "command": "go test ./... -count=1"
+    },
+    {
+      "name": "race test",
+      "command": "go test -race ./... -count=1"
+    },
+    {
+      "name": "static vet",
+      "command": "go vet ./..."
+    }
+  ]
+}

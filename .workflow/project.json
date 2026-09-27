@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "MAX Remote Commander",
+    "repository": "maxqstudio/max-remote-commander",
+    "purpose": "Provide a secure self-hosted gateway that lets LLM clients request structured capabilities on user-owned computers without exposing inbound device ports.",
+    "primary_users": [
+      "developers operating their own computers",
+      "self-hosters integrating LLM agents"
+    ],
+    "expected_outcomes": [
+      "cross-platform agent execution",
+      "local policy enforcement",
+      "auditable remote tool calls",
+      "provider-neutral LLM integration"
+    ]
+  },
+  "technology": {
+    "languages": [
+      "Go",
+      "TypeScript"
+    ],
+    "frameworks": [
+      "Go standard library initially",
+      "React planned for chat client"
+    ],
+    "persistence": [
+      "local device identity and policy configuration planned"
+    ],
+    "external_systems": [
+      "GitHub Actions",
+      "LLM provider APIs",
+      "MCP clients"
+    ]
+  },
+  "entry_points": [
+    "cmd/max-agent/main.go"
+  ],
+  "constraints": [
+    "agent networking must be outbound-only by default",
+    "structured capabilities are safer default than raw shell",
+    "raw shell must require explicit policy or user approval",
+    "no PASS claim without executed evidence",
+    "cross-platform behavior must be tested on Linux Windows and macOS"
+  ]
+}

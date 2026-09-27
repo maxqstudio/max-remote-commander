@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "id": "FLOW-COMMAND",
+  "name": "Remote command authorization flow",
+  "states": [
+    "requested",
+    "verified",
+    "policy_checked",
+    "approved_or_denied",
+    "executed_or_rejected",
+    "reported"
+  ],
+  "transitions": [
+    {
+      "from": "requested",
+      "to": "verified",
+      "condition": "signature expiry nonce and shape validation pass",
+      "failure": "reject"
+    },
+    {
+      "from": "verified",
+      "to": "policy_checked",
+      "condition": "device policy is evaluated",
+      "failure": "reject"
+    },
+    {
+      "from": "policy_checked",
+      "to": "approved_or_denied",
+      "condition": "allow deny or explicit approval result exists",
+      "failure": "deny"
+    },
+    {
+      "from": "approved_or_denied",
+      "to": "executed_or_rejected",
+      "condition": "only approved capability may execute",
+      "failure": "reject"
+    },
+    {
+      "from": "executed_or_rejected",
+      "to": "reported",
+      "condition": "bounded result and audit metadata are returned",
+      "failure": "report execution error"
+    }
+  ],
+  "invariants": [
+    "verification precedes execution",
+    "policy decision is local authority",
+    "denied command has no execution side effect"
+  ]
+}

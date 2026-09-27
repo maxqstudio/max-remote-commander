@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "decisions": [
+    {
+      "date": "2026-09-27",
+      "decision": "Use Go for agent and relay core",
+      "reason": "single-binary cross-platform distribution and small dependency surface"
+    },
+    {
+      "date": "2026-09-27",
+      "decision": "Structured capabilities are default; raw shell is privileged",
+      "reason": "reduce prompt-injection blast radius and make local policy enforceable"
+    },
+    {
+      "date": "2026-09-27",
+      "decision": "Device networking is outbound-only by default",
+      "reason": "avoid exposing user-PC inbound services across NAT and firewalls"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "changes": [
+    {
+      "date": "2026-09-27",
+      "change": "Bootstrapped security and governance foundation candidate."
+    }
+  ]
+}
