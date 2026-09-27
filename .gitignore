@@ -3,3 +3,7 @@
 *.exe
 *.test
 .DS_Store
+
+# Sequence actuals are per-SHA CI evidence, not tracked self-referential state.
+/docs/sequence/generated/
+/artifacts/sequence/
