@@ -5,109 +5,70 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
-	"time"
+
+	"github.com/maxqstudio/max-remote-commander/internal/policy"
 )
 
-func raw(v any) json.RawMessage {
-	data, _ := json.Marshal(v)
-	return data
-}
+func TestDispatcherAllowsReadAndList(t *testing.T) {
+	root := t.TempDir()
+	fs, err := OpenFilesystem(root, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer fs.Close()
+	if err := os.WriteFile(filepath.Join(root, "note.txt"), []byte("hello"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 
-func TestDispatcherUnknownCapabilityFailsClosed(t *testing.T) {
-	d := &Dispatcher{}
-	_, err := d.Execute(context.Background(), Request{Capability: "shell.exec", Arguments: raw(struct{}{})})
-	if !errors.Is(err, ErrUnknownCapability) {
-		t.Fatalf("got %v", err)
+	d := &Dispatcher{Filesystem: fs}
+	readArgs, _ := json.Marshal(pathArguments{Path: "note.txt"})
+	read, err := d.Dispatch(context.Background(), CapabilityRequest{Tool: "filesystem.read", Arguments: readArgs})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(read.Data) != "hello" {
+		t.Fatalf("read %q", read.Data)
+	}
+
+	listArgs, _ := json.Marshal(pathArguments{Path: "."})
+	list, err := d.Dispatch(context.Background(), CapabilityRequest{Tool: "filesystem.list", Arguments: listArgs})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list.Entries) != 1 || list.Entries[0].Name != "note.txt" {
+		t.Fatalf("entries %#v", list.Entries)
 	}
 }
 
-func TestDispatcherRequiresApprovalBeforePrivilegedExecutors(t *testing.T) {
-	d := &Dispatcher{}
-	cases := []Request{
-		{Capability: "process.run", Arguments: raw(map[string]any{"executable":"helper","args":[]string{},"timeout_ms":1000})},
-		{Capability: "git.clone", Arguments: raw(map[string]string{"url":"https://example.com/repo.git","destination":"repo"})},
+func TestDispatcherDoesNotTrustRemoteApprovalForPrivilegedTools(t *testing.T) {
+	root := t.TempDir()
+	fs, err := OpenFilesystem(root, 0)
+	if err != nil {
+		t.Fatal(err)
 	}
-	for _, req := range cases {
-		if _, err := d.Execute(context.Background(), req); !errors.Is(err, ErrApprovalRequired) {
-			t.Fatalf("%s: got %v", req.Capability, err)
+	defer fs.Close()
+	d := &Dispatcher{Filesystem: fs}
+
+	writeArgs := json.RawMessage(`{"path":"created.txt","content":"ignored"}`)
+	for _, tool := range []string{"filesystem.write", "filesystem.patch", "process.run", "git.clone"} {
+		_, err := d.Dispatch(context.Background(), CapabilityRequest{Tool: tool, Arguments: writeArgs})
+		if !errors.Is(err, policy.ErrApprovalRequired) {
+			t.Fatalf("%s: got %v", tool, err)
 		}
 	}
-}
-
-func TestDispatcherRejectsUnknownArgumentFields(t *testing.T) {
-	root := t.TempDir()
-	fs, err := OpenFilesystem(root, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer fs.Close()
-	d := &Dispatcher{Filesystem: fs}
-	_, err = d.Execute(context.Background(), Request{
-		Capability: "filesystem.read",
-		Arguments: raw(map[string]any{"path":"x","unexpected":true}),
-	})
-	if !errors.Is(err, ErrInvalidArguments) {
-		t.Fatalf("got %v", err)
+	if _, err := os.Stat(filepath.Join(root, "created.txt")); !os.IsNotExist(err) {
+		t.Fatalf("privileged request caused side effect: %v", err)
 	}
 }
 
-func TestDispatcherFilesystemRoundTrip(t *testing.T) {
-	root := t.TempDir()
-	fs, err := OpenFilesystem(root, 0)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer fs.Close()
-	d := &Dispatcher{Filesystem: fs}
-
-	if _, err := d.Execute(context.Background(), Request{
-		Capability: "filesystem.write",
-		Arguments: raw(map[string]string{"path":"note.txt","content":"hello"}),
-	}); err != nil {
-		t.Fatal(err)
-	}
-	resp, err := d.Execute(context.Background(), Request{
-		Capability: "filesystem.read",
-		Arguments: raw(map[string]string{"path":"note.txt"}),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if string(resp.Data.([]byte)) != "hello" || !resp.Completed {
-		t.Fatalf("response %#v", resp)
-	}
-}
-
-func TestDispatcherApprovedProcessUsesAllowlist(t *testing.T) {
-	exe, err := os.Executable()
-	if err != nil {
-		t.Fatal(err)
-	}
-	runner, err := NewProcessRunner(
-		t.TempDir(),
-		[]Executable{{Name:"helper", Path:exe}},
-		append(os.Environ(), "MAXRC_HELPER_PROCESS=1"),
-		5*time.Second,
-		1024,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	d := &Dispatcher{Process: runner}
-	resp, err := d.Execute(context.Background(), Request{
-		Capability: "process.run",
-		Approved: true,
-		Arguments: raw(map[string]any{
-			"executable":"helper",
-			"args":[]string{"-test.run=TestProcessHelper","--","cwd"},
-			"timeout_ms":5000,
-		}),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if resp.Process == nil || resp.Process.ExitCode != 0 || !resp.Completed {
-		t.Fatalf("response %#v", resp)
+func TestDispatcherDeniesShellAndUnknownTools(t *testing.T) {
+	d := &Dispatcher{}
+	for _, tool := range []string{"shell.exec", "powershell.exec", "bash.exec", "registry.write", ""} {
+		_, err := d.Dispatch(context.Background(), CapabilityRequest{Tool: tool, Arguments: json.RawMessage(`{}`)})
+		if !errors.Is(err, policy.ErrCapabilityDenied) {
+			t.Fatalf("%q: got %v", tool, err)
+		}
 	}
 }
