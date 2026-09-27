@@ -96,8 +96,9 @@ func TestHTTPRelayRoundTripAndSSE(t *testing.T) {
 			return
 		}
 		defer resp.Body.Close()
-		line, _ := bufio.NewReader(resp.Body).ReadString('\n')
-		line2, _ := bufio.NewReader(resp.Body).ReadString('\n')
+		reader := bufio.NewReader(resp.Body)
+		line, _ := reader.ReadString('\n')
+		line2, _ := reader.ReadString('\n')
 		sseResult <- line + line2
 	}()
 
