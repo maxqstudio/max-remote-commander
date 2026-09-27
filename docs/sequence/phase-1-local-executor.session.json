@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "session_id": "phase-1-local-executor",
+  "phase": "Phase 1 - local structured capability executor",
+  "mode": "BEFORE",
+  "scope": "CURRENT",
+  "critical": true,
+  "status": "PLANNED",
+  "implementation_base_sha": "3254e6703ab3081b7b299019170e56831aae3c22",
+  "plan": {
+    "required": true,
+    "contract": "docs/sequence/plans/phase-1-local-executor.plan.json",
+    "frozen": true,
+    "frozen_commit": "3254e6703ab3081b7b299019170e56831aae3c22",
+    "sha256": "41a9630632a731730cbab6de8f106ea89a7043029ab79eeb79cba3e6ea31659e",
+    "diagram": "docs/sequence/generated/phase-1-local-executor.plan.mmd"
+  },
+  "actual": {
+    "graph": "docs/sequence/generated/phase-1-local-executor.actual.json",
+    "diagram": "docs/sequence/generated/phase-1-local-executor.actual.mmd",
+    "source_digest": "",
+    "entries": [
+      "internal/executor/executor.go::Executor.Execute"
+    ]
+  },
+  "test_traceability_required": true,
+  "tests": [
+    "internal/executor/filesystem_test.go",
+    "internal/executor/process_test.go",
+    "internal/executor/git_test.go",
+    "internal/executor/executor_test.go"
+  ],
+  "runtime_trace": {
+    "required": false,
+    "graph": ""
+  },
+  "acceptance_report": "artifacts/sequence/phase-1-local-executor.acceptance.json"
+}
