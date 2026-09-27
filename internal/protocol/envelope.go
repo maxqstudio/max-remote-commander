@@ -120,13 +120,18 @@ func (e CommandEnvelope) validateShape() error {
 	return nil
 }
 
+type replayKey struct {
+	deviceID string
+	nonce    string
+}
+
 type MemoryReplayStore struct {
 	mu   sync.Mutex
-	seen map[string]int64
+	seen map[replayKey]int64
 }
 
 func NewMemoryReplayStore() *MemoryReplayStore {
-	return &MemoryReplayStore{seen: make(map[string]int64)}
+	return &MemoryReplayStore{seen: make(map[replayKey]int64)}
 }
 
 func (s *MemoryReplayStore) Use(deviceID, nonce string, expiresAt int64, now time.Time) bool {
@@ -138,7 +143,7 @@ func (s *MemoryReplayStore) Use(deviceID, nonce string, expiresAt int64, now tim
 			delete(s.seen, key)
 		}
 	}
-	key := deviceID + "\x00" + nonce
+	key := replayKey{deviceID: deviceID, nonce: nonce}
 	if _, exists := s.seen[key]; exists {
 		return false
 	}
