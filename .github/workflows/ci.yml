@@ -55,13 +55,15 @@ jobs:
       - name: Generate deterministic Project Truth docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/sync_project_truth.py" --root "$GITHUB_WORKSPACE"
-      - name: Generate DURING actual sequence evidence
+      - name: Generate Go-aware DURING actual sequence evidence
         shell: bash
         run: |
-          python "$RUNNER_TEMP/Skill_Workflow/scripts/generate_sequence_actual.py" \
+          python .workflow/tools/generate_sequence_actual.py \
             --root "$GITHUB_WORKSPACE" \
             --output-json docs/sequence/generated/phase-0.actual.json \
-            --output-mermaid docs/sequence/generated/phase-0.actual.mmd
+            --output-mermaid docs/sequence/generated/phase-0.actual.mmd \
+            --entry "internal/protocol/envelope.go::CommandEnvelope.Verify" \
+            --entry "internal/policy/pathguard.go::Workspace.Resolve"
       - name: Validate sequence contract
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-0.session.json

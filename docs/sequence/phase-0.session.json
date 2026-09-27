@@ -19,7 +19,10 @@
     "graph": "docs/sequence/generated/phase-0.actual.json",
     "diagram": "docs/sequence/generated/phase-0.actual.mmd",
     "source_digest": "",
-    "entries": []
+    "entries": [
+      "internal/protocol/envelope.go::CommandEnvelope.Verify",
+      "internal/policy/pathguard.go::Workspace.Resolve"
+    ]
   },
   "test_traceability_required": true,
   "tests": [
