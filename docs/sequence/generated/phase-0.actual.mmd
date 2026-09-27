@@ -1,0 +1,19 @@
+%% GENERATED FILE - DO NOT EDIT
+%% SOURCE_DIGEST: 773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593
+%% OBSERVED_HEAD: 5b2bbbb607d7b7a17ed908efcf88fabe1fe281bc
+%% GENERATED_BY: generate_sequence_actual.py
+sequenceDiagram
+    participant internal_policy_pathguard_go__Workspace_Resolve_0 as internal/policy/pathguard.go::Workspace.Resolve
+    participant internal_policy_pathguard_go__canonicalizeCandidate_1 as internal/policy/pathguard.go::canonicalizeCandidate
+    participant internal_policy_pathguard_go__deepestExistingAncestor_2 as internal/policy/pathguard.go::deepestExistingAncestor
+    participant internal_policy_pathguard_go__within_3 as internal/policy/pathguard.go::within
+    participant internal_protocol_envelope_go__CommandEnvelope_Verify_4 as internal/protocol/envelope.go::CommandEnvelope.Verify
+    participant internal_protocol_envelope_go__CommandEnvelope_canonicalBytes_5 as internal/protocol/envelope.go::CommandEnvelope.canonicalBytes
+    participant internal_protocol_envelope_go__CommandEnvelope_validateShape_6 as internal/protocol/envelope.go::CommandEnvelope.validateShape
+    participant internal_protocol_envelope_go__MemoryReplayStore_Use_7 as internal/protocol/envelope.go::MemoryReplayStore.Use
+    internal_policy_pathguard_go__Workspace_Resolve_0->>internal_policy_pathguard_go__canonicalizeCandidate_1: canonicalizeCandidate [STATIC]
+    internal_policy_pathguard_go__Workspace_Resolve_0->>internal_policy_pathguard_go__within_3: within [STATIC]
+    internal_policy_pathguard_go__canonicalizeCandidate_1->>internal_policy_pathguard_go__deepestExistingAncestor_2: deepestExistingAncestor [STATIC]
+    internal_protocol_envelope_go__CommandEnvelope_Verify_4->>internal_protocol_envelope_go__CommandEnvelope_canonicalBytes_5: canonicalBytes [STATIC]
+    internal_protocol_envelope_go__CommandEnvelope_Verify_4->>internal_protocol_envelope_go__CommandEnvelope_validateShape_6: validateShape [STATIC]
+    internal_protocol_envelope_go__CommandEnvelope_Verify_4->>internal_protocol_envelope_go__MemoryReplayStore_Use_7: Use [STATIC]

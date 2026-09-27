@@ -1,0 +1,65 @@
+{
+  "coverage": {
+    "call_inventory": "Python AST token calls only",
+    "limitations": [
+      "non-Python symbol extraction requires language-specific parsers or Ctags",
+      "dynamic dispatch/dependency injection/reflection are not resolved",
+      "JS/TS function-level semantics are not inferred here"
+    ],
+    "module_inventory": "multi-language by extension",
+    "python_parse_failures": [],
+    "route_inventory": "Python decorator routes only",
+    "symbol_inventory": "Python AST only"
+  },
+  "modules": [
+    {
+      "directory": "cmd/max-agent",
+      "file": "cmd/max-agent/main.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 20
+    },
+    {
+      "directory": "internal/policy",
+      "file": "internal/policy/pathguard.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 118
+    },
+    {
+      "directory": "internal/policy",
+      "file": "internal/policy/pathguard_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 54
+    },
+    {
+      "directory": "internal/protocol",
+      "file": "internal/protocol/envelope.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 147
+    },
+    {
+      "directory": "internal/protocol",
+      "file": "internal/protocol/envelope_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 93
+    }
+  ],
+  "python_calls": [],
+  "python_routes": [],
+  "python_symbols": [],
+  "schema_version": 1,
+  "source_digest": "773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593",
+  "source_summary": {
+    "files": 5,
+    "languages": {
+      "Go": 5
+    },
+    "lines": 432,
+    "test_files": 0
+  },
+  "tests": []
+}
