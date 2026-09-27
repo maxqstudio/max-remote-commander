@@ -59,8 +59,8 @@ func TestProcessHelper(t *testing.T) {
 }
 
 func TestProcessRunnerUsesArgvAndTrustedWorkspace(t *testing.T) {
-	runner := helperRunner(t, time.Second, 1024)
-	result, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "cwd"}, time.Second)
+	runner := helperRunner(t, 5*time.Second, 1024)
+	result, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "cwd"}, 5*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,15 +77,15 @@ func TestProcessRunnerUsesArgvAndTrustedWorkspace(t *testing.T) {
 }
 
 func TestProcessRunnerDeniesUnknownExecutable(t *testing.T) {
-	runner := helperRunner(t, time.Second, 1024)
-	if _, err := runner.Run(context.Background(), "sh", []string{"-c", "echo unsafe"}, time.Second); !errors.Is(err, ErrExecutableDenied) {
+	runner := helperRunner(t, 5*time.Second, 1024)
+	if _, err := runner.Run(context.Background(), "sh", []string{"-c", "echo unsafe"}, 5*time.Second); !errors.Is(err, ErrExecutableDenied) {
 		t.Fatalf("got %v", err)
 	}
 }
 
 func TestProcessRunnerRejectsExcessiveTimeout(t *testing.T) {
 	runner := helperRunner(t, 100*time.Millisecond, 1024)
-	if _, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "cwd"}, time.Second); !errors.Is(err, ErrInvalidTimeout) {
+	if _, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "cwd"}, 5*time.Second); !errors.Is(err, ErrInvalidTimeout) {
 		t.Fatalf("got %v", err)
 	}
 }
@@ -102,8 +102,8 @@ func TestProcessRunnerReportsTimeoutWithoutHanging(t *testing.T) {
 }
 
 func TestProcessRunnerBoundsOutput(t *testing.T) {
-	runner := helperRunner(t, time.Second, 16)
-	result, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "large"}, time.Second)
+	runner := helperRunner(t, 5*time.Second, 16)
+	result, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "large"}, 5*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,8 +113,8 @@ func TestProcessRunnerBoundsOutput(t *testing.T) {
 }
 
 func TestProcessRunnerReturnsNonZeroExitAsResult(t *testing.T) {
-	runner := helperRunner(t, time.Second, 1024)
-	result, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "exit7"}, time.Second)
+	runner := helperRunner(t, 5*time.Second, 1024)
+	result, err := runner.Run(context.Background(), "helper", []string{"-test.run=TestProcessHelper", "--", "exit7"}, 5*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}

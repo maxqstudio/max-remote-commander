@@ -138,9 +138,13 @@ func (r *ProcessRunner) Run(ctx context.Context, executable string, args []strin
 }
 
 type limitedBuffer struct {
-	bytes.Buffer
+	buf       bytes.Buffer
 	limit     int
 	truncated bool
+}
+
+func (b *limitedBuffer) Bytes() []byte {
+	return b.buf.Bytes()
 }
 
 func (b *limitedBuffer) Write(p []byte) (int, error) {
@@ -148,13 +152,13 @@ func (b *limitedBuffer) Write(p []byte) (int, error) {
 		b.truncated = b.truncated || len(p) > 0
 		return len(p), nil
 	}
-	remaining := b.limit - b.Len()
+	remaining := b.limit - b.buf.Len()
 	if remaining > 0 {
 		n := len(p)
 		if n > remaining {
 			n = remaining
 		}
-		_, _ = b.Buffer.Write(p[:n])
+		_, _ = b.buf.Write(p[:n])
 	}
 	if len(p) > remaining {
 		b.truncated = true
