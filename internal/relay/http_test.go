@@ -99,7 +99,8 @@ func TestHTTPRelayRoundTripAndSSE(t *testing.T) {
 		reader := bufio.NewReader(resp.Body)
 		line, _ := reader.ReadString('\n')
 		line2, _ := reader.ReadString('\n')
-		sseResult <- line + line2
+		line3, _ := reader.ReadString('\n')
+		sseResult <- line + line2 + line3
 	}()
 
 	resultReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/device-a/results", session.Token, map[string]any{
