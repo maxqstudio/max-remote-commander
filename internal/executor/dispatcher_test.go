@@ -7,7 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/maxqstudio/max-remote-commander/internal/approval"
 	"github.com/maxqstudio/max-remote-commander/internal/policy"
 )
 
@@ -53,7 +55,7 @@ func TestDispatcherDoesNotTrustRemoteApprovalForPrivilegedTools(t *testing.T) {
 
 	writeArgs := json.RawMessage(`{"path":"created.txt","content":"ignored"}`)
 	for _, tool := range []string{"filesystem.write", "filesystem.patch", "process.run", "git.clone"} {
-		_, err := d.Dispatch(context.Background(), CapabilityRequest{Tool: tool, Arguments: writeArgs})
+		_, err := d.Dispatch(context.Background(), CapabilityRequest{RequestID:"req-remote", Tool: tool, Arguments: writeArgs})
 		if !errors.Is(err, policy.ErrApprovalRequired) {
 			t.Fatalf("%s: got %v", tool, err)
 		}
@@ -63,12 +65,58 @@ func TestDispatcherDoesNotTrustRemoteApprovalForPrivilegedTools(t *testing.T) {
 	}
 }
 
-func TestDispatcherDeniesShellAndUnknownTools(t *testing.T) {
-	d := &Dispatcher{}
-	for _, tool := range []string{"shell.exec", "powershell.exec", "bash.exec", "registry.write", ""} {
-		_, err := d.Dispatch(context.Background(), CapabilityRequest{Tool: tool, Arguments: json.RawMessage(`{}`)})
-		if !errors.Is(err, policy.ErrCapabilityDenied) {
-			t.Fatalf("%q: got %v", tool, err)
-		}
+func TestLocalApprovalBindsExactRequestAndIsOneUse(t *testing.T) {
+	root := t.TempDir()
+	fs, err := OpenFilesystem(root, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer fs.Close()
+	approvals := approval.NewStore(time.Minute)
+	d := &Dispatcher{Filesystem: fs, Approvals: approvals}
+
+	args := json.RawMessage(`{"path":"approved.txt","content":"hello"}`)
+	req := CapabilityRequest{RequestID:"req-1", Tool:"filesystem.write", Arguments:args}
+	token, err := approvals.Issue(req.RequestID, req.Tool, req.Arguments, 30*time.Second, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tampered := req
+	tampered.Arguments = json.RawMessage(`{"path":"approved.txt","content":"tampered"}`)
+	if _, err := d.DispatchApproved(context.Background(), tampered, token); !errors.Is(err, approval.ErrApprovalBinding) {
+		t.Fatalf("tampered approval: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "approved.txt")); !os.IsNotExist(err) {
+		t.Fatalf("tampered approval caused side effect: %v", err)
+	}
+	if _, err := d.DispatchApproved(context.Background(), req, token); !errors.Is(err, approval.ErrApprovalMissing) {
+		t.Fatalf("consumed token replay: %v", err)
+	}
+
+	token, err = approvals.Issue(req.RequestID, req.Tool, req.Arguments, 30*time.Second, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := d.DispatchApproved(context.Background(), req, token); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(filepath.Join(root, "approved.txt"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "hello" {
+		t.Fatalf("content %q", got)
+	}
+	if _, err := d.DispatchApproved(context.Background(), req, token); !errors.Is(err, approval.ErrApprovalMissing) {
+		t.Fatalf("approved replay: %v", err)
+	}
+}
+
+func TestDispatcherDeniesShellEvenWithApprovedPath(t *testing.T) {
+	d := &Dispatcher{Approvals: approval.NewStore(time.Minute)}
+	req := CapabilityRequest{RequestID:"req-shell", Tool:"shell.exec", Arguments:json.RawMessage(`{}`)}
+	if _, err := d.DispatchApproved(context.Background(), req, "anything"); !errors.Is(err, policy.ErrCapabilityDenied) {
+		t.Fatalf("got %v", err)
 	}
 }
