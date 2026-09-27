@@ -4,16 +4,17 @@
 
 ## Evidence boundary
 
-Phase 0 source-level security primitives and cross-platform CI only; relay, real devices, UI, providers, MCP, restart-safe replay protection, and production runtime remain NOT_PROVEN.
+Phase 0 security primitives and GitHub-hosted cross-platform execution only; relay, paired physical devices, production runtime, LLM providers, MCP, and restart-safe replay protection remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
 Current source digest: 773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
-| P0-SEC-001 | Tampered, expired, future-issued, and replayed envelopes fail closed within one active agent process. | internal/protocol/envelope_test.go | LOCAL_PASS |
-| P0-PATH-001 | Workspace escape through traversal or symlink ancestors fails closed at authorization time. | internal/policy/pathguard_test.go | LOCAL_PASS |
-| P0-XOS-001 | Tests and build pass on Linux, Windows, and macOS GitHub runners. | GitHub Actions current candidate | NOT_PROVEN |
+| P0-SEC-001 | Tampered, expired, future-issued, replayed, and invalid-key envelopes fail closed within one active agent process. | GitHub Actions run 36326230664; internal/protocol/envelope_test.go | PASS |
+| P0-PATH-001 | Workspace escape through lexical traversal or symlink ancestors fails closed at authorization time. | GitHub Actions run 36326230664; internal/policy/pathguard_test.go | PASS |
+| P0-XOS-001 | Tests, vet, and build pass on Linux, Windows, and macOS GitHub runners. | GitHub Actions run 36326230664: ubuntu-latest, windows-latest, macos-latest all succeeded | PASS |
+| P0-SEQ-001 | Critical Phase 0 Go source entrypoints produce deterministic actual sequence evidence accepted by the pinned Skill_Workflow validator. | GitHub Actions run 36326230664: Skill Workflow STRICT job succeeded | PASS |
 
 ## Test commands
 
@@ -29,7 +30,7 @@ Current source digest: 773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948
 
 Sequence mode for this phase/session: DURING
 Sequence session contract: docs/sequence/phase-0.session.json
-SEQUENCE_SYNC: NOT_PROVEN
+SEQUENCE_SYNC: PASS
 
 ## Project Truth Compiler evidence
 

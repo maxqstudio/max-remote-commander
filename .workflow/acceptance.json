@@ -1,62 +1,62 @@
 {
-  "schema_version": 1,
   "evidence_boundary": "Phase 0 security primitives and GitHub-hosted cross-platform execution only; relay, paired physical devices, production runtime, LLM providers, MCP, and restart-safe replay protection remain NOT_PROVEN.",
-  "runtime_status": "NOT_PROVEN",
-  "human_comprehension_status": "NOT_PROVEN",
   "human_comprehension_questions": {},
-  "sequence_mode": "DURING",
-  "sequence_session": "docs/sequence/phase-0.session.json",
-  "sequence_sync_status": "PASS",
-  "truth_gates": {
-    "SOURCE_TESTS": "PASS",
-    "RUNTIME_E2E": "NOT_PROVEN",
-    "PROVENANCE_SYNC": "NOT_PROVEN",
-    "REFERENCE_SYNC": "NOT_PROVEN",
-    "STRUCTURAL_SYNC": "NOT_PROVEN",
-    "SEMANTIC_SYNC": "NOT_PROVEN",
-    "BEHAVIORAL_SYNC": "NOT_PROVEN",
-    "CROSS_DOCUMENT_CONSISTENCY": "NOT_PROVEN",
-    "HUMAN_COMPREHENSION": "NOT_PROVEN",
-    "SEQUENCE_SYNC": "PASS",
-    "DOC_SOURCE_TRACEABILITY": "NOT_PROVEN",
-    "DOC_TEST_TRACEABILITY": "NOT_PROVEN",
-    "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN",
-    "PROJECT_STATE_SYNC": "NOT_PROVEN",
-    "PROJECT_DOCS_SYNC": "PASS",
-    "DOC_LAYOUT": "PASS",
-    "PROJECT_DOCS_NORMALIZED": "PASS",
-    "DOC_READABILITY": "PASS"
-  },
+  "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
     {
+      "evidence": "GitHub Actions run 36326230664; internal/protocol/envelope_test.go",
       "id": "P0-SEC-001",
       "requirement": "Tampered, expired, future-issued, replayed, and invalid-key envelopes fail closed within one active agent process.",
-      "evidence": "GitHub Actions run 36326230664; internal/protocol/envelope_test.go",
       "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36326230664; internal/policy/pathguard_test.go",
       "id": "P0-PATH-001",
       "requirement": "Workspace escape through lexical traversal or symlink ancestors fails closed at authorization time.",
-      "evidence": "GitHub Actions run 36326230664; internal/policy/pathguard_test.go",
       "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36326230664: ubuntu-latest, windows-latest, macos-latest all succeeded",
       "id": "P0-XOS-001",
       "requirement": "Tests, vet, and build pass on Linux, Windows, and macOS GitHub runners.",
-      "evidence": "GitHub Actions run 36326230664: ubuntu-latest, windows-latest, macos-latest all succeeded",
       "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36326230664: Skill Workflow STRICT job succeeded",
       "id": "P0-SEQ-001",
       "requirement": "Critical Phase 0 Go source entrypoints produce deterministic actual sequence evidence accepted by the pinned Skill_Workflow validator.",
-      "evidence": "GitHub Actions run 36326230664: Skill Workflow STRICT job succeeded",
       "status": "PASS"
     }
   ],
+  "runtime_checks": [],
+  "runtime_status": "NOT_PROVEN",
+  "schema_version": 1,
+  "sequence_mode": "DURING",
+  "sequence_session": "docs/sequence/phase-0.session.json",
+  "sequence_sync_status": "PASS",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
     "go vet ./..."
   ],
-  "runtime_checks": []
+  "truth_gates": {
+    "BEHAVIORAL_SYNC": "NOT_PROVEN",
+    "CROSS_DOCUMENT_CONSISTENCY": "NOT_PROVEN",
+    "DOC_LAYOUT": "PASS",
+    "DOC_READABILITY": "PASS",
+    "DOC_SOURCE_TRACEABILITY": "NOT_PROVEN",
+    "DOC_TEST_TRACEABILITY": "NOT_PROVEN",
+    "HUMAN_COMPREHENSION": "NOT_PROVEN",
+    "PROJECT_DOCS_NORMALIZED": "PASS",
+    "PROJECT_DOCS_SYNC": "PASS",
+    "PROJECT_STATE_SYNC": "NOT_PROVEN",
+    "PROVENANCE_SYNC": "NOT_PROVEN",
+    "REFERENCE_SYNC": "NOT_PROVEN",
+    "RUNTIME_E2E": "NOT_PROVEN",
+    "SEMANTIC_SYNC": "NOT_PROVEN",
+    "SEQUENCE_SYNC": "PASS",
+    "SOURCE_TESTS": "PASS",
+    "STRUCTURAL_SYNC": "NOT_PROVEN",
+    "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"
+  }
 }

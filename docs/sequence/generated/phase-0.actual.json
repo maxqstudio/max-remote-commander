@@ -133,7 +133,7 @@
       "locator": "internal/protocol/envelope.go::MemoryReplayStore.Use"
     }
   ],
-  "observed_head": "5b2bbbb607d7b7a17ed908efcf88fabe1fe281bc",
+  "observed_head": "32fee2e378d57ed725a87759e90c532e40baf03b",
   "schema_version": 1,
   "source_digest": "773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593"
 }
