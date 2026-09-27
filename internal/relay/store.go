@@ -28,6 +28,7 @@ type Config struct {
 	LeaseTTL        time.Duration
 	MaxQueue        int
 	MaxResults      int
+	MaxPairingAttempts int
 }
 
 type Command struct {
@@ -64,6 +65,7 @@ type Store struct {
 	leaseTTL         time.Duration
 	maxQueue         int
 	maxResults       int
+	maxPairingAttempts int
 
 	knownDevices map[string]struct{}
 	sessions     map[string]sessionState
@@ -73,6 +75,9 @@ type Store struct {
 	queueNotify  map[string]chan struct{}
 	resultNotify map[string]chan struct{}
 	resultOrder  []string
+	pairingOffers map[string]pairingOffer
+	pairings      map[string]Pairing
+	pairingGeneration map[string]uint64
 }
 
 func NewStore(cfg Config) (*Store, error) {
@@ -94,6 +99,9 @@ func NewStore(cfg Config) (*Store, error) {
 	if cfg.MaxResults <= 0 {
 		cfg.MaxResults = 1024
 	}
+	if cfg.MaxPairingAttempts <= 0 {
+		cfg.MaxPairingAttempts = 5
+	}
 	return &Store{
 		registrationHash: sha256.Sum256([]byte(cfg.RegistrationKey)),
 		controllerHash: sha256.Sum256([]byte(cfg.ControllerKey)),
@@ -101,6 +109,7 @@ func NewStore(cfg Config) (*Store, error) {
 		leaseTTL: cfg.LeaseTTL,
 		maxQueue: cfg.MaxQueue,
 		maxResults: cfg.MaxResults,
+		maxPairingAttempts: cfg.MaxPairingAttempts,
 		knownDevices: make(map[string]struct{}),
 		sessions: make(map[string]sessionState),
 		queues: make(map[string][]*queuedCommand),
@@ -108,6 +117,9 @@ func NewStore(cfg Config) (*Store, error) {
 		results: make(map[string]Result),
 		queueNotify: make(map[string]chan struct{}),
 		resultNotify: make(map[string]chan struct{}),
+		pairingOffers: make(map[string]pairingOffer),
+		pairings: make(map[string]Pairing),
+		pairingGeneration: make(map[string]uint64),
 	}, nil
 }
 
