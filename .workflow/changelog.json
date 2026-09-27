@@ -1,9 +1,17 @@
 {
   "schema_version": 1,
-  "changes": [
+  "entries": [
     {
       "date": "2026-09-27",
-      "change": "Bootstrapped security and governance foundation candidate."
+      "title": "Phase 0 foundation candidate",
+      "type": "foundation",
+      "changes": [
+        "Added signed command-envelope primitives.",
+        "Added active-process replay rejection.",
+        "Added workspace traversal and symlink-escape guard.",
+        "Added STRICT Skill_Workflow governance and cross-OS GitHub Actions.",
+        "Added Saweria and PayPal support links."
+      ]
     }
   ]
 }

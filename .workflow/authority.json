@@ -20,22 +20,28 @@
       "mutable": false
     },
     {
-      "concern": "cross_platform_acceptance",
-      "authority": "GitHub Actions matrix",
-      "meaning": "Linux Windows and macOS build/test evidence for GitHub-hosted execution",
+      "concern": "acceptance",
+      "authority": "GitHub Actions plus explicit runtime evidence where required",
+      "meaning": "Acceptance never exceeds the strongest executed evidence",
       "mutable": false
     },
     {
-      "concern": "user_device_runtime",
-      "authority": "future physical/runtime acceptance on explicitly paired devices",
-      "meaning": "Real remote-device behavior; not implied by CI",
+      "concern": "runtime",
+      "authority": "explicitly paired user device runtime evidence",
+      "meaning": "Real device behavior; GitHub CI alone does not prove physical-device execution",
+      "mutable": false
+    },
+    {
+      "concern": "cross_platform_acceptance",
+      "authority": "GitHub Actions matrix",
+      "meaning": "Linux Windows and macOS build/test evidence for GitHub-hosted execution",
       "mutable": false
     }
   ],
   "invariants": [
     "An LLM request never bypasses the local policy engine.",
-    "A command envelope is rejected after expiry or nonce replay.",
-    "Filesystem capabilities cannot escape configured workspace roots through lexical traversal or symlink ancestors.",
+    "Within one active agent process a command envelope is rejected after expiry or nonce replay.",
+    "Filesystem path authorization cannot escape configured workspace roots through lexical traversal or symlink ancestors.",
     "No user PC needs an inbound listening port for normal operation."
   ]
 }

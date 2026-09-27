@@ -18,32 +18,40 @@
     {
       "from": "requested",
       "to": "verified",
-      "condition": "signature expiry nonce and shape validation pass",
-      "failure": "reject"
+      "action": "verify envelope signature, freshness, and nonce",
+      "side_effects": [
+        "record accepted nonce after successful verification"
+      ]
     },
     {
       "from": "verified",
       "to": "policy_checked",
-      "condition": "device policy is evaluated",
-      "failure": "reject"
+      "action": "evaluate local device policy",
+      "side_effects": []
     },
     {
       "from": "policy_checked",
       "to": "approved_or_denied",
-      "condition": "allow deny or explicit approval result exists",
-      "failure": "deny"
+      "action": "resolve allow, deny, or explicit user approval",
+      "side_effects": [
+        "may request local user approval"
+      ]
     },
     {
       "from": "approved_or_denied",
       "to": "executed_or_rejected",
-      "condition": "only approved capability may execute",
-      "failure": "reject"
+      "action": "execute only an approved structured capability",
+      "side_effects": [
+        "may access locally authorized resources"
+      ]
     },
     {
       "from": "executed_or_rejected",
       "to": "reported",
-      "condition": "bounded result and audit metadata are returned",
-      "failure": "report execution error"
+      "action": "return bounded result and audit metadata",
+      "side_effects": [
+        "append audit event when audit subsystem exists"
+      ]
     }
   ],
   "invariants": [
@@ -59,7 +67,7 @@
   "restart_behavior": [
     "reconnect outbound session",
     "discard expired queued commands",
-    "retain no replay nonce beyond its command expiry"
+    "restart-safe nonce replay protection remains OPEN until durable replay state or per-start session rotation is implemented"
   ],
   "rollback_behavior": [
     "disable affected capability",

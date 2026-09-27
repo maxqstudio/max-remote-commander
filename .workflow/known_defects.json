@@ -1,1 +1,11 @@
-{"schema_version":1,"known_defects":[]}
+{
+  "schema_version": 1,
+  "defects": [
+    {
+      "id": "SEC-REPLAY-RESTART-001",
+      "status": "OPEN",
+      "summary": "The Phase 0 nonce replay store is in-memory; restarting the agent loses unexpired nonce history, so restart-safe replay protection is not yet proven.",
+      "evidence": "internal/protocol/envelope.go::MemoryReplayStore; persistent replay state or per-start session rotation is not implemented."
+    }
+  ]
+}

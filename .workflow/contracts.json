@@ -2,53 +2,62 @@
   "schema_version": 1,
   "api_contracts": [
     {
-      "name": "CommandEnvelope",
-      "purpose": "Authenticated command transport",
-      "input": "typed command arguments",
-      "output": "signed envelope verified on device",
-      "errors": [
-        "invalid envelope",
-        "expired",
-        "future-issued",
-        "invalid signature",
-        "replay"
-      ]
+      "method": "VERIFY",
+      "path": "CommandEnvelope",
+      "purpose": "Authenticate and freshness-check a typed remote command before local policy evaluation.",
+      "authority": "PC agent protocol verifier",
+      "mutation": "Records nonce in replay store only after signature and time checks pass.",
+      "error_behavior": "Fail closed on malformed, expired, future-issued, overlong, invalid-signature, or replayed envelopes."
     }
   ],
   "data_contracts": [
     {
-      "name": "workspace roots",
-      "meaning": "canonical local directories a capability may access",
-      "mutability": "user-controlled policy configuration"
+      "name": "Workspace roots",
+      "source_of_truth": "Local PC agent policy configuration",
+      "mutability": "User-controlled configuration",
+      "legal_writes": [
+        "Explicit local policy configuration"
+      ],
+      "retention": "Until user changes configuration",
+      "invariants": [
+        "Resolved filesystem targets remain within a canonical configured root at authorization time."
+      ]
     },
     {
-      "name": "nonce replay cache",
-      "meaning": "used device nonce pairs retained through command expiry",
-      "mutability": "ephemeral runtime state"
-    }
-  ],
-  "ui_surfaces": [
-    {
-      "name": "future chat client",
-      "authority": "relay/device state",
-      "forbidden_actions": [
-        "silently grant privileged shell",
-        "claim execution before device result"
+      "name": "Active-process nonce replay cache",
+      "source_of_truth": "PC agent process memory",
+      "mutability": "Ephemeral runtime state",
+      "legal_writes": [
+        "Successful command-envelope verification"
+      ],
+      "retention": "Until command expiry or agent process exit",
+      "invariants": [
+        "A deviceID+nonce pair is accepted at most once within one active process before expiry.",
+        "Restart-safe replay prevention is not yet implemented."
       ]
     }
   ],
+  "ui_surfaces": [],
   "runbook_steps": [
     {
-      "name": "local test",
-      "command": "go test ./... -count=1"
+      "name": "Run unit tests",
+      "command": "go test ./... -count=1",
+      "expected": "all Go packages pass"
     },
     {
-      "name": "race test",
-      "command": "go test -race ./... -count=1"
+      "name": "Run race tests",
+      "command": "go test -race ./... -count=1",
+      "expected": "all Go packages pass without detected data races"
     },
     {
-      "name": "static vet",
-      "command": "go vet ./..."
+      "name": "Run static vet",
+      "command": "go vet ./...",
+      "expected": "no vet diagnostics"
+    },
+    {
+      "name": "Build agent",
+      "command": "go build ./cmd/max-agent",
+      "expected": "cross-platform agent binary builds on the current runner OS"
     }
   ]
 }

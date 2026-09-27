@@ -40,7 +40,7 @@
     {
       "id": "protocol",
       "name": "Command Protocol",
-      "purpose": "Defines signed expiring replay-resistant command envelopes",
+      "purpose": "Defines signed expiring command envelopes and active-process replay checks",
       "owns": [
         "envelope format",
         "signature verification",
@@ -63,27 +63,36 @@
     {
       "from": "llm_client",
       "to": "relay_server",
-      "data": "structured tool request"
+      "meaning": "structured tool request"
     },
     {
       "from": "relay_server",
       "to": "agent",
-      "data": "signed short-lived command envelope"
+      "meaning": "signed short-lived command envelope"
     },
     {
       "from": "agent",
       "to": "relay_server",
-      "data": "bounded execution result and audit metadata"
+      "meaning": "bounded execution result and audit metadata"
     },
     {
       "from": "relay_server",
       "to": "llm_client",
-      "data": "tool result"
+      "meaning": "tool result"
     }
   ],
   "external_boundaries": [
-    "public network between clients relay and devices",
-    "local filesystem and process boundary on each paired device",
-    "LLM provider API boundary"
+    {
+      "name": "Public network",
+      "contract": "All remote device traffic is outbound from the agent and must be authenticated before execution."
+    },
+    {
+      "name": "Local filesystem and process boundary",
+      "contract": "The PC agent policy engine is final authority for local access and execution."
+    },
+    {
+      "name": "LLM provider API",
+      "contract": "Provider output is untrusted intent and cannot directly authorize privileged device operations."
+    }
   ]
 }

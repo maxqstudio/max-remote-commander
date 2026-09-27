@@ -2,19 +2,25 @@
   "schema_version": 1,
   "decisions": [
     {
-      "date": "2026-09-27",
-      "decision": "Use Go for agent and relay core",
-      "reason": "single-binary cross-platform distribution and small dependency surface"
+      "id": "DEC-001",
+      "title": "Go for agent and relay core",
+      "status": "ACCEPTED",
+      "decision": "Use Go for the device agent and relay-server core.",
+      "rationale": "Single-binary cross-platform distribution, straightforward concurrency, and a small runtime dependency surface."
     },
     {
-      "date": "2026-09-27",
-      "decision": "Structured capabilities are default; raw shell is privileged",
-      "reason": "reduce prompt-injection blast radius and make local policy enforceable"
+      "id": "DEC-002",
+      "title": "Structured capabilities before raw shell",
+      "status": "ACCEPTED",
+      "decision": "Structured capabilities are the default execution interface; raw shell is privileged.",
+      "rationale": "Reduce prompt-injection blast radius and keep local policy decisions explicit and auditable."
     },
     {
-      "date": "2026-09-27",
-      "decision": "Device networking is outbound-only by default",
-      "reason": "avoid exposing user-PC inbound services across NAT and firewalls"
+      "id": "DEC-003",
+      "title": "Outbound-only device networking",
+      "status": "ACCEPTED",
+      "decision": "Normal device connectivity originates outbound from the user PC.",
+      "rationale": "Avoid exposing inbound services on user machines and work across NAT/firewalls more safely."
     }
   ]
 }

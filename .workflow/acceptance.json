@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "evidence_boundary": "Phase 0 source-level security primitives and cross-platform CI only; relay, real devices, UI, providers, MCP and production runtime remain NOT_PROVEN.",
+  "evidence_boundary": "Phase 0 source-level security primitives and cross-platform CI only; relay, real devices, UI, providers, MCP, restart-safe replay protection, and production runtime remain NOT_PROVEN.",
   "runtime_status": "NOT_PROVEN",
   "human_comprehension_status": "NOT_PROVEN",
   "human_comprehension_questions": {},
@@ -30,17 +30,20 @@
   "requirements": [
     {
       "id": "P0-SEC-001",
-      "requirement": "tampered expired future-issued and replayed envelopes fail closed",
+      "requirement": "Tampered, expired, future-issued, and replayed envelopes fail closed within one active agent process.",
+      "evidence": "internal/protocol/envelope_test.go",
       "status": "LOCAL_PASS"
     },
     {
       "id": "P0-PATH-001",
-      "requirement": "workspace escape through traversal or symlink fails closed",
+      "requirement": "Workspace escape through traversal or symlink ancestors fails closed at authorization time.",
+      "evidence": "internal/policy/pathguard_test.go",
       "status": "LOCAL_PASS"
     },
     {
       "id": "P0-XOS-001",
-      "requirement": "tests and build pass on Linux Windows macOS GitHub runners",
+      "requirement": "Tests and build pass on Linux, Windows, and macOS GitHub runners.",
+      "evidence": "GitHub Actions current candidate",
       "status": "NOT_PROVEN"
     }
   ],

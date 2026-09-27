@@ -3,49 +3,49 @@
   "claims": [
     {
       "id": "TRUTH-PROTOCOL-SIGNED-001",
-      "claim": "Command requests are signed with Ed25519 and signature verification covers all authority-bearing envelope fields.",
-      "status": "PASS",
-      "docs": [
+      "claim": "Command requests are signed with Ed25519 and verification covers all authority-bearing envelope fields.",
+      "documents": [
         "API_CONTRACTS.md"
       ],
-      "sources": [
-        "internal/protocol/envelope.go::CommandEnvelope.Sign",
-        "internal/protocol/envelope.go::CommandEnvelope.Verify"
+      "source_owners": [
+        "internal/protocol/envelope.go::Sign(",
+        "internal/protocol/envelope.go::Verify("
       ],
       "tests": [
         "internal/protocol/envelope_test.go"
       ],
-      "runtime": "NOT_PROVEN"
+      "runtime_evidence": [],
+      "status": "PASS"
     },
     {
       "id": "TRUTH-PROTOCOL-REPLAY-001",
-      "claim": "A valid command nonce cannot be accepted twice for the same device before expiry.",
-      "status": "PASS",
-      "docs": [
+      "claim": "Within one active agent process a deviceID+nonce pair cannot be accepted twice before expiry.",
+      "documents": [
         "DATA_CONTRACTS.md"
       ],
-      "sources": [
+      "source_owners": [
         "internal/protocol/envelope.go::MemoryReplayStore"
       ],
       "tests": [
         "internal/protocol/envelope_test.go"
       ],
-      "runtime": "NOT_PROVEN"
+      "runtime_evidence": [],
+      "status": "PASS"
     },
     {
       "id": "TRUTH-PATH-BOUNDARY-001",
-      "claim": "Workspace path resolution rejects lexical traversal and symlink-ancestor escapes, including missing descendant targets.",
-      "status": "PASS",
-      "docs": [
+      "claim": "Workspace path authorization rejects lexical traversal and symlink-ancestor escapes, including missing descendant targets.",
+      "documents": [
         "DATA_CONTRACTS.md"
       ],
-      "sources": [
-        "internal/policy/pathguard.go::Workspace.Resolve"
+      "source_owners": [
+        "internal/policy/pathguard.go::Resolve("
       ],
       "tests": [
         "internal/policy/pathguard_test.go"
       ],
-      "runtime": "NOT_PROVEN"
+      "runtime_evidence": [],
+      "status": "PASS"
     }
   ],
   "relations": []

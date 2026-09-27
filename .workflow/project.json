@@ -34,7 +34,11 @@
     ]
   },
   "entry_points": [
-    "cmd/max-agent/main.go"
+    {
+      "name": "max-agent",
+      "path": "cmd/max-agent/main.go",
+      "purpose": "Cross-platform user-device agent executable"
+    }
   ],
   "constraints": [
     "agent networking must be outbound-only by default",
