@@ -1,25 +1,137 @@
 {
-  "schema_version":1,
-  "components":[
-    {"id":"llm_client","name":"LLM Client","purpose":"Requests typed tools and consumes results","owns":["conversation and tool intents"],"depends_on":["relay_server"]},
-    {"id":"relay_server","name":"Relay Server","purpose":"Authenticates and routes device sessions without inbound PC ports","owns":["session routing and command queue"],"depends_on":["agent"]},
-    {"id":"agent","name":"PC Agent","purpose":"Verifies signed requests and delegates only locally authorized capabilities","owns":["device identity","policy enforcement","executor"],"depends_on":["protocol","policy","executor"]},
-    {"id":"protocol","name":"Command Protocol","purpose":"Defines signed expiring command envelopes and active-process replay checks","owns":["envelope format","signature verification","nonce replay state"],"depends_on":[]},
-    {"id":"policy","name":"Policy Engine","purpose":"Makes automatic allow approval-required or deny decisions at the user device","owns":["capability authorization","default shell denial"],"depends_on":[]},
-    {"id":"executor","name":"Local Capability Executor","purpose":"Executes bounded filesystem process and Git operations after policy authorization","owns":["os.Root filesystem access","allowlisted argv process execution","constrained Git operations","automatic capability dispatcher"],"depends_on":["policy"]}
+  "schema_version": 1,
+  "components": [
+    {
+      "id": "llm_client",
+      "name": "LLM Client",
+      "purpose": "Requests typed tools and consumes streamed results",
+      "owns": [
+        "conversation and tool intents"
+      ],
+      "depends_on": [
+        "relay_server"
+      ]
+    },
+    {
+      "id": "relay_server",
+      "name": "Relay Server",
+      "purpose": "Routes controller commands to outbound-connected device sessions",
+      "owns": [
+        "bootstrap authentication",
+        "session rotation",
+        "bounded command leases",
+        "bounded result retention",
+        "SSE result stream"
+      ],
+      "depends_on": [
+        "agent"
+      ]
+    },
+    {
+      "id": "agent",
+      "name": "PC Agent",
+      "purpose": "Polls outbound for commands, verifies signed requests, and delegates only locally authorized capabilities",
+      "owns": [
+        "device identity",
+        "policy enforcement",
+        "executor"
+      ],
+      "depends_on": [
+        "protocol",
+        "policy",
+        "executor",
+        "relay_server"
+      ]
+    },
+    {
+      "id": "protocol",
+      "name": "Command Protocol",
+      "purpose": "Defines signed expiring command envelopes and active-process replay checks",
+      "owns": [
+        "envelope format",
+        "signature verification",
+        "nonce replay state"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "policy",
+      "name": "Policy Engine",
+      "purpose": "Makes automatic allow approval-required or deny decisions at the user device",
+      "owns": [
+        "capability authorization",
+        "default shell denial"
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "executor",
+      "name": "Local Capability Executor",
+      "purpose": "Executes bounded filesystem process and Git operations after policy authorization",
+      "owns": [
+        "os.Root filesystem access",
+        "allowlisted argv process execution",
+        "constrained Git operations",
+        "automatic capability dispatcher"
+      ],
+      "depends_on": [
+        "policy"
+      ]
+    }
   ],
-  "data_flows":[
-    {"from":"llm_client","to":"relay_server","meaning":"structured tool request"},
-    {"from":"relay_server","to":"agent","meaning":"signed short-lived command envelope"},
-    {"from":"agent","to":"policy","meaning":"untrusted structured capability intent"},
-    {"from":"policy","to":"executor","meaning":"automatic allow only; privileged requests remain approval-required"},
-    {"from":"executor","to":"agent","meaning":"bounded local capability result"},
-    {"from":"agent","to":"relay_server","meaning":"bounded execution result and audit metadata"},
-    {"from":"relay_server","to":"llm_client","meaning":"tool result"}
+  "data_flows": [
+    {
+      "from": "llm_client",
+      "to": "relay_server",
+      "meaning": "controller-authenticated structured command"
+    },
+    {
+      "from": "relay_server",
+      "to": "agent",
+      "meaning": "outbound long-poll command delivery under device session token"
+    },
+    {
+      "from": "agent",
+      "to": "policy",
+      "meaning": "untrusted structured capability intent after future envelope verification"
+    },
+    {
+      "from": "policy",
+      "to": "executor",
+      "meaning": "automatic allow only; privileged requests remain approval-required"
+    },
+    {
+      "from": "executor",
+      "to": "agent",
+      "meaning": "bounded local capability result"
+    },
+    {
+      "from": "agent",
+      "to": "relay_server",
+      "meaning": "device-session-authenticated result submission"
+    },
+    {
+      "from": "relay_server",
+      "to": "llm_client",
+      "meaning": "controller-authenticated SSE result event"
+    }
   ],
-  "external_boundaries":[
-    {"name":"Public network","contract":"All remote device traffic is outbound from the agent and must be authenticated before execution."},
-    {"name":"Local filesystem and process boundary","contract":"Filesystem operations use Go os.Root; process execution requires an executable allowlist, bounded output and timeout, trusted workspace CWD, and explicit environment."},
-    {"name":"LLM provider API","contract":"Provider output is untrusted intent and cannot directly authorize privileged device operations."}
+  "external_boundaries": [
+    {
+      "name": "Public network",
+      "contract": "Device traffic is outbound from the agent. Phase 2 relay binds loopback by default; public deployment requires external TLS termination and is not yet proven."
+    },
+    {
+      "name": "Relay bootstrap credentials",
+      "contract": "Registration and controller keys are distinct secrets of at least 32 bytes; session tokens are random, short-lived, hashed in memory, and rotated on reconnect."
+    },
+    {
+      "name": "Local filesystem and process boundary",
+      "contract": "Filesystem operations use Go os.Root; process execution requires an executable allowlist, bounded output and timeout, trusted workspace CWD, and explicit environment."
+    },
+    {
+      "name": "LLM provider API",
+      "contract": "Provider output is untrusted intent and cannot directly authorize privileged device operations."
+    }
   ]
 }

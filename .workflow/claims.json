@@ -1,12 +1,110 @@
 {
-  "schema_version":1,
-  "claims":[
-    {"id":"TRUTH-PROTOCOL-SIGNED-001","claim":"Command requests are signed with Ed25519 and verification covers all authority-bearing envelope fields.","documents":["API_CONTRACTS.md"],"source_owners":["internal/protocol/envelope.go::Sign(","internal/protocol/envelope.go::Verify("],"tests":["internal/protocol/envelope_test.go"],"runtime_evidence":[],"status":"PASS"},
-    {"id":"TRUTH-PROTOCOL-REPLAY-001","claim":"Within one active agent process a deviceID+nonce pair cannot be accepted twice before expiry.","documents":["DATA_CONTRACTS.md"],"source_owners":["internal/protocol/envelope.go::MemoryReplayStore"],"tests":["internal/protocol/envelope_test.go"],"runtime_evidence":[],"status":"PASS"},
-    {"id":"TRUTH-EXEC-FS-001","claim":"Phase 1 filesystem operations use Go os.Root and local paths so lexical and symlink traversal cannot escape the workspace root.","documents":["ARCHITECTURE.md","DATA_CONTRACTS.md"],"source_owners":["internal/executor/filesystem.go::OpenFilesystem(","internal/executor/filesystem.go::Read(","internal/executor/filesystem.go::Write("],"tests":["internal/executor/filesystem_test.go"],"runtime_evidence":[],"status":"PASS"},
-    {"id":"TRUTH-EXEC-PROCESS-001","claim":"ProcessRunner executes only allowlisted executables with argv arguments trusted workspace CWD bounded timeout bounded output and explicit environment.","documents":["ARCHITECTURE.md","DATA_CONTRACTS.md"],"source_owners":["internal/executor/process.go::NewProcessRunner(","internal/executor/process.go::Run("],"tests":["internal/executor/process_test.go"],"runtime_evidence":[],"status":"PASS"},
-    {"id":"TRUTH-EXEC-GIT-001","claim":"Git status and diff disable external execution paths and clone validation accepts only credential-free HTTPS into a new direct workspace child.","documents":["API_CONTRACTS.md","DATA_CONTRACTS.md"],"source_owners":["internal/executor/git.go::Status(","internal/executor/git.go::Diff(","internal/executor/git.go::Clone("],"tests":["internal/executor/git_test.go"],"runtime_evidence":[],"status":"PASS"},
-    {"id":"TRUTH-POLICY-DEFAULT-001","claim":"Automatic dispatch allows only read list status and diff; write patch process and clone require trusted local approval; shell and unknown capabilities deny.","documents":["API_CONTRACTS.md","WORKFLOW_STATE_MACHINE.md"],"source_owners":["internal/policy/capability.go::DecideCapability(","internal/executor/dispatcher.go::Dispatch("],"tests":["internal/policy/capability_test.go","internal/executor/dispatcher_test.go"],"runtime_evidence":[],"status":"PASS"}
+  "schema_version": 1,
+  "claims": [
+    {
+      "id": "TRUTH-PROTOCOL-SIGNED-001",
+      "claim": "Command requests are signed with Ed25519 and verification covers all authority-bearing envelope fields.",
+      "documents": [
+        "API_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/protocol/envelope.go::Sign(",
+        "internal/protocol/envelope.go::Verify("
+      ],
+      "tests": [
+        "internal/protocol/envelope_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-EXEC-FS-001",
+      "claim": "Filesystem operations use Go os.Root and local paths so lexical and symlink traversal cannot escape the workspace root.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/executor/filesystem.go::OpenFilesystem(",
+        "internal/executor/filesystem.go::Read(",
+        "internal/executor/filesystem.go::Write("
+      ],
+      "tests": [
+        "internal/executor/filesystem_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-POLICY-DEFAULT-001",
+      "claim": "Automatic dispatch allows only read list status and diff; write patch process and clone require trusted local approval; shell and unknown capabilities deny.",
+      "documents": [
+        "API_CONTRACTS.md",
+        "WORKFLOW_STATE_MACHINE.md"
+      ],
+      "source_owners": [
+        "internal/policy/capability.go::DecideCapability(",
+        "internal/executor/dispatcher.go::Dispatch("
+      ],
+      "tests": [
+        "internal/policy/capability_test.go",
+        "internal/executor/dispatcher_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-RELAY-SESSION-001",
+      "claim": "Relay reconnect rotates a random per-device session token and old or cross-device tokens fail closed.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/relay/store.go::Register(",
+        "internal/relay/store.go::NextCommand("
+      ],
+      "tests": [
+        "internal/relay/store_test.go",
+        "internal/relay/http_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-RELAY-QUEUE-001",
+      "claim": "Relay command queues are bounded per device and duplicate request IDs reject.",
+      "documents": [
+        "API_CONTRACTS.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/relay/store.go::QueueCommand("
+      ],
+      "tests": [
+        "internal/relay/store_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-RELAY-RESULT-001",
+      "claim": "Only the owning authenticated device can submit a request result and completed result retention is bounded.",
+      "documents": [
+        "API_CONTRACTS.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/relay/store.go::SubmitResult(",
+        "internal/relay/store.go::WaitResult("
+      ],
+      "tests": [
+        "internal/relay/store_test.go",
+        "internal/relay/http_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    }
   ],
-  "relations":[]
+  "relations": []
 }

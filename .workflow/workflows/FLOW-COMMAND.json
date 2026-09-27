@@ -1,24 +1,121 @@
 {
-  "schema_version":1,
-  "flow_id":"FLOW-COMMAND",
-  "title":"Remote command authorization flow",
-  "purpose":"Verify each command, enforce local policy, execute only automatically allowed or separately trusted-approved capabilities, and report bounded results.",
-  "critical":true,
-  "entry_condition":"A structured capability request reaches the local agent after transport authentication.",
-  "authority":"The local PC agent policy engine is the final execution authority.",
-  "states":["requested","verified","policy_checked","approval_required_or_allowed_or_denied","executed_or_rejected","reported"],
-  "transitions":[
-    {"from":"requested","to":"verified","action":"verify envelope signature freshness and nonce","side_effects":["record accepted nonce after successful verification"]},
-    {"from":"verified","to":"policy_checked","action":"evaluate local capability policy","side_effects":[]},
-    {"from":"policy_checked","to":"approval_required_or_allowed_or_denied","action":"resolve automatic allow approval-required or deny","side_effects":[]},
-    {"from":"approval_required_or_allowed_or_denied","to":"executed_or_rejected","action":"Phase 1 automatic dispatcher executes only read list status and diff; privileged tools stop before side effects","side_effects":["read-only local resource access for automatically allowed tools"]},
-    {"from":"executed_or_rejected","to":"reported","action":"return bounded result or policy error","side_effects":[]}
+  "schema_version": 1,
+  "flow_id": "FLOW-COMMAND",
+  "title": "Remote command relay and local authorization flow",
+  "purpose": "Route a controller-authenticated command through a device-isolated outbound relay session, then preserve local policy as final execution authority and stream the bounded result back.",
+  "critical": true,
+  "entry_condition": "A controller queues a structured command for a known device.",
+  "authority": "Relay authentication controls transport access; the local PC agent policy remains final execution authority.",
+  "states": [
+    "controller_submitted",
+    "relay_queued",
+    "device_session_polled",
+    "command_leased",
+    "locally_verified",
+    "policy_checked",
+    "executed_or_rejected",
+    "result_submitted",
+    "result_streamed"
   ],
-  "invariants":["verification precedes future remote execution","local policy is final execution authority","remote payload cannot self-assert trusted approval","approval-required automatic requests have no privileged side effect","raw shell and unknown capabilities deny by default"],
-  "failure_behavior":["fail closed on invalid envelope","fail closed on filesystem escape","fail closed on unknown or shell capability","return approval-required without executing privileged automatic requests"],
-  "restart_behavior":["discard expired queued commands after future reconnect","restart-safe nonce replay remains OPEN until durable state or per-start session rotation"],
-  "rollback_behavior":["disable affected capability","revert candidate commit if acceptance regression is confirmed"],
-  "source_owners":["internal/protocol","internal/policy","internal/executor"],
-  "tests":["internal/protocol/envelope_test.go","internal/executor/filesystem_test.go","internal/executor/process_test.go","internal/executor/git_test.go","internal/policy/capability_test.go","internal/executor/dispatcher_test.go"],
-  "sequence_session":"docs/sequence/phase-1.session.json"
+  "transitions": [
+    {
+      "from": "controller_submitted",
+      "to": "relay_queued",
+      "action": "authenticate controller and enqueue bounded request",
+      "side_effects": [
+        "append request to bounded in-memory device queue"
+      ]
+    },
+    {
+      "from": "relay_queued",
+      "to": "device_session_polled",
+      "action": "authenticate current device session on outbound long poll",
+      "side_effects": []
+    },
+    {
+      "from": "device_session_polled",
+      "to": "command_leased",
+      "action": "lease first available command for bounded interval",
+      "side_effects": [
+        "set in-memory lease deadline"
+      ]
+    },
+    {
+      "from": "command_leased",
+      "to": "locally_verified",
+      "action": "future agent verifies signed envelope freshness and replay state",
+      "side_effects": [
+        "record nonce only after valid verification"
+      ]
+    },
+    {
+      "from": "locally_verified",
+      "to": "policy_checked",
+      "action": "evaluate local capability policy",
+      "side_effects": []
+    },
+    {
+      "from": "policy_checked",
+      "to": "executed_or_rejected",
+      "action": "automatic dispatcher executes only read-only allowed tools; privileged tools stop at approval-required",
+      "side_effects": [
+        "bounded local read-only effects only for automatic tools"
+      ]
+    },
+    {
+      "from": "executed_or_rejected",
+      "to": "result_submitted",
+      "action": "owning device session submits bounded result",
+      "side_effects": [
+        "complete queued request and retain bounded result"
+      ]
+    },
+    {
+      "from": "result_submitted",
+      "to": "result_streamed",
+      "action": "controller-authenticated SSE emits one result event",
+      "side_effects": []
+    }
+  ],
+  "invariants": [
+    "registration and controller bootstrap secrets are distinct",
+    "session token is bound to one device ID",
+    "old token is invalid after reconnect rotation",
+    "controller cannot use device session token as controller authority",
+    "cross-device result submission rejects",
+    "local policy remains final execution authority",
+    "remote payload cannot self-assert trusted local approval"
+  ],
+  "failure_behavior": [
+    "invalid or expired credentials fail closed",
+    "unknown devices and requests reject",
+    "full device queues reject",
+    "cross-device session use rejects",
+    "unknown and shell capabilities deny locally",
+    "relay timeout does not fabricate a result"
+  ],
+  "restart_behavior": [
+    "relay restart loses in-memory sessions queues and results and therefore requires device reconnect; durability is OPEN",
+    "agent restart-safe nonce replay remains OPEN"
+  ],
+  "rollback_behavior": [
+    "stop relay listener",
+    "rotate bootstrap secrets",
+    "revert candidate commit if acceptance regression is confirmed"
+  ],
+  "source_owners": [
+    "internal/relay",
+    "cmd/max-relay",
+    "internal/protocol",
+    "internal/policy",
+    "internal/executor"
+  ],
+  "tests": [
+    "internal/relay/store_test.go",
+    "internal/relay/http_test.go",
+    "internal/protocol/envelope_test.go",
+    "internal/policy/capability_test.go",
+    "internal/executor/dispatcher_test.go"
+  ],
+  "sequence_session": "docs/sequence/phase-2.session.json"
 }

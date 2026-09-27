@@ -1,7 +1,35 @@
 {
-  "schema_version":1,
-  "defects":[
-    {"id":"SEC-REPLAY-RESTART-001","status":"OPEN","summary":"Nonce replay state is in-memory; restarting the agent loses unexpired nonce history, so restart-safe replay protection is not proven.","evidence":"internal/protocol/envelope.go::MemoryReplayStore; durable replay state or per-start session rotation is not implemented."},
-    {"id":"P1-APPROVAL-001","status":"OPEN","summary":"Trusted local approval issuance and binding are not implemented; Phase 1 therefore does not expose write patch process or clone through automatic dispatch.","evidence":"internal/policy/capability.go returns APPROVAL_REQUIRED and internal/executor/dispatcher.go stops before privileged side effects."}
+  "schema_version": 1,
+  "defects": [
+    {
+      "id": "SEC-REPLAY-RESTART-001",
+      "status": "OPEN",
+      "summary": "Agent nonce replay state is in-memory; restarting the agent loses unexpired nonce history.",
+      "evidence": "internal/protocol/envelope.go::MemoryReplayStore"
+    },
+    {
+      "id": "P1-APPROVAL-001",
+      "status": "OPEN",
+      "summary": "Trusted local approval issuance and binding are not implemented; privileged executor primitives are not reachable through automatic remote dispatch.",
+      "evidence": "internal/policy/capability.go and internal/executor/dispatcher.go"
+    },
+    {
+      "id": "P2-DURABILITY-001",
+      "status": "OPEN",
+      "summary": "Relay sessions queues leases and completed results are in-memory and are lost on relay restart.",
+      "evidence": "internal/relay/store.go"
+    },
+    {
+      "id": "P2-IDENTITY-001",
+      "status": "OPEN",
+      "summary": "Phase 2 uses separate symmetric bootstrap registration/controller keys; final Ed25519 device pairing and per-device controller authorization are deferred to Phase 3.",
+      "evidence": "internal/relay/store.go Config and Register"
+    },
+    {
+      "id": "P2-TLS-001",
+      "status": "OPEN",
+      "summary": "max-relay serves HTTP and defaults to loopback; public TLS termination/deployment is not yet implemented or proven.",
+      "evidence": "cmd/max-relay/main.go"
+    }
   ]
 }

@@ -1,22 +1,192 @@
 {
-  "schema_version":1,
-  "api_contracts":[
-    {"method":"VERIFY","path":"CommandEnvelope","purpose":"Authenticate and freshness-check a typed remote command before local policy evaluation.","authority":"PC agent protocol verifier","mutation":"Records nonce only after signature and time checks pass.","error_behavior":"Fail closed on malformed expired future-issued overlong invalid-signature or replayed envelopes."},
-    {"method":"DISPATCH","path":"CapabilityRequest","purpose":"Route automatically allowed structured capabilities to bounded local executors.","authority":"Local capability policy","mutation":"Automatic dispatch is read-only in Phase 1; mutating or execution capabilities stop at approval-required.","error_behavior":"Unknown and shell capabilities deny; write patch process and clone return approval-required before side effects."}
+  "schema_version": 1,
+  "api_contracts": [
+    {
+      "method": "VERIFY",
+      "path": "CommandEnvelope",
+      "purpose": "Authenticate and freshness-check a typed remote command before local policy evaluation.",
+      "authority": "PC agent protocol verifier",
+      "mutation": "Records nonce only after signature and time checks pass.",
+      "error_behavior": "Fail closed on malformed expired future-issued overlong invalid-signature or replayed envelopes."
+    },
+    {
+      "method": "DISPATCH",
+      "path": "CapabilityRequest",
+      "purpose": "Route automatically allowed structured capabilities to bounded local executors.",
+      "authority": "Local capability policy",
+      "mutation": "Automatic dispatch remains read-only; mutating or execution capabilities stop at approval-required.",
+      "error_behavior": "Unknown and shell capabilities deny; write patch process and clone return approval-required before side effects."
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/{device}/session",
+      "purpose": "Register or reconnect an outbound device and rotate its short-lived relay session token.",
+      "authority": "Relay registration key",
+      "mutation": "Replaces the active in-memory session token hash for the device.",
+      "error_behavior": "Invalid device IDs or bad registration credentials fail closed."
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/{device}/commands",
+      "purpose": "Queue a bounded command for a known device.",
+      "authority": "Relay controller key",
+      "mutation": "Adds one request to the bounded per-device queue.",
+      "error_behavior": "Unknown devices duplicate request IDs and full queues reject."
+    },
+    {
+      "method": "GET",
+      "path": "/v1/devices/{device}/commands/next",
+      "purpose": "Long-poll the next available command from an outbound device connection.",
+      "authority": "Current per-device session token",
+      "mutation": "Leases a command for bounded time; it remains eligible for redelivery after lease expiry until a result is submitted.",
+      "error_behavior": "Expired rotated or cross-device session tokens reject."
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/{device}/results",
+      "purpose": "Submit a result for a request owned by the authenticated device.",
+      "authority": "Current per-device session token",
+      "mutation": "Completes the queued request and stores a bounded retained result.",
+      "error_behavior": "Unknown requests and cross-device submissions reject."
+    },
+    {
+      "method": "GET",
+      "path": "/v1/results/{request}/events",
+      "purpose": "Stream the completed result as one SSE event.",
+      "authority": "Relay controller key",
+      "mutation": "No source mutation.",
+      "error_behavior": "Unknown requests reject and waits time out without fabricating results."
+    }
   ],
-  "data_contracts":[
-    {"name":"Workspace root","source_of_truth":"Local PC agent configuration","mutability":"User-controlled configuration","legal_writes":["Explicit local configuration"],"retention":"Until user changes configuration","invariants":["Filesystem operations are relative to os.Root and cannot resolve outside it through lexical or symlink traversal.","Process working directory is the trusted workspace root."]},
-    {"name":"Process execution policy","source_of_truth":"Local PC agent configuration","mutability":"User-controlled configuration","legal_writes":["Explicit executable allowlist and environment configuration"],"retention":"Until user changes configuration","invariants":["No shell string interpretation is used by ProcessRunner.","Executable must be allowlisted.","Timeout and captured stdout stderr are bounded.","Environment is explicit and is not implicitly inherited when configuration is empty."]},
-    {"name":"Capability authorization","source_of_truth":"internal/policy/capability.go","mutability":"Source-controlled policy","legal_writes":["Reviewed source changes"],"retention":"Versioned with source","invariants":["filesystem.read filesystem.list git.status and git.diff may auto-execute.","filesystem.write filesystem.patch process.run and git.clone require trusted local approval.","shell.exec powershell.exec bash.exec and unknown capabilities deny by default.","Remote request payloads cannot self-assert trusted approval."]},
-    {"name":"Active-process nonce replay cache","source_of_truth":"PC agent process memory","mutability":"Ephemeral runtime state","legal_writes":["Successful command-envelope verification"],"retention":"Until command expiry or process exit","invariants":["A deviceID+nonce pair is accepted at most once within one active process before expiry.","Restart-safe replay prevention is not yet implemented."]}
+  "data_contracts": [
+    {
+      "name": "Workspace root",
+      "source_of_truth": "Local PC agent configuration",
+      "mutability": "User-controlled configuration",
+      "legal_writes": [
+        "Explicit local configuration"
+      ],
+      "retention": "Until user changes configuration",
+      "invariants": [
+        "Filesystem operations are relative to os.Root and cannot resolve outside it through lexical or symlink traversal.",
+        "Process working directory is the trusted workspace root."
+      ]
+    },
+    {
+      "name": "Capability authorization",
+      "source_of_truth": "internal/policy/capability.go",
+      "mutability": "Source-controlled policy",
+      "legal_writes": [
+        "Reviewed source changes"
+      ],
+      "retention": "Versioned with source",
+      "invariants": [
+        "filesystem.read filesystem.list git.status and git.diff may auto-execute.",
+        "filesystem.write filesystem.patch process.run and git.clone require trusted local approval.",
+        "shell.exec powershell.exec bash.exec and unknown capabilities deny by default.",
+        "Remote request payloads cannot self-assert trusted approval."
+      ]
+    },
+    {
+      "name": "Relay device session",
+      "source_of_truth": "internal/relay/store.go",
+      "mutability": "Ephemeral server memory",
+      "legal_writes": [
+        "Successful authenticated register/reconnect"
+      ],
+      "retention": "Until expiry restart or replacement by reconnect",
+      "invariants": [
+        "Registration and controller bootstrap keys are distinct.",
+        "Session token is random and only its hash is stored.",
+        "A rotated session invalidates the prior token.",
+        "A session token authenticates only its device ID."
+      ]
+    },
+    {
+      "name": "Relay command queue",
+      "source_of_truth": "internal/relay/store.go",
+      "mutability": "Ephemeral server memory",
+      "legal_writes": [
+        "Controller-authenticated queue request",
+        "Device-authenticated result completion"
+      ],
+      "retention": "Until completion or relay restart",
+      "invariants": [
+        "Queue length is bounded per device.",
+        "Request IDs are unique while retained.",
+        "Leased commands may redeliver after lease expiry until completion."
+      ]
+    },
+    {
+      "name": "Relay completed results",
+      "source_of_truth": "internal/relay/store.go",
+      "mutability": "Ephemeral server memory",
+      "legal_writes": [
+        "Device-authenticated result submission"
+      ],
+      "retention": "Bounded by maximum retained result count or relay restart",
+      "invariants": [
+        "Result request must belong to submitting device.",
+        "Old completed results are evicted when the configured bound is reached."
+      ]
+    },
+    {
+      "name": "Active-process nonce replay cache",
+      "source_of_truth": "PC agent process memory",
+      "mutability": "Ephemeral runtime state",
+      "legal_writes": [
+        "Successful command-envelope verification"
+      ],
+      "retention": "Until command expiry or process exit",
+      "invariants": [
+        "A deviceID+nonce pair is accepted at most once within one active process before expiry.",
+        "Restart-safe replay prevention is not yet implemented."
+      ]
+    }
   ],
-  "ui_surfaces":[
-    {"name":"Chat client","status":"PLANNED","backend_authority":"Future authenticated relay plus local PC-agent policy result","visible_data":["paired devices","chat messages","tool requests","approval decisions","bounded execution results"],"actions":["select a paired device","submit a chat request","approve or deny privileged capability requests"],"forbidden_actions":["silently approve privileged execution","represent an unverified runtime result as successful"]}
+  "ui_surfaces": [
+    {
+      "name": "Chat client",
+      "status": "PLANNED",
+      "backend_authority": "Future paired controller plus relay plus local PC-agent policy result",
+      "visible_data": [
+        "paired devices",
+        "chat messages",
+        "tool requests",
+        "approval decisions",
+        "bounded execution results"
+      ],
+      "actions": [
+        "select a paired device",
+        "submit a chat request",
+        "approve or deny privileged capability requests"
+      ],
+      "forbidden_actions": [
+        "silently approve privileged execution",
+        "represent an unverified runtime result as successful"
+      ]
+    }
   ],
-  "runbook_steps":[
-    {"name":"Run unit tests","command":"go test ./... -count=1","expected":"all Go packages pass"},
-    {"name":"Run race tests","command":"go test -race ./... -count=1","expected":"all Go packages pass without detected data races"},
-    {"name":"Run static vet","command":"go vet ./...","expected":"no vet diagnostics"},
-    {"name":"Build agent","command":"go build ./cmd/max-agent","expected":"agent builds on current runner OS"}
+  "runbook_steps": [
+    {
+      "name": "Run unit tests",
+      "command": "go test ./... -count=1",
+      "expected": "all Go packages pass"
+    },
+    {
+      "name": "Run race tests",
+      "command": "go test -race ./... -count=1",
+      "expected": "all Go packages pass without detected data races"
+    },
+    {
+      "name": "Run static vet",
+      "command": "go vet ./...",
+      "expected": "no vet diagnostics"
+    },
+    {
+      "name": "Build binaries",
+      "command": "go build ./cmd/max-agent ./cmd/max-relay",
+      "expected": "agent and relay build on current runner OS"
+    }
   ]
 }

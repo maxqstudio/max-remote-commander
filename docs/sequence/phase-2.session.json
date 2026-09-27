@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "session_id": "phase-2-authenticated-relay",
+  "phase": "Phase 2 - authenticated outbound relay",
+  "mode": "DURING",
+  "scope": "CURRENT",
+  "critical": true,
+  "status": "ACTIVE",
+  "implementation_base_sha": "6132e215fb15862471ec5a40acd72ca8d0422f88",
+  "plan": {
+    "required": false,
+    "contract": "",
+    "frozen": false,
+    "frozen_commit": "",
+    "sha256": "",
+    "diagram": ""
+  },
+  "actual": {
+    "graph": "docs/sequence/generated/phase-2.actual.json",
+    "diagram": "docs/sequence/generated/phase-2.actual.mmd",
+    "source_digest": "",
+    "entries": [
+      "internal/relay/http.go::HTTPServer.Handler",
+      "internal/relay/store.go::Store.NextCommand",
+      "internal/relay/store.go::Store.SubmitResult"
+    ]
+  },
+  "test_traceability_required": true,
+  "tests": [
+    "internal/relay/store_test.go",
+    "internal/relay/http_test.go"
+  ],
+  "runtime_trace": {
+    "required": false,
+    "graph": ""
+  },
+  "acceptance_report": "artifacts/sequence/phase-2.acceptance.json"
+}

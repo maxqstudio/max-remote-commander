@@ -26,8 +26,8 @@ jobs:
         run: go test ./... -count=1
       - name: Vet
         run: go vet ./...
-      - name: Build agent
-        run: go build ./cmd/max-agent
+      - name: Build binaries
+        run: go build ./cmd/max-agent ./cmd/max-relay
 
   race:
     name: Race and security regression
@@ -62,10 +62,16 @@ jobs:
       - name: Generate Go-aware DURING actual sequence evidence
         shell: bash
         run: |
-          python .workflow/tools/generate_sequence_actual.py             --root "$GITHUB_WORKSPACE"             --output-json docs/sequence/generated/phase-1.actual.json             --output-mermaid docs/sequence/generated/phase-1.actual.mmd             --entry "internal/executor/dispatcher.go::Dispatcher.Dispatch"             --entry "internal/policy/capability.go::AuthorizeAutomatic"
+          python .workflow/tools/generate_sequence_actual.py \
+            --root "$GITHUB_WORKSPACE" \
+            --output-json docs/sequence/generated/phase-2.actual.json \
+            --output-mermaid docs/sequence/generated/phase-2.actual.mmd \
+            --entry "internal/relay/http.go::HTTPServer.Handler" \
+            --entry "internal/relay/store.go::Store.NextCommand" \
+            --entry "internal/relay/store.go::Store.SubmitResult"
       - name: Validate sequence contract
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-1.session.json
+        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-2.session.json
       - name: Validate generated docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"
