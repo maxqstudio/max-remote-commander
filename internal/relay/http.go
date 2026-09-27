@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -89,6 +90,8 @@ func decodeBody(w http.ResponseWriter, r *http.Request, target any) error {
 	var trailing any
 	if err := decoder.Decode(&trailing); err == nil {
 		return errors.New("multiple JSON values")
+	} else if !errors.Is(err, io.EOF) {
+		return err
 	}
 	return nil
 }
