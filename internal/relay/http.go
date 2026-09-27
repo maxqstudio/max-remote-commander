@@ -2,6 +2,7 @@ package relay
 
 import (
 	"context"
+	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -30,6 +31,17 @@ type resultBody struct {
 	Payload   json.RawMessage `json:"payload"`
 }
 
+type pairingOfferBody struct {
+	CodeHash        string `json:"code_hash"`
+	DevicePublicKey string `json:"device_public_key"`
+	TTLSeconds      int64  `json:"ttl_seconds"`
+}
+
+type pairingRedeemBody struct {
+	Code                string `json:"code"`
+	ControllerPublicKey string `json:"controller_public_key"`
+}
+
 func (s *HTTPServer) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
@@ -38,6 +50,10 @@ func (s *HTTPServer) Handler() http.Handler {
 		_, _ = w.Write([]byte("ok\n"))
 	})
 	mux.HandleFunc("POST /v1/devices/{device}/session", s.register)
+	mux.HandleFunc("POST /v1/devices/{device}/pairing-offer", s.publishPairingOffer)
+	mux.HandleFunc("POST /v1/devices/{device}/pairing/redeem", s.redeemPairing)
+	mux.HandleFunc("POST /v1/devices/{device}/controller-session", s.controllerSession)
+	mux.HandleFunc("DELETE /v1/devices/{device}/pairing", s.revokePairing)
 	mux.HandleFunc("POST /v1/devices/{device}/commands", s.queueCommand)
 	mux.HandleFunc("GET /v1/devices/{device}/commands/next", s.nextCommand)
 	mux.HandleFunc("POST /v1/devices/{device}/results", s.submitResult)
@@ -71,9 +87,9 @@ func bearer(r *http.Request) (string, bool) {
 	return token, token != ""
 }
 
-func (s *HTTPServer) requireController(w http.ResponseWriter, r *http.Request) bool {
+func (s *HTTPServer) requirePairedController(w http.ResponseWriter, r *http.Request, deviceID string) bool {
 	token, ok := bearer(r)
-	if !ok || !s.Store.ControllerAuthorized(token) {
+	if !ok || !s.Store.PairedControllerAuthorized(deviceID, token, s.now()) {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return false
 	}
@@ -96,6 +112,14 @@ func decodeBody(w http.ResponseWriter, r *http.Request, target any) error {
 	return nil
 }
 
+func decodeFixedBase64(value string, size int) ([]byte, error) {
+	raw, err := base64.RawURLEncoding.DecodeString(value)
+	if err != nil || len(raw) != size {
+		return nil, ErrInvalidIdentifier
+	}
+	return raw, nil
+}
+
 func writeJSON(w http.ResponseWriter, status int, value any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -110,13 +134,17 @@ func relayStatus(err error) int {
 	switch {
 	case errors.Is(err, ErrUnauthorized):
 		return http.StatusUnauthorized
-	case errors.Is(err, ErrInvalidIdentifier):
+	case errors.Is(err, ErrPairingCodeInvalid), errors.Is(err, ErrControllerAssertion):
+		return http.StatusUnauthorized
+	case errors.Is(err, ErrInvalidIdentifier), errors.Is(err, ErrInvalidPublicKey), errors.Is(err, ErrPairingMismatch):
 		return http.StatusBadRequest
-	case errors.Is(err, ErrUnknownDevice), errors.Is(err, ErrUnknownRequest):
+	case errors.Is(err, ErrUnknownDevice), errors.Is(err, ErrUnknownRequest), errors.Is(err, ErrPairingOfferMissing), errors.Is(err, ErrNotPaired):
 		return http.StatusNotFound
-	case errors.Is(err, ErrQueueFull):
+	case errors.Is(err, ErrPairingOfferExpired):
+		return http.StatusGone
+	case errors.Is(err, ErrQueueFull), errors.Is(err, ErrPairingAttempts):
 		return http.StatusTooManyRequests
-	case errors.Is(err, ErrDuplicateRequest):
+	case errors.Is(err, ErrDuplicateRequest), errors.Is(err, ErrAlreadyPaired), errors.Is(err, ErrControllerReplay), errors.Is(err, ErrPairingGeneration):
 		return http.StatusConflict
 	case errors.Is(err, ErrWrongDevice):
 		return http.StatusForbidden
@@ -139,8 +167,100 @@ func (s *HTTPServer) register(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, session)
 }
 
+func (s *HTTPServer) publishPairingOffer(w http.ResponseWriter, r *http.Request) {
+	token, ok := bearer(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	var body pairingOfferBody
+	if err := decodeBody(w, r, &body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	codeHashRaw, err := decodeFixedBase64(body.CodeHash, 32)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid code hash")
+		return
+	}
+	publicRaw, err := decodeFixedBase64(body.DevicePublicKey, ed25519.PublicKeySize)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid device public key")
+		return
+	}
+	var codeHash [32]byte
+	copy(codeHash[:], codeHashRaw)
+	if err := s.Store.PublishPairingOffer(
+		r.PathValue("device"),
+		token,
+		codeHash,
+		ed25519.PublicKey(publicRaw),
+		time.Duration(body.TTLSeconds)*time.Second,
+		s.now(),
+	); err != nil {
+		writeError(w, relayStatus(err), err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]string{"status":"pairing-offer-created"})
+}
+
+func (s *HTTPServer) redeemPairing(w http.ResponseWriter, r *http.Request) {
+	var body pairingRedeemBody
+	if err := decodeBody(w, r, &body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	publicRaw, err := decodeFixedBase64(body.ControllerPublicKey, ed25519.PublicKeySize)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "invalid controller public key")
+		return
+	}
+	pairing, err := s.Store.RedeemPairing(r.PathValue("device"), body.Code, ed25519.PublicKey(publicRaw), s.now())
+	if err != nil {
+		writeError(w, relayStatus(err), err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"device_id": pairing.DeviceID,
+		"generation": pairing.Generation,
+		"paired_at": pairing.PairedAt,
+	})
+}
+
+func (s *HTTPServer) controllerSession(w http.ResponseWriter, r *http.Request) {
+	var assertion ControllerAssertion
+	if err := decodeBody(w, r, &assertion); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	if assertion.DeviceID != r.PathValue("device") {
+		writeError(w, http.StatusBadRequest, "device id mismatch")
+		return
+	}
+	session, err := s.Store.AuthenticateController(assertion, s.now())
+	if err != nil {
+		writeError(w, relayStatus(err), err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, session)
+}
+
+func (s *HTTPServer) revokePairing(w http.ResponseWriter, r *http.Request) {
+	token, ok := bearer(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	if err := s.Store.RevokePairing(r.PathValue("device"), token, s.now()); err != nil {
+		writeError(w, relayStatus(err), err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (s *HTTPServer) queueCommand(w http.ResponseWriter, r *http.Request) {
-	if !s.requireController(w, r) {
+	deviceID := r.PathValue("device")
+	if !s.requirePairedController(w, r, deviceID) {
 		return
 	}
 	var body commandBody
@@ -153,7 +273,7 @@ func (s *HTTPServer) queueCommand(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "payload is required")
 		return
 	}
-	if err := s.Store.QueueCommand(r.PathValue("device"), Command{RequestID: body.RequestID, Payload: payload}); err != nil {
+	if err := s.Store.QueueCommand(deviceID, Command{RequestID: body.RequestID, Payload: payload}); err != nil {
 		writeError(w, relayStatus(err), err.Error())
 		return
 	}
@@ -215,7 +335,13 @@ func (s *HTTPServer) submitResult(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *HTTPServer) resultEvents(w http.ResponseWriter, r *http.Request) {
-	if !s.requireController(w, r) {
+	requestID := r.PathValue("request")
+	deviceID, err := s.Store.RequestOwner(requestID)
+	if err != nil {
+		writeError(w, relayStatus(err), err.Error())
+		return
+	}
+	if !s.requirePairedController(w, r, deviceID) {
 		return
 	}
 	flusher, ok := w.(http.Flusher)
@@ -225,7 +351,7 @@ func (s *HTTPServer) resultEvents(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
-	result, err := s.Store.WaitResult(ctx, r.PathValue("request"))
+	result, err := s.Store.WaitResult(ctx, requestID)
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 		w.WriteHeader(http.StatusNoContent)
 		return

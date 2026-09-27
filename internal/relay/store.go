@@ -353,3 +353,16 @@ func (s *Store) signalResultLocked(requestID string) {
 		delete(s.resultNotify, requestID)
 	}
 }
+
+func (s *Store) RequestOwner(requestID string) (string, error) {
+	if !validID(requestID, 128) {
+		return "", ErrInvalidIdentifier
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	deviceID, ok := s.requests[requestID]
+	if !ok {
+		return "", ErrUnknownRequest
+	}
+	return deviceID, nil
+}
