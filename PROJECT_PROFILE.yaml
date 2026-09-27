@@ -3,7 +3,7 @@ profile: strict
 contracts:
   api_contracts: required
   data_contracts: required
-  ui_information_architecture: required
+  ui_information_architecture: not_applicable
   runbook: required
   decisions: required
   known_defects: required
@@ -23,4 +23,4 @@ sequence:
   runtime_trace_required: false
 
 notes:
-  profile_reason: "Remote command execution crosses network, authentication, filesystem, process, and device trust boundaries; STRICT governance is required."
+  profile_reason: "Remote command execution crosses network, authentication, filesystem, process, and device trust boundaries; STRICT governance is required. UI information architecture becomes required when the chat-client phase begins."

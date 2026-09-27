@@ -68,3 +68,26 @@ func TestVerifyRejectsExpiredAndFutureCommands(t *testing.T) {
 		t.Fatalf("future: %v", err)
 	}
 }
+
+func TestInvalidKeyLengthsFailClosedWithoutPanic(t *testing.T) {
+	now := time.Unix(1_800_000_000, 0)
+	env, pub := signedEnvelope(t, now)
+
+	if err := env.Verify(ed25519.PublicKey{1, 2, 3}, now, 5*time.Second, NewMemoryReplayStore()); !errors.Is(err, ErrInvalidKey) {
+		t.Fatalf("invalid public key: %v", err)
+	}
+
+	args, _ := json.Marshal(map[string]any{"path": "workspace/file.txt"})
+	unsigned := CommandEnvelope{
+		Version: CurrentVersion, RequestID: "req-2", DeviceID: "dev-1", SessionID: "sess-1",
+		IssuedAt: now.Unix(), ExpiresAt: now.Add(time.Minute).Unix(), Nonce: "nonce-2",
+		Tool: "filesystem.read", Arguments: args,
+	}
+	if err := unsigned.Sign(ed25519.PrivateKey{1, 2, 3}); !errors.Is(err, ErrInvalidKey) {
+		t.Fatalf("invalid private key: %v", err)
+	}
+
+	if err := env.Verify(pub, now, 5*time.Second, NewMemoryReplayStore()); err != nil {
+		t.Fatalf("valid key regressed: %v", err)
+	}
+}
