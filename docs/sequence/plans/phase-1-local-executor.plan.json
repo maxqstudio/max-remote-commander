@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "flow_id": "FLOW-LOCAL-EXECUTOR",
+  "title": "Local structured capability execution",
+  "status": "FROZEN",
+  "nodes": [
+    {"id":"dispatch","label":"Executor.Execute","locator":"internal/executor/executor.go::Executor.Execute","kind":"source"},
+    {"id":"fs_list","label":"Filesystem.List","locator":"internal/executor/filesystem.go::Filesystem.List","kind":"source"},
+    {"id":"fs_read","label":"Filesystem.ReadFile","locator":"internal/executor/filesystem.go::Filesystem.ReadFile","kind":"source"},
+    {"id":"fs_write","label":"Filesystem.WriteFile","locator":"internal/executor/filesystem.go::Filesystem.WriteFile","kind":"source"},
+    {"id":"fs_replace","label":"Filesystem.ReplaceExact","locator":"internal/executor/filesystem.go::Filesystem.ReplaceExact","kind":"source"},
+    {"id":"proc_run","label":"ProcessRunner.Run","locator":"internal/executor/process.go::ProcessRunner.Run","kind":"source"},
+    {"id":"git_status","label":"GitClient.Status","locator":"internal/executor/git.go::GitClient.Status","kind":"source"},
+    {"id":"git_diff","label":"GitClient.Diff","locator":"internal/executor/git.go::GitClient.Diff","kind":"source"},
+    {"id":"git_clone","label":"GitClient.Clone","locator":"internal/executor/git.go::GitClient.Clone","kind":"source"}
+  ],
+  "edges": [
+    {"from":"dispatch","to":"fs_list","action":"filesystem.list","requirement":"MUST","verification":"SOURCE"},
+    {"from":"dispatch","to":"fs_read","action":"filesystem.read","requirement":"MUST","verification":"SOURCE"},
+    {"from":"dispatch","to":"fs_write","action":"filesystem.write","requirement":"MUST","verification":"SOURCE"},
+    {"from":"dispatch","to":"fs_replace","action":"filesystem.replace_exact","requirement":"MUST","verification":"SOURCE"},
+    {"from":"dispatch","to":"proc_run","action":"process.run","requirement":"MUST","verification":"SOURCE"},
+    {"from":"dispatch","to":"git_status","action":"git.status","requirement":"MUST","verification":"SOURCE"},
+    {"from":"dispatch","to":"git_diff","action":"git.diff","requirement":"MUST","verification":"SOURCE"},
+    {"from":"dispatch","to":"git_clone","action":"git.clone","requirement":"MUST","verification":"SOURCE"}
+  ]
+}

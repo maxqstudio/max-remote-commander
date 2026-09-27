@@ -1,0 +1,21 @@
+%% GENERATED FILE - DO NOT EDIT
+%% PLAN_SHA256: 41a9630632a731730cbab6de8f106ea89a7043029ab79eeb79cba3e6ea31659e
+%% FLOW_ID: FLOW-LOCAL-EXECUTOR
+sequenceDiagram
+    participant dispatch_0 as Executor.Execute
+    participant fs_list_1 as Filesystem.List
+    participant fs_read_2 as Filesystem.ReadFile
+    participant fs_write_3 as Filesystem.WriteFile
+    participant fs_replace_4 as Filesystem.ReplaceExact
+    participant proc_run_5 as ProcessRunner.Run
+    participant git_status_6 as GitClient.Status
+    participant git_diff_7 as GitClient.Diff
+    participant git_clone_8 as GitClient.Clone
+    dispatch_0->>fs_list_1: filesystem.list [MUST]
+    dispatch_0->>fs_read_2: filesystem.read [MUST]
+    dispatch_0->>fs_write_3: filesystem.write [MUST]
+    dispatch_0->>fs_replace_4: filesystem.replace_exact [MUST]
+    dispatch_0->>proc_run_5: process.run [MUST]
+    dispatch_0->>git_status_6: git.status [MUST]
+    dispatch_0->>git_diff_7: git.diff [MUST]
+    dispatch_0->>git_clone_8: git.clone [MUST]
