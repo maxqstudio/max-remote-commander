@@ -103,3 +103,53 @@ func TestQueueBoundsAndDuplicateRequest(t *testing.T) {
 		t.Fatalf("queue full: %v", err)
 	}
 }
+
+
+func TestStoreRejectsSharedBootstrapKeys(t *testing.T) {
+	_, err := NewStore(Config{
+		RegistrationKey: testRegistrationKey,
+		ControllerKey: testRegistrationKey,
+	})
+	if err == nil {
+		t.Fatal("shared registration/controller key was accepted")
+	}
+}
+
+func TestResultRetentionIsBounded(t *testing.T) {
+	store, err := NewStore(Config{
+		RegistrationKey: testRegistrationKey,
+		ControllerKey: testControllerKey,
+		SessionTTL: time.Minute,
+		LeaseTTL: 50 * time.Millisecond,
+		MaxQueue: 4,
+		MaxResults: 1,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Unix(1_800_000_000, 0)
+	session, err := store.Register("device-a", testRegistrationKey, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, requestID := range []string{"req-1", "req-2"} {
+		if err := store.QueueCommand("device-a", Command{RequestID: requestID, Payload: []byte("{}")}); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := store.NextCommand(context.Background(), "device-a", session.Token, func() time.Time { return now }); err != nil {
+			t.Fatal(err)
+		}
+		if err := store.SubmitResult("device-a", session.Token, Result{RequestID: requestID, Payload: []byte("{}")}, now); err != nil {
+			t.Fatal(err)
+		}
+		now = now.Add(time.Second)
+	}
+
+	if _, err := store.WaitResult(context.Background(), "req-1"); !errors.Is(err, ErrUnknownRequest) {
+		t.Fatalf("evicted result: got %v", err)
+	}
+	if _, err := store.WaitResult(context.Background(), "req-2"); err != nil {
+		t.Fatalf("latest result missing: %v", err)
+	}
+}
