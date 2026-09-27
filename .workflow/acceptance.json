@@ -1,23 +1,75 @@
 {
-  "evidence_boundary":"Phase 0 is accepted on main at 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7. Phase 1 source executor behavior has cross-platform CI evidence, but exact final Phase 1 STRICT governance/main revalidation, trusted local approvals, relay, paired physical devices, production runtime, LLM providers, MCP, and restart-safe replay protection remain NOT_PROVEN.",
-  "human_comprehension_questions":{},
-  "human_comprehension_status":"NOT_PROVEN",
-  "requirements":[
-    {"evidence":"GitHub Actions main run 36326604795","id":"P0-FINAL-001","requirement":"Phase 0 exact accepted SHA passes Linux Windows macOS race and STRICT governance on main.","status":"PASS"},
-    {"evidence":"GitHub Actions run 36327425533; internal/executor/filesystem_test.go","id":"P1-FS-001","requirement":"Filesystem read list write and patch stay rooted with os.Root, reject traversal and symlink escape, enforce size bounds, and fail closed on patch mismatch.","status":"PASS"},
-    {"evidence":"GitHub Actions run 36327425533; internal/executor/process_test.go","id":"P1-PROC-001","requirement":"Process execution is argv-only, executable-allowlisted, bounded by trusted workspace timeout output and explicit environment.","status":"PASS"},
-    {"evidence":"GitHub Actions run 36327425533; internal/executor/git_test.go","id":"P1-GIT-001","requirement":"Git status and diff disable external execution paths and clone accepts only credential-free HTTPS into a new direct workspace child.","status":"PASS"},
-    {"evidence":"GitHub Actions run 36327425533; internal/policy/capability_test.go; internal/executor/dispatcher_test.go","id":"P1-POLICY-001","requirement":"Only read list status and diff auto-execute; write patch process and clone require trusted local approval; shell and unknown tools deny.","status":"PASS"},
-    {"evidence":"Pending exact final Phase 1 CI","id":"P1-FINAL-001","requirement":"Exact final Phase 1 SHA passes Linux Windows macOS race and STRICT governance, then the identical SHA passes main revalidation.","status":"NOT_PROVEN"}
+  "evidence_boundary": "Phase 0 is accepted on main at 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7. Phase 1 source executor behavior has cross-platform CI evidence, but exact final Phase 1 STRICT governance/main revalidation, trusted local approvals, relay, paired physical devices, production runtime, LLM providers, MCP, and restart-safe replay protection remain NOT_PROVEN.",
+  "human_comprehension_questions": {},
+  "human_comprehension_status": "NOT_PROVEN",
+  "requirements": [
+    {
+      "evidence": "GitHub Actions main run 36326604795",
+      "id": "P0-FINAL-001",
+      "requirement": "Phase 0 exact accepted SHA passes Linux Windows macOS race and STRICT governance on main.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36327425533; internal/executor/filesystem_test.go",
+      "id": "P1-FS-001",
+      "requirement": "Filesystem read list write and patch stay rooted with os.Root, reject traversal and symlink escape, enforce size bounds, and fail closed on patch mismatch.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36327425533; internal/executor/process_test.go",
+      "id": "P1-PROC-001",
+      "requirement": "Process execution is argv-only, executable-allowlisted, bounded by trusted workspace timeout output and explicit environment.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36327425533; internal/executor/git_test.go",
+      "id": "P1-GIT-001",
+      "requirement": "Git status and diff disable external execution paths and clone accepts only credential-free HTTPS into a new direct workspace child.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36327425533; internal/policy/capability_test.go; internal/executor/dispatcher_test.go",
+      "id": "P1-POLICY-001",
+      "requirement": "Only read list status and diff auto-execute; write patch process and clone require trusted local approval; shell and unknown tools deny.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Pending exact final Phase 1 CI",
+      "id": "P1-FINAL-001",
+      "requirement": "Exact final Phase 1 SHA passes Linux Windows macOS race and STRICT governance, then the identical SHA passes main revalidation.",
+      "status": "NOT_PROVEN"
+    }
   ],
-  "runtime_checks":[],
-  "runtime_status":"NOT_PROVEN",
-  "schema_version":1,
-  "sequence_mode":"DURING",
-  "sequence_session":"docs/sequence/phase-1.session.json",
-  "sequence_sync_status":"NOT_PROVEN",
-  "test_commands":["go test ./... -count=1","go test -race ./... -count=1","go vet ./...","go build ./cmd/max-agent"],
-  "truth_gates":{
-    "BEHAVIORAL_SYNC":"NOT_PROVEN","CROSS_DOCUMENT_CONSISTENCY":"NOT_PROVEN","DOC_LAYOUT":"NOT_PROVEN","DOC_READABILITY":"NOT_PROVEN","DOC_SOURCE_TRACEABILITY":"NOT_PROVEN","DOC_TEST_TRACEABILITY":"NOT_PROVEN","HUMAN_COMPREHENSION":"NOT_PROVEN","PROJECT_DOCS_NORMALIZED":"NOT_PROVEN","PROJECT_DOCS_SYNC":"NOT_PROVEN","PROJECT_STATE_SYNC":"NOT_PROVEN","PROVENANCE_SYNC":"NOT_PROVEN","REFERENCE_SYNC":"NOT_PROVEN","RUNTIME_E2E":"NOT_PROVEN","SEMANTIC_SYNC":"NOT_PROVEN","SEQUENCE_SYNC":"NOT_PROVEN","SOURCE_TESTS":"PASS","STRUCTURAL_SYNC":"NOT_PROVEN","TEST_RUNTIME_TRACEABILITY":"NOT_PROVEN"
+  "runtime_checks": [],
+  "runtime_status": "NOT_PROVEN",
+  "schema_version": 1,
+  "sequence_mode": "DURING",
+  "sequence_session": "docs/sequence/phase-1.session.json",
+  "sequence_sync_status": "NOT_PROVEN",
+  "test_commands": [
+    "go test ./... -count=1",
+    "go test -race ./... -count=1",
+    "go vet ./...",
+    "go build ./cmd/max-agent"
+  ],
+  "truth_gates": {
+    "BEHAVIORAL_SYNC": "NOT_PROVEN",
+    "CROSS_DOCUMENT_CONSISTENCY": "NOT_PROVEN",
+    "DOC_LAYOUT": "PASS",
+    "DOC_READABILITY": "PASS",
+    "DOC_SOURCE_TRACEABILITY": "NOT_PROVEN",
+    "DOC_TEST_TRACEABILITY": "NOT_PROVEN",
+    "HUMAN_COMPREHENSION": "NOT_PROVEN",
+    "PROJECT_DOCS_NORMALIZED": "PASS",
+    "PROJECT_DOCS_SYNC": "PASS",
+    "PROJECT_STATE_SYNC": "NOT_PROVEN",
+    "PROVENANCE_SYNC": "NOT_PROVEN",
+    "REFERENCE_SYNC": "NOT_PROVEN",
+    "RUNTIME_E2E": "NOT_PROVEN",
+    "SEMANTIC_SYNC": "NOT_PROVEN",
+    "SEQUENCE_SYNC": "NOT_PROVEN",
+    "SOURCE_TESTS": "PASS",
+    "STRUCTURAL_SYNC": "NOT_PROVEN",
+    "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"
   }
 }

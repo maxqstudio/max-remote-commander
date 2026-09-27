@@ -14,9 +14,9 @@ Rationale: Single-binary cross-platform distribution, straightforward concurrenc
 
 Status: ACCEPTED
 
-Structured capabilities are the default execution interface; raw shell is privileged.
+Structured capabilities are the default execution interface; raw shell is denied by default.
 
-Rationale: Reduce prompt-injection blast radius and keep local policy decisions explicit and auditable.
+Rationale: Reduce prompt-injection blast radius and keep local policy explicit.
 
 ## DEC-003 — Outbound-only device networking
 
@@ -24,4 +24,20 @@ Status: ACCEPTED
 
 Normal device connectivity originates outbound from the user PC.
 
-Rationale: Avoid exposing inbound services on user machines and work across NAT/firewalls more safely.
+Rationale: Avoid exposing inbound services on user machines and work across NAT and firewalls.
+
+## DEC-004 — Go 1.24 minimum for traversal-resistant filesystem execution
+
+Status: ACCEPTED
+
+Raise the project minimum to Go 1.24 and use os.Root for filesystem executor operations.
+
+Rationale: The project is new and security-sensitive; os.Root provides traversal-resistant operations without a check-then-use authorization race.
+
+## DEC-005 — Remote payload cannot grant privileged approval
+
+Status: ACCEPTED
+
+CapabilityRequest contains no trusted approval boolean or token in Phase 1; privileged capabilities stop at APPROVAL_REQUIRED.
+
+Rationale: An LLM or compromised relay must not self-authorize mutation process execution or network clone.

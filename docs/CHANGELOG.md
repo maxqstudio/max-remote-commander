@@ -2,12 +2,18 @@
 
 # CHANGELOG
 
-## 2026-09-27 — Phase 0 foundation candidate
+## 2026-09-27 — Phase 0 accepted foundation
 
 Type: foundation
 
-- Added signed command-envelope primitives.
-- Added active-process replay rejection.
-- Added workspace traversal and symlink-escape guard.
-- Added STRICT Skill_Workflow governance and cross-OS GitHub Actions.
-- Added Saweria and PayPal support links.
+- Accepted exact SHA 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7 after work-branch and main 5-job PASS.
+- Added signed envelopes active-process replay rejection workspace guard STRICT governance and cross-OS CI.
+
+## 2026-09-27 — Phase 1 local capability executor candidate
+
+Type: feature
+
+- Raised minimum Go to 1.24 and added os.Root filesystem read list write and patch.
+- Added allowlisted argv-only process execution with trusted CWD explicit environment timeout and output limits.
+- Added constrained Git status diff and HTTPS clone primitives.
+- Added fail-closed capability policy and automatic read-only dispatcher.

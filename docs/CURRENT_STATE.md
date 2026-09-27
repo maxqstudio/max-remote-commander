@@ -3,20 +3,20 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: ba02ae3beb61c7aea97e870cb267a5ceb61fabe0
+Authority verified at SHA: 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7
 Governance profile: strict
 
 ## Current phase
-Phase: Phase 0 - security and governance foundation
+Phase: Phase 1 - local capability executor
 Status: ACTIVE_CANDIDATE
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/phase-0-foundation
+Branch: work/phase-1-executor
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: ba02ae3beb61c7aea97e870cb267a5ceb61fabe0
+Last accepted SHA: 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7
 Current candidate SHA: external final acceptance evidence
-Current source digest: 773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593
+Current source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
 
 ## Runtime
 Environment: see SOURCE_AUTHORITY_MAP.md and RUNBOOK.md
@@ -33,35 +33,39 @@ PROJECT_DOCS_SYNC: PASS
 ## Sequence governance
 Sequence policy: REQUIRED
 Current sequence mode: DURING
-Current sequence session: docs/sequence/phase-0.session.json
-SEQUENCE_SYNC: PASS
+Current sequence session: docs/sequence/phase-1.session.json
+SEQUENCE_SYNC: NOT_PROVEN
 
 ## Proven
-- local Go unit tests pass
-- local Go race tests pass
-- local go vet passes
-- local cross-compilation for representative Windows Linux macOS targets passes
+- Phase 0 exact SHA 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7 passed all five GitHub Actions jobs on main in run 36326604795
+- Phase 1 filesystem source jobs passed Linux Windows macOS and race at run 36326941302 after repair
+- Phase 1 process source jobs passed Linux Windows macOS and race at run 36327158451 after repair
+- Phase 1 Git source jobs passed Linux Windows macOS and race at run 36327292093
+- Phase 1 dispatcher and capability-policy source jobs passed Linux Windows macOS and race at run 36327425533
 
 ## Not proven
-- GitHub Actions cross-OS result for current candidate
+- STRICT governance and cross-platform CI on the exact final Phase 1 closure SHA
+- main-branch revalidation of accepted Phase 1
+- trusted local approval issuance and binding for privileged capabilities
 - real remote relay behavior
 - physical user-device runtime
 - chat client
 - MCP adapter
+- restart-safe replay protection
 
 ## Known blockers
-- Phase 0 cannot be accepted until GitHub Actions and governed documentation gates pass on the exact candidate SHA
+- Phase 1 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
 
 ## Known defects
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- commit Phase 0 candidate
-- run GitHub Actions
-- repair failures
-- merge Phase 0 after evidence passes
+- synchronize deterministic Project Truth for Phase 1
+- run exact-SHA Phase 1 acceptance
+- fast-forward accepted Phase 1 SHA to main
+- revalidate the same SHA on main
 
 ## Explicitly blocked
-- claim project complete
+- auto-execute write patch process or clone without trusted local approval
 - enable unrestricted shell by default
-- claim physical runtime proven from CI
+- claim remote or physical runtime proven from GitHub-hosted CI

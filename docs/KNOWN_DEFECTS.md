@@ -4,6 +4,7 @@
 
 | ID | Status | Summary | Evidence |
 |---|---|---|---|
-| SEC-REPLAY-RESTART-001 | OPEN | The Phase 0 nonce replay store is in-memory; restarting the agent loses unexpired nonce history, so restart-safe replay protection is not yet proven. | internal/protocol/envelope.go::MemoryReplayStore; persistent replay state or per-start session rotation is not implemented. |
+| SEC-REPLAY-RESTART-001 | OPEN | Nonce replay state is in-memory; restarting the agent loses unexpired nonce history, so restart-safe replay protection is not proven. | internal/protocol/envelope.go::MemoryReplayStore; durable replay state or per-start session rotation is not implemented. |
+| P1-APPROVAL-001 | OPEN | Trusted local approval issuance and binding are not implemented; Phase 1 therefore does not expose write patch process or clone through automatic dispatch. | internal/policy/capability.go returns APPROVAL_REQUIRED and internal/executor/dispatcher.go stops before privileged side effects. |
 
 Use explicit OPEN, FIXED/ACCEPTED, HISTORICAL, or NOT_PROVEN semantics.

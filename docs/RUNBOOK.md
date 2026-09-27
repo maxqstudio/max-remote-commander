@@ -5,4 +5,4 @@
 1. Run unit tests — go test ./... -count=1 — expected: all Go packages pass
 2. Run race tests — go test -race ./... -count=1 — expected: all Go packages pass without detected data races
 3. Run static vet — go vet ./... — expected: no vet diagnostics
-4. Build agent — go build ./cmd/max-agent — expected: cross-platform agent binary builds on the current runner OS
+4. Build agent — go build ./cmd/max-agent — expected: agent builds on current runner OS

@@ -27,22 +27,26 @@ Users / External Systems
     -> State / Evidence Authorities
     -> External Runtime / Outputs
 
-Observed source inventory: 5 files, 1 language categories.
+Observed source inventory: 15 files, 1 language categories.
 
 ## Major components
 
 | Component | Purpose | Owns / Decides | Depends On |
 |---|---|---|---|
 | LLM Client | Requests typed tools and consumes results | conversation and tool intents | relay_server |
-| Relay Server | Authenticates and routes device sessions without requiring inbound PC ports | session routing and command queue | agent |
-| PC Agent | Verifies signed requests and executes locally approved capabilities | device identity, policy enforcement, executor | protocol, policy |
+| Relay Server | Authenticates and routes device sessions without inbound PC ports | session routing and command queue | agent |
+| PC Agent | Verifies signed requests and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor |
 | Command Protocol | Defines signed expiring command envelopes and active-process replay checks | envelope format, signature verification, nonce replay state |  |
-| Policy Engine | Makes allow deny or approval decisions at the user device | workspace boundaries, capability authorization |  |
+| Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
+| Local Capability Executor | Executes bounded filesystem process and Git operations after policy authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, automatic capability dispatcher | policy |
 
 ## Main data flow
 
 - llm_client -> relay_server: structured tool request
 - relay_server -> agent: signed short-lived command envelope
+- agent -> policy: untrusted structured capability intent
+- policy -> executor: automatic allow only; privileged requests remain approval-required
+- executor -> agent: bounded local capability result
 - agent -> relay_server: bounded execution result and audit metadata
 - relay_server -> llm_client: tool result
 
@@ -50,19 +54,19 @@ Observed source inventory: 5 files, 1 language categories.
 
 ### FLOW-COMMAND — Remote command authorization flow
 
-Verify each remote command, enforce local policy, execute only approved capabilities, and report bounded results.
+Verify each command, enforce local policy, execute only automatically allowed or separately trusted-approved capabilities, and report bounded results.
 
 Authority: The local PC agent policy engine is the final execution authority.
 
-- requested -> verified : verify envelope signature, freshness, and nonce
-- verified -> policy_checked : evaluate local device policy
-- policy_checked -> approved_or_denied : resolve allow, deny, or explicit user approval
-- approved_or_denied -> executed_or_rejected : execute only an approved structured capability
-- executed_or_rejected -> reported : return bounded result and audit metadata
+- requested -> verified : verify envelope signature freshness and nonce
+- verified -> policy_checked : evaluate local capability policy
+- policy_checked -> approval_required_or_allowed_or_denied : resolve automatic allow approval-required or deny
+- approval_required_or_allowed_or_denied -> executed_or_rejected : Phase 1 automatic dispatcher executes only read list status and diff; privileged tools stop before side effects
+- executed_or_rejected -> reported : return bounded result or policy error
 
 ## Lifecycle and state
 
-Current phase: Phase 0 - security and governance foundation
+Current phase: Phase 1 - local capability executor
 
 Current status: ACTIVE_CANDIDATE
 
@@ -101,41 +105,46 @@ compiler does not infer them from implementation names.
 ## Failure and recovery
 
 - FLOW-COMMAND: fail closed on invalid envelope
-- FLOW-COMMAND: fail closed on workspace escape
-- FLOW-COMMAND: return a bounded error result without executing denied commands
+- FLOW-COMMAND: fail closed on filesystem escape
+- FLOW-COMMAND: fail closed on unknown or shell capability
+- FLOW-COMMAND: return approval-required without executing privileged automatic requests
 
 ## Current project state
 
 Next authorized actions:
-- commit Phase 0 candidate
-- run GitHub Actions
-- repair failures
-- merge Phase 0 after evidence passes
+- synchronize deterministic Project Truth for Phase 1
+- run exact-SHA Phase 1 acceptance
+- fast-forward accepted Phase 1 SHA to main
+- revalidate the same SHA on main
 
 Blocked actions:
-- claim project complete
+- auto-execute write patch process or clone without trusted local approval
 - enable unrestricted shell by default
-- claim physical runtime proven from CI
+- claim remote or physical runtime proven from GitHub-hosted CI
 
 Known blockers:
-- Phase 0 cannot be accepted until GitHub Actions and governed documentation gates pass on the exact candidate SHA
+- Phase 1 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
 
 ## Proven vs not proven
 
 ### Proven
 
-- local Go unit tests pass
-- local Go race tests pass
-- local go vet passes
-- local cross-compilation for representative Windows Linux macOS targets passes
+- Phase 0 exact SHA 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7 passed all five GitHub Actions jobs on main in run 36326604795
+- Phase 1 filesystem source jobs passed Linux Windows macOS and race at run 36326941302 after repair
+- Phase 1 process source jobs passed Linux Windows macOS and race at run 36327158451 after repair
+- Phase 1 Git source jobs passed Linux Windows macOS and race at run 36327292093
+- Phase 1 dispatcher and capability-policy source jobs passed Linux Windows macOS and race at run 36327425533
 
 ### Not proven
 
-- GitHub Actions cross-OS result for current candidate
+- STRICT governance and cross-platform CI on the exact final Phase 1 closure SHA
+- main-branch revalidation of accepted Phase 1
+- trusted local approval issuance and binding for privileged capabilities
 - real remote relay behavior
 - physical user-device runtime
 - chat client
 - MCP adapter
+- restart-safe replay protection
 
 ## Important limitations
 

@@ -4,6 +4,7 @@
 
 | Method | Path / Event | Purpose | Authority | Mutation | Error behavior |
 |---|---|---|---|---|---|
-| VERIFY | CommandEnvelope | Authenticate and freshness-check a typed remote command before local policy evaluation. | PC agent protocol verifier | Records nonce in replay store only after signature and time checks pass. | Fail closed on malformed, expired, future-issued, overlong, invalid-signature, or replayed envelopes. |
+| VERIFY | CommandEnvelope | Authenticate and freshness-check a typed remote command before local policy evaluation. | PC agent protocol verifier | Records nonce only after signature and time checks pass. | Fail closed on malformed expired future-issued overlong invalid-signature or replayed envelopes. |
+| DISPATCH | CapabilityRequest | Route automatically allowed structured capabilities to bounded local executors. | Local capability policy | Automatic dispatch is read-only in Phase 1; mutating or execution capabilities stop at approval-required. | Unknown and shell capabilities deny; write patch process and clone return approval-required before side effects. |
 
 Declared in .workflow/contracts.json. Observed routes are listed in FLOW_INDEX.

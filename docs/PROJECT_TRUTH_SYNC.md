@@ -20,7 +20,7 @@ HEAD is recorded externally after the commit exists.
 | BEHAVIORAL_SYNC | NOT_PROVEN | |
 | CROSS_DOCUMENT_CONSISTENCY | NOT_PROVEN | |
 | HUMAN_COMPREHENSION | NOT_PROVEN | |
-| SEQUENCE_SYNC | PASS | |
+| SEQUENCE_SYNC | NOT_PROVEN | |
 | DOC_LAYOUT | PASS | |
 | PROJECT_DOCS_NORMALIZED | PASS | |
 | DOC_READABILITY | PASS | |
@@ -36,7 +36,10 @@ HEAD is recorded externally after the commit exists.
 |---|---|---|---|---|---|---|
 | TRUTH-PROTOCOL-SIGNED-001 | Command requests are signed with Ed25519 and verification covers all authority-bearing envelope fields. | API_CONTRACTS.md | internal/protocol/envelope.go::Sign(; internal/protocol/envelope.go::Verify( | internal/protocol/envelope_test.go | NOT_APPLICABLE | PASS |
 | TRUTH-PROTOCOL-REPLAY-001 | Within one active agent process a deviceID+nonce pair cannot be accepted twice before expiry. | DATA_CONTRACTS.md | internal/protocol/envelope.go::MemoryReplayStore | internal/protocol/envelope_test.go | NOT_APPLICABLE | PASS |
-| TRUTH-PATH-BOUNDARY-001 | Workspace path authorization rejects lexical traversal and symlink-ancestor escapes, including missing descendant targets. | DATA_CONTRACTS.md | internal/policy/pathguard.go::Resolve( | internal/policy/pathguard_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-EXEC-FS-001 | Phase 1 filesystem operations use Go os.Root and local paths so lexical and symlink traversal cannot escape the workspace root. | ARCHITECTURE.md; DATA_CONTRACTS.md | internal/executor/filesystem.go::OpenFilesystem(; internal/executor/filesystem.go::Read(; internal/executor/filesystem.go::Write( | internal/executor/filesystem_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-EXEC-PROCESS-001 | ProcessRunner executes only allowlisted executables with argv arguments trusted workspace CWD bounded timeout bounded output and explicit environment. | ARCHITECTURE.md; DATA_CONTRACTS.md | internal/executor/process.go::NewProcessRunner(; internal/executor/process.go::Run( | internal/executor/process_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-EXEC-GIT-001 | Git status and diff disable external execution paths and clone validation accepts only credential-free HTTPS into a new direct workspace child. | API_CONTRACTS.md; DATA_CONTRACTS.md | internal/executor/git.go::Status(; internal/executor/git.go::Diff(; internal/executor/git.go::Clone( | internal/executor/git_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-POLICY-DEFAULT-001 | Automatic dispatch allows only read list status and diff; write patch process and clone require trusted local approval; shell and unknown capabilities deny. | API_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | internal/policy/capability.go::DecideCapability(; internal/executor/dispatcher.go::Dispatch( | internal/policy/capability_test.go; internal/executor/dispatcher_test.go | NOT_APPLICABLE | PASS |
 
 ## Claim relations
 

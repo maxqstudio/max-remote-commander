@@ -2,36 +2,40 @@
 
 # ARCHITECTURE
 
-Current source digest: 773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593
+Current source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
 
 ## Components
 
 | ID | Component | Purpose | Owns | Depends On |
 |---|---|---|---|---|
 | llm_client | LLM Client | Requests typed tools and consumes results | conversation and tool intents | relay_server |
-| relay_server | Relay Server | Authenticates and routes device sessions without requiring inbound PC ports | session routing and command queue | agent |
-| agent | PC Agent | Verifies signed requests and executes locally approved capabilities | device identity, policy enforcement, executor | protocol, policy |
+| relay_server | Relay Server | Authenticates and routes device sessions without inbound PC ports | session routing and command queue | agent |
+| agent | PC Agent | Verifies signed requests and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor |
 | protocol | Command Protocol | Defines signed expiring command envelopes and active-process replay checks | envelope format, signature verification, nonce replay state |  |
-| policy | Policy Engine | Makes allow deny or approval decisions at the user device | workspace boundaries, capability authorization |  |
+| policy | Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
+| executor | Local Capability Executor | Executes bounded filesystem process and Git operations after policy authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, automatic capability dispatcher | policy |
 
 ## Data flow
 
 - llm_client -> relay_server: structured tool request
 - relay_server -> agent: signed short-lived command envelope
+- agent -> policy: untrusted structured capability intent
+- policy -> executor: automatic allow only; privileged requests remain approval-required
+- executor -> agent: bounded local capability result
 - agent -> relay_server: bounded execution result and audit metadata
 - relay_server -> llm_client: tool result
 
 ## External boundaries
 
 - Public network: All remote device traffic is outbound from the agent and must be authenticated before execution.
-- Local filesystem and process boundary: The PC agent policy engine is final authority for local access and execution.
+- Local filesystem and process boundary: Filesystem operations use Go os.Root; process execution requires an executable allowlist, bounded output and timeout, trusted workspace CWD, and explicit environment.
 - LLM provider API: Provider output is untrusted intent and cannot directly authorize privileged device operations.
 
 ## Observed implementation inventory
 
-Source files: 5
-Source lines: 432
-Languages: Go=5
+Source files: 15
+Source lines: 1450
+Languages: Go=15
 
 Structural facts come from the code extractor. Component meaning comes from
 .workflow/architecture.json.

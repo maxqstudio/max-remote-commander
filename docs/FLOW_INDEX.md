@@ -3,13 +3,13 @@
 # FLOW INDEX
 
 Authority SHA: external final acceptance evidence
-Source digest: 773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593
+Source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
 
 ## Flow inventory
 
 | Flow | Entry | Authority symbol | State mutation | Tests | Sequence session | Sequence status |
 |---|---|---|---|---|---|---|
-| FLOW-COMMAND | A paired device receives a command request. | internal/protocol, internal/policy, future internal/executor | verified, policy_checked, approved_or_denied, executed_or_rejected, reported | internal/protocol/envelope_test.go, internal/policy/pathguard_test.go | docs/sequence/phase-0.session.json | DECLARED |
+| FLOW-COMMAND | A structured capability request reaches the local agent after transport authentication. | internal/protocol, internal/policy, internal/executor | verified, policy_checked, approval_required_or_allowed_or_denied, executed_or_rejected, reported | internal/protocol/envelope_test.go, internal/executor/filesystem_test.go, internal/executor/process_test.go, internal/executor/git_test.go, internal/policy/capability_test.go, internal/executor/dispatcher_test.go | docs/sequence/phase-1.session.json | DECLARED |
 
 ## Observed Python HTTP routes
 

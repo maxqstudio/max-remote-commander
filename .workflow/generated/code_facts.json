@@ -20,6 +20,76 @@
       "lines": 20
     },
     {
+      "directory": "internal/executor",
+      "file": "internal/executor/dispatcher.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 97
+    },
+    {
+      "directory": "internal/executor",
+      "file": "internal/executor/dispatcher_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 74
+    },
+    {
+      "directory": "internal/executor",
+      "file": "internal/executor/filesystem.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 139
+    },
+    {
+      "directory": "internal/executor",
+      "file": "internal/executor/filesystem_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 120
+    },
+    {
+      "directory": "internal/executor",
+      "file": "internal/executor/git.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 110
+    },
+    {
+      "directory": "internal/executor",
+      "file": "internal/executor/git_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 107
+    },
+    {
+      "directory": "internal/executor",
+      "file": "internal/executor/process.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 167
+    },
+    {
+      "directory": "internal/executor",
+      "file": "internal/executor/process_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 124
+    },
+    {
+      "directory": "internal/policy",
+      "file": "internal/policy/capability.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 40
+    },
+    {
+      "directory": "internal/policy",
+      "file": "internal/policy/capability_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 40
+    },
+    {
       "directory": "internal/policy",
       "file": "internal/policy/pathguard.go",
       "is_test": false,
@@ -52,13 +122,13 @@
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593",
+  "source_digest": "28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c",
   "source_summary": {
-    "files": 5,
+    "files": 15,
     "languages": {
-      "Go": 5
+      "Go": 15
     },
-    "lines": 432,
+    "lines": 1450,
     "test_files": 0
   },
   "tests": []

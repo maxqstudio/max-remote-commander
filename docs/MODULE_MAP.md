@@ -3,12 +3,22 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: 773ddd7b677672f29ef646239d06e9f9b1ba31a05ee0c395441326948df26593
+Source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
 |---|---|---:|---|---|
 | cmd/max-agent/main.go | Go | 20 | cmd/max-agent | NO |
+| internal/executor/dispatcher.go | Go | 97 | internal/executor | NO |
+| internal/executor/dispatcher_test.go | Go | 74 | internal/executor | NO |
+| internal/executor/filesystem.go | Go | 139 | internal/executor | NO |
+| internal/executor/filesystem_test.go | Go | 120 | internal/executor | NO |
+| internal/executor/git.go | Go | 110 | internal/executor | NO |
+| internal/executor/git_test.go | Go | 107 | internal/executor | NO |
+| internal/executor/process.go | Go | 167 | internal/executor | NO |
+| internal/executor/process_test.go | Go | 124 | internal/executor | NO |
+| internal/policy/capability.go | Go | 40 | internal/policy | NO |
+| internal/policy/capability_test.go | Go | 40 | internal/policy | NO |
 | internal/policy/pathguard.go | Go | 118 | internal/policy | NO |
 | internal/policy/pathguard_test.go | Go | 54 | internal/policy | NO |
 | internal/protocol/envelope.go | Go | 147 | internal/protocol | NO |

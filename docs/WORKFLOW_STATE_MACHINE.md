@@ -4,9 +4,9 @@
 
 ## FLOW-COMMAND — Remote command authorization flow
 
-Purpose: Verify each remote command, enforce local policy, execute only approved capabilities, and report bounded results.
+Purpose: Verify each command, enforce local policy, execute only automatically allowed or separately trusted-approved capabilities, and report bounded results.
 Critical: TRUE
-Entry condition: A paired device receives a command request.
+Entry condition: A structured capability request reaches the local agent after transport authentication.
 Authority: The local PC agent policy engine is the final execution authority.
 
 ### States
@@ -14,7 +14,7 @@ Authority: The local PC agent policy engine is the final execution authority.
 - requested
 - verified
 - policy_checked
-- approved_or_denied
+- approval_required_or_allowed_or_denied
 - executed_or_rejected
 - reported
 
@@ -22,29 +22,31 @@ Authority: The local PC agent policy engine is the final execution authority.
 
 | From | To | Action | Authority | Side effects |
 |---|---|---|---|---|
-| requested | verified | verify envelope signature, freshness, and nonce | The local PC agent policy engine is the final execution authority. | record accepted nonce after successful verification |
-| verified | policy_checked | evaluate local device policy | The local PC agent policy engine is the final execution authority. |  |
-| policy_checked | approved_or_denied | resolve allow, deny, or explicit user approval | The local PC agent policy engine is the final execution authority. | may request local user approval |
-| approved_or_denied | executed_or_rejected | execute only an approved structured capability | The local PC agent policy engine is the final execution authority. | may access locally authorized resources |
-| executed_or_rejected | reported | return bounded result and audit metadata | The local PC agent policy engine is the final execution authority. | append audit event when audit subsystem exists |
+| requested | verified | verify envelope signature freshness and nonce | The local PC agent policy engine is the final execution authority. | record accepted nonce after successful verification |
+| verified | policy_checked | evaluate local capability policy | The local PC agent policy engine is the final execution authority. |  |
+| policy_checked | approval_required_or_allowed_or_denied | resolve automatic allow approval-required or deny | The local PC agent policy engine is the final execution authority. |  |
+| approval_required_or_allowed_or_denied | executed_or_rejected | Phase 1 automatic dispatcher executes only read list status and diff; privileged tools stop before side effects | The local PC agent policy engine is the final execution authority. | read-only local resource access for automatically allowed tools |
+| executed_or_rejected | reported | return bounded result or policy error | The local PC agent policy engine is the final execution authority. |  |
 
 ### Invariants
 
-- verification precedes execution
-- policy decision is local authority
-- denied command has no execution side effect
+- verification precedes future remote execution
+- local policy is final execution authority
+- remote payload cannot self-assert trusted approval
+- approval-required automatic requests have no privileged side effect
+- raw shell and unknown capabilities deny by default
 
 ### Failure behavior
 
 - fail closed on invalid envelope
-- fail closed on workspace escape
-- return a bounded error result without executing denied commands
+- fail closed on filesystem escape
+- fail closed on unknown or shell capability
+- return approval-required without executing privileged automatic requests
 
 ### Restart behavior
 
-- reconnect outbound session
-- discard expired queued commands
-- restart-safe nonce replay protection remains OPEN until durable replay state or per-start session rotation is implemented
+- discard expired queued commands after future reconnect
+- restart-safe nonce replay remains OPEN until durable state or per-start session rotation
 
 ### Rollback behavior
 
