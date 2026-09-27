@@ -2,53 +2,64 @@
 
 # WORKFLOW STATE MACHINE
 
-## FLOW-COMMAND — Remote command authorization flow
+## FLOW-COMMAND — Remote command relay and local authorization flow
 
-Purpose: Verify each command, enforce local policy, execute only automatically allowed or separately trusted-approved capabilities, and report bounded results.
+Purpose: Route a controller-authenticated command through a device-isolated outbound relay session, then preserve local policy as final execution authority and stream the bounded result back.
 Critical: TRUE
-Entry condition: A structured capability request reaches the local agent after transport authentication.
-Authority: The local PC agent policy engine is the final execution authority.
+Entry condition: A controller queues a structured command for a known device.
+Authority: Relay authentication controls transport access; the local PC agent policy remains final execution authority.
 
 ### States
 
-- requested
-- verified
+- controller_submitted
+- relay_queued
+- device_session_polled
+- command_leased
+- locally_verified
 - policy_checked
-- approval_required_or_allowed_or_denied
 - executed_or_rejected
-- reported
+- result_submitted
+- result_streamed
 
 ### Legal transitions
 
 | From | To | Action | Authority | Side effects |
 |---|---|---|---|---|
-| requested | verified | verify envelope signature freshness and nonce | The local PC agent policy engine is the final execution authority. | record accepted nonce after successful verification |
-| verified | policy_checked | evaluate local capability policy | The local PC agent policy engine is the final execution authority. |  |
-| policy_checked | approval_required_or_allowed_or_denied | resolve automatic allow approval-required or deny | The local PC agent policy engine is the final execution authority. |  |
-| approval_required_or_allowed_or_denied | executed_or_rejected | Phase 1 automatic dispatcher executes only read list status and diff; privileged tools stop before side effects | The local PC agent policy engine is the final execution authority. | read-only local resource access for automatically allowed tools |
-| executed_or_rejected | reported | return bounded result or policy error | The local PC agent policy engine is the final execution authority. |  |
+| controller_submitted | relay_queued | authenticate controller and enqueue bounded request | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | append request to bounded in-memory device queue |
+| relay_queued | device_session_polled | authenticate current device session on outbound long poll | Relay authentication controls transport access; the local PC agent policy remains final execution authority. |  |
+| device_session_polled | command_leased | lease first available command for bounded interval | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | set in-memory lease deadline |
+| command_leased | locally_verified | future agent verifies signed envelope freshness and replay state | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | record nonce only after valid verification |
+| locally_verified | policy_checked | evaluate local capability policy | Relay authentication controls transport access; the local PC agent policy remains final execution authority. |  |
+| policy_checked | executed_or_rejected | automatic dispatcher executes only read-only allowed tools; privileged tools stop at approval-required | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | bounded local read-only effects only for automatic tools |
+| executed_or_rejected | result_submitted | owning device session submits bounded result | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | complete queued request and retain bounded result |
+| result_submitted | result_streamed | controller-authenticated SSE emits one result event | Relay authentication controls transport access; the local PC agent policy remains final execution authority. |  |
 
 ### Invariants
 
-- verification precedes future remote execution
-- local policy is final execution authority
-- remote payload cannot self-assert trusted approval
-- approval-required automatic requests have no privileged side effect
-- raw shell and unknown capabilities deny by default
+- registration and controller bootstrap secrets are distinct
+- session token is bound to one device ID
+- old token is invalid after reconnect rotation
+- controller cannot use device session token as controller authority
+- cross-device result submission rejects
+- local policy remains final execution authority
+- remote payload cannot self-assert trusted local approval
 
 ### Failure behavior
 
-- fail closed on invalid envelope
-- fail closed on filesystem escape
-- fail closed on unknown or shell capability
-- return approval-required without executing privileged automatic requests
+- invalid or expired credentials fail closed
+- unknown devices and requests reject
+- full device queues reject
+- cross-device session use rejects
+- unknown and shell capabilities deny locally
+- relay timeout does not fabricate a result
 
 ### Restart behavior
 
-- discard expired queued commands after future reconnect
-- restart-safe nonce replay remains OPEN until durable state or per-start session rotation
+- relay restart loses in-memory sessions queues and results and therefore requires device reconnect; durability is OPEN
+- agent restart-safe nonce replay remains OPEN
 
 ### Rollback behavior
 
-- disable affected capability
+- stop relay listener
+- rotate bootstrap secrets
 - revert candidate commit if acceptance regression is confirmed

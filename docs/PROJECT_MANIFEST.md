@@ -10,10 +10,10 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/phase-1-executor
+Active branch: work/phase-2-relay
 Current authoritative SHA: external final acceptance evidence
-Last accepted SHA: 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7
-Current source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
+Last accepted SHA: 6132e215fb15862471ec5a40acd72ca8d0422f88
+Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
 
 ## Authorities
 Source authority: Canonical source history and releases
@@ -26,7 +26,7 @@ Historical/reference authority: see SOURCE_AUTHORITY_MAP.md
 ## Technology
 Languages: Go, TypeScript
 Frameworks: Go standard library initially, React planned for chat client
-Persistence: local device identity and policy configuration planned
+Persistence: local device identity and policy configuration planned, relay state is in-memory in Phase 2
 External systems: GitHub Actions, LLM provider APIs, MCP clients
 
 ## Entry points
@@ -34,6 +34,7 @@ External systems: GitHub Actions, LLM provider APIs, MCP clients
 | Entry | Path | Purpose |
 |---|---|---|
 | max-agent | cmd/max-agent/main.go | Cross-platform user-device agent executable |
+| max-relay | cmd/max-relay/main.go | Authenticated outbound relay server executable |
 
 ## Critical directories
 
@@ -62,5 +63,7 @@ Generated from PROJECT_PROFILE.yaml.
 - agent networking must be outbound-only by default
 - structured capabilities are safer default than raw shell
 - raw shell must require explicit policy or user approval
+- relay bootstrap registration and controller authorities must remain distinct
+- relay public exposure requires TLS termination and is not yet proven
 - no PASS claim without executed evidence
 - cross-platform behavior must be tested on Linux Windows and macOS

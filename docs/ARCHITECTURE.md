@@ -2,40 +2,41 @@
 
 # ARCHITECTURE
 
-Current source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
+Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
 
 ## Components
 
 | ID | Component | Purpose | Owns | Depends On |
 |---|---|---|---|---|
-| llm_client | LLM Client | Requests typed tools and consumes results | conversation and tool intents | relay_server |
-| relay_server | Relay Server | Authenticates and routes device sessions without inbound PC ports | session routing and command queue | agent |
-| agent | PC Agent | Verifies signed requests and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor |
+| llm_client | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
+| relay_server | Relay Server | Routes controller commands to outbound-connected device sessions | bootstrap authentication, session rotation, bounded command leases, bounded result retention, SSE result stream | agent |
+| agent | PC Agent | Polls outbound for commands, verifies signed requests, and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor, relay_server |
 | protocol | Command Protocol | Defines signed expiring command envelopes and active-process replay checks | envelope format, signature verification, nonce replay state |  |
 | policy | Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
 | executor | Local Capability Executor | Executes bounded filesystem process and Git operations after policy authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, automatic capability dispatcher | policy |
 
 ## Data flow
 
-- llm_client -> relay_server: structured tool request
-- relay_server -> agent: signed short-lived command envelope
-- agent -> policy: untrusted structured capability intent
+- llm_client -> relay_server: controller-authenticated structured command
+- relay_server -> agent: outbound long-poll command delivery under device session token
+- agent -> policy: untrusted structured capability intent after future envelope verification
 - policy -> executor: automatic allow only; privileged requests remain approval-required
 - executor -> agent: bounded local capability result
-- agent -> relay_server: bounded execution result and audit metadata
-- relay_server -> llm_client: tool result
+- agent -> relay_server: device-session-authenticated result submission
+- relay_server -> llm_client: controller-authenticated SSE result event
 
 ## External boundaries
 
-- Public network: All remote device traffic is outbound from the agent and must be authenticated before execution.
+- Public network: Device traffic is outbound from the agent. Phase 2 relay binds loopback by default; public deployment requires external TLS termination and is not yet proven.
+- Relay bootstrap credentials: Registration and controller keys are distinct secrets of at least 32 bytes; session tokens are random, short-lived, hashed in memory, and rotated on reconnect.
 - Local filesystem and process boundary: Filesystem operations use Go os.Root; process execution requires an executable allowlist, bounded output and timeout, trusted workspace CWD, and explicit environment.
 - LLM provider API: Provider output is untrusted intent and cannot directly authorize privileged device operations.
 
 ## Observed implementation inventory
 
-Source files: 15
-Source lines: 1450
-Languages: Go=15
+Source files: 20
+Source lines: 2365
+Languages: Go=20
 
 Structural facts come from the code extractor. Component meaning comes from
 .workflow/architecture.json.

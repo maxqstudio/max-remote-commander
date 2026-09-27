@@ -4,7 +4,10 @@
 
 | ID | Status | Summary | Evidence |
 |---|---|---|---|
-| SEC-REPLAY-RESTART-001 | OPEN | Nonce replay state is in-memory; restarting the agent loses unexpired nonce history, so restart-safe replay protection is not proven. | internal/protocol/envelope.go::MemoryReplayStore; durable replay state or per-start session rotation is not implemented. |
-| P1-APPROVAL-001 | OPEN | Trusted local approval issuance and binding are not implemented; Phase 1 therefore does not expose write patch process or clone through automatic dispatch. | internal/policy/capability.go returns APPROVAL_REQUIRED and internal/executor/dispatcher.go stops before privileged side effects. |
+| SEC-REPLAY-RESTART-001 | OPEN | Agent nonce replay state is in-memory; restarting the agent loses unexpired nonce history. | internal/protocol/envelope.go::MemoryReplayStore |
+| P1-APPROVAL-001 | OPEN | Trusted local approval issuance and binding are not implemented; privileged executor primitives are not reachable through automatic remote dispatch. | internal/policy/capability.go and internal/executor/dispatcher.go |
+| P2-DURABILITY-001 | OPEN | Relay sessions queues leases and completed results are in-memory and are lost on relay restart. | internal/relay/store.go |
+| P2-IDENTITY-001 | OPEN | Phase 2 uses separate symmetric bootstrap registration/controller keys; final Ed25519 device pairing and per-device controller authorization are deferred to Phase 3. | internal/relay/store.go Config and Register |
+| P2-TLS-001 | OPEN | max-relay serves HTTP and defaults to loopback; public TLS termination/deployment is not yet implemented or proven. | cmd/max-relay/main.go |
 
 Use explicit OPEN, FIXED/ACCEPTED, HISTORICAL, or NOT_PROVEN semantics.

@@ -7,13 +7,17 @@
 Type: foundation
 
 - Accepted exact SHA 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7 after work-branch and main 5-job PASS.
-- Added signed envelopes active-process replay rejection workspace guard STRICT governance and cross-OS CI.
 
-## 2026-09-27 — Phase 1 local capability executor candidate
+## 2026-09-27 — Phase 1 accepted local capability executor
 
 Type: feature
 
-- Raised minimum Go to 1.24 and added os.Root filesystem read list write and patch.
-- Added allowlisted argv-only process execution with trusted CWD explicit environment timeout and output limits.
-- Added constrained Git status diff and HTTPS clone primitives.
-- Added fail-closed capability policy and automatic read-only dispatcher.
+- Accepted exact SHA 6132e215fb15862471ec5a40acd72ca8d0422f88 after work-branch and main 5-job PASS.
+- Added os.Root filesystem executor, allowlisted argv-only process executor, constrained Git primitives, and fail-closed automatic dispatcher.
+
+## 2026-09-27 — Phase 2 authenticated outbound relay candidate
+
+Type: feature
+
+- Added separate registration/controller bootstrap authorities, rotating per-device relay sessions, bounded command leases and result retention.
+- Added outbound long-poll command delivery, device-authenticated result submission, controller-authenticated SSE result stream, and max-relay binary.

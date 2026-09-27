@@ -3,13 +3,13 @@
 # FLOW INDEX
 
 Authority SHA: external final acceptance evidence
-Source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
+Source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
 
 ## Flow inventory
 
 | Flow | Entry | Authority symbol | State mutation | Tests | Sequence session | Sequence status |
 |---|---|---|---|---|---|---|
-| FLOW-COMMAND | A structured capability request reaches the local agent after transport authentication. | internal/protocol, internal/policy, internal/executor | verified, policy_checked, approval_required_or_allowed_or_denied, executed_or_rejected, reported | internal/protocol/envelope_test.go, internal/executor/filesystem_test.go, internal/executor/process_test.go, internal/executor/git_test.go, internal/policy/capability_test.go, internal/executor/dispatcher_test.go | docs/sequence/phase-1.session.json | DECLARED |
+| FLOW-COMMAND | A controller queues a structured command for a known device. | internal/relay, cmd/max-relay, internal/protocol, internal/policy, internal/executor | relay_queued, device_session_polled, command_leased, locally_verified, policy_checked, executed_or_rejected, result_submitted, result_streamed | internal/relay/store_test.go, internal/relay/http_test.go, internal/protocol/envelope_test.go, internal/policy/capability_test.go, internal/executor/dispatcher_test.go | docs/sequence/phase-2.session.json | DECLARED |
 
 ## Observed Python HTTP routes
 

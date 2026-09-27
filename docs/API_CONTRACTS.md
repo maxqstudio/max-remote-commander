@@ -5,6 +5,11 @@
 | Method | Path / Event | Purpose | Authority | Mutation | Error behavior |
 |---|---|---|---|---|---|
 | VERIFY | CommandEnvelope | Authenticate and freshness-check a typed remote command before local policy evaluation. | PC agent protocol verifier | Records nonce only after signature and time checks pass. | Fail closed on malformed expired future-issued overlong invalid-signature or replayed envelopes. |
-| DISPATCH | CapabilityRequest | Route automatically allowed structured capabilities to bounded local executors. | Local capability policy | Automatic dispatch is read-only in Phase 1; mutating or execution capabilities stop at approval-required. | Unknown and shell capabilities deny; write patch process and clone return approval-required before side effects. |
+| DISPATCH | CapabilityRequest | Route automatically allowed structured capabilities to bounded local executors. | Local capability policy | Automatic dispatch remains read-only; mutating or execution capabilities stop at approval-required. | Unknown and shell capabilities deny; write patch process and clone return approval-required before side effects. |
+| POST | /v1/devices/{device}/session | Register or reconnect an outbound device and rotate its short-lived relay session token. | Relay registration key | Replaces the active in-memory session token hash for the device. | Invalid device IDs or bad registration credentials fail closed. |
+| POST | /v1/devices/{device}/commands | Queue a bounded command for a known device. | Relay controller key | Adds one request to the bounded per-device queue. | Unknown devices duplicate request IDs and full queues reject. |
+| GET | /v1/devices/{device}/commands/next | Long-poll the next available command from an outbound device connection. | Current per-device session token | Leases a command for bounded time; it remains eligible for redelivery after lease expiry until a result is submitted. | Expired rotated or cross-device session tokens reject. |
+| POST | /v1/devices/{device}/results | Submit a result for a request owned by the authenticated device. | Current per-device session token | Completes the queued request and stores a bounded retained result. | Unknown requests and cross-device submissions reject. |
+| GET | /v1/results/{request}/events | Stream the completed result as one SSE event. | Relay controller key | No source mutation. | Unknown requests reject and waits time out without fabricating results. |
 
 Declared in .workflow/contracts.json. Observed routes are listed in FLOW_INDEX.

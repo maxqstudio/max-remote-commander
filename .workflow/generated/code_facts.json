@@ -20,6 +20,13 @@
       "lines": 20
     },
     {
+      "directory": "cmd/max-relay",
+      "file": "cmd/max-relay/main.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 45
+    },
+    {
       "directory": "internal/executor",
       "file": "internal/executor/dispatcher.go",
       "is_test": false,
@@ -116,19 +123,47 @@
       "is_test": false,
       "language": "Go",
       "lines": 93
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/http.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 242
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/http_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 146
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/store.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 327
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/store_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 155
     }
   ],
   "python_calls": [],
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c",
+  "source_digest": "b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6",
   "source_summary": {
-    "files": 15,
+    "files": 20,
     "languages": {
-      "Go": 15
+      "Go": 20
     },
-    "lines": 1450,
+    "lines": 2365,
     "test_files": 0
   },
   "tests": []

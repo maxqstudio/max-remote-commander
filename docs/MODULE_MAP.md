@@ -3,12 +3,13 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
+Source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
 |---|---|---:|---|---|
 | cmd/max-agent/main.go | Go | 20 | cmd/max-agent | NO |
+| cmd/max-relay/main.go | Go | 45 | cmd/max-relay | NO |
 | internal/executor/dispatcher.go | Go | 97 | internal/executor | NO |
 | internal/executor/dispatcher_test.go | Go | 74 | internal/executor | NO |
 | internal/executor/filesystem.go | Go | 139 | internal/executor | NO |
@@ -23,5 +24,9 @@ Generated/refreshed: current compiler run
 | internal/policy/pathguard_test.go | Go | 54 | internal/policy | NO |
 | internal/protocol/envelope.go | Go | 147 | internal/protocol | NO |
 | internal/protocol/envelope_test.go | Go | 93 | internal/protocol | NO |
+| internal/relay/http.go | Go | 242 | internal/relay | NO |
+| internal/relay/http_test.go | Go | 146 | internal/relay | NO |
+| internal/relay/store.go | Go | 327 | internal/relay | NO |
+| internal/relay/store_test.go | Go | 155 | internal/relay | NO |
 
 Machine-derived facts do not invent semantic ownership.

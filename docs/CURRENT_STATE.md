@@ -3,20 +3,20 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7
+Authority verified at SHA: 6132e215fb15862471ec5a40acd72ca8d0422f88
 Governance profile: strict
 
 ## Current phase
-Phase: Phase 1 - local capability executor
+Phase: Phase 2 - authenticated outbound relay
 Status: ACTIVE_CANDIDATE
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/phase-1-executor
+Branch: work/phase-2-relay
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7
+Last accepted SHA: 6132e215fb15862471ec5a40acd72ca8d0422f88
 Current candidate SHA: external final acceptance evidence
-Current source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
+Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
 
 ## Runtime
 Environment: see SOURCE_AUTHORITY_MAP.md and RUNBOOK.md
@@ -33,39 +33,42 @@ PROJECT_DOCS_SYNC: PASS
 ## Sequence governance
 Sequence policy: REQUIRED
 Current sequence mode: DURING
-Current sequence session: docs/sequence/phase-1.session.json
+Current sequence session: docs/sequence/phase-2.session.json
 SEQUENCE_SYNC: NOT_PROVEN
 
 ## Proven
-- Phase 0 exact SHA 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7 passed all five GitHub Actions jobs on main in run 36326604795
-- Phase 1 filesystem source jobs passed Linux Windows macOS and race at run 36326941302 after repair
-- Phase 1 process source jobs passed Linux Windows macOS and race at run 36327158451 after repair
-- Phase 1 Git source jobs passed Linux Windows macOS and race at run 36327292093
-- Phase 1 dispatcher and capability-policy source jobs passed Linux Windows macOS and race at run 36327425533
+- Phase 1 exact SHA 6132e215fb15862471ec5a40acd72ca8d0422f88 passed all five GitHub Actions jobs on work branch run 36328313786 and main run 36328415659
+- Phase 2 relay source jobs passed Linux Windows macOS and race at run 36328789997
+- Relay registration rotates per-device session tokens and old tokens fail closed
+- Device session tokens are isolated by device ID and controller commands use a separate bootstrap authority
+- Per-device command queue and completed-result retention are bounded
 
 ## Not proven
-- STRICT governance and cross-platform CI on the exact final Phase 1 closure SHA
-- main-branch revalidation of accepted Phase 1
+- STRICT governance and cross-platform CI on the exact final Phase 2 closure SHA
+- main-branch revalidation of accepted Phase 2
+- durable relay queue/session/result state across relay restart
+- public TLS deployment and reverse-proxy configuration
+- device Ed25519 pairing and per-device controller authorization
 - trusted local approval issuance and binding for privileged capabilities
-- real remote relay behavior
-- physical user-device runtime
+- physical remote-device runtime
 - chat client
 - MCP adapter
-- restart-safe replay protection
+- restart-safe agent replay protection
 
 ## Known blockers
-- Phase 1 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
+- Phase 2 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
 
 ## Known defects
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- synchronize deterministic Project Truth for Phase 1
-- run exact-SHA Phase 1 acceptance
-- fast-forward accepted Phase 1 SHA to main
+- synchronize deterministic Project Truth for Phase 2
+- run exact-SHA Phase 2 acceptance
+- fast-forward accepted Phase 2 SHA to main
 - revalidate the same SHA on main
 
 ## Explicitly blocked
-- auto-execute write patch process or clone without trusted local approval
-- enable unrestricted shell by default
-- claim remote or physical runtime proven from GitHub-hosted CI
+- expose relay publicly without TLS termination
+- claim relay state survives restart
+- treat bootstrap keys as final device identity
+- auto-execute privileged local capabilities without trusted local approval

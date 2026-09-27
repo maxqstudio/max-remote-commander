@@ -27,46 +27,49 @@ Users / External Systems
     -> State / Evidence Authorities
     -> External Runtime / Outputs
 
-Observed source inventory: 15 files, 1 language categories.
+Observed source inventory: 20 files, 1 language categories.
 
 ## Major components
 
 | Component | Purpose | Owns / Decides | Depends On |
 |---|---|---|---|
-| LLM Client | Requests typed tools and consumes results | conversation and tool intents | relay_server |
-| Relay Server | Authenticates and routes device sessions without inbound PC ports | session routing and command queue | agent |
-| PC Agent | Verifies signed requests and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor |
+| LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
+| Relay Server | Routes controller commands to outbound-connected device sessions | bootstrap authentication, session rotation, bounded command leases, bounded result retention, SSE result stream | agent |
+| PC Agent | Polls outbound for commands, verifies signed requests, and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor, relay_server |
 | Command Protocol | Defines signed expiring command envelopes and active-process replay checks | envelope format, signature verification, nonce replay state |  |
 | Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
 | Local Capability Executor | Executes bounded filesystem process and Git operations after policy authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, automatic capability dispatcher | policy |
 
 ## Main data flow
 
-- llm_client -> relay_server: structured tool request
-- relay_server -> agent: signed short-lived command envelope
-- agent -> policy: untrusted structured capability intent
+- llm_client -> relay_server: controller-authenticated structured command
+- relay_server -> agent: outbound long-poll command delivery under device session token
+- agent -> policy: untrusted structured capability intent after future envelope verification
 - policy -> executor: automatic allow only; privileged requests remain approval-required
 - executor -> agent: bounded local capability result
-- agent -> relay_server: bounded execution result and audit metadata
-- relay_server -> llm_client: tool result
+- agent -> relay_server: device-session-authenticated result submission
+- relay_server -> llm_client: controller-authenticated SSE result event
 
 ## Main user workflows
 
-### FLOW-COMMAND — Remote command authorization flow
+### FLOW-COMMAND — Remote command relay and local authorization flow
 
-Verify each command, enforce local policy, execute only automatically allowed or separately trusted-approved capabilities, and report bounded results.
+Route a controller-authenticated command through a device-isolated outbound relay session, then preserve local policy as final execution authority and stream the bounded result back.
 
-Authority: The local PC agent policy engine is the final execution authority.
+Authority: Relay authentication controls transport access; the local PC agent policy remains final execution authority.
 
-- requested -> verified : verify envelope signature freshness and nonce
-- verified -> policy_checked : evaluate local capability policy
-- policy_checked -> approval_required_or_allowed_or_denied : resolve automatic allow approval-required or deny
-- approval_required_or_allowed_or_denied -> executed_or_rejected : Phase 1 automatic dispatcher executes only read list status and diff; privileged tools stop before side effects
-- executed_or_rejected -> reported : return bounded result or policy error
+- controller_submitted -> relay_queued : authenticate controller and enqueue bounded request
+- relay_queued -> device_session_polled : authenticate current device session on outbound long poll
+- device_session_polled -> command_leased : lease first available command for bounded interval
+- command_leased -> locally_verified : future agent verifies signed envelope freshness and replay state
+- locally_verified -> policy_checked : evaluate local capability policy
+- policy_checked -> executed_or_rejected : automatic dispatcher executes only read-only allowed tools; privileged tools stop at approval-required
+- executed_or_rejected -> result_submitted : owning device session submits bounded result
+- result_submitted -> result_streamed : controller-authenticated SSE emits one result event
 
 ## Lifecycle and state
 
-Current phase: Phase 1 - local capability executor
+Current phase: Phase 2 - authenticated outbound relay
 
 Current status: ACTIVE_CANDIDATE
 
@@ -104,47 +107,52 @@ compiler does not infer them from implementation names.
 
 ## Failure and recovery
 
-- FLOW-COMMAND: fail closed on invalid envelope
-- FLOW-COMMAND: fail closed on filesystem escape
-- FLOW-COMMAND: fail closed on unknown or shell capability
-- FLOW-COMMAND: return approval-required without executing privileged automatic requests
+- FLOW-COMMAND: invalid or expired credentials fail closed
+- FLOW-COMMAND: unknown devices and requests reject
+- FLOW-COMMAND: full device queues reject
+- FLOW-COMMAND: cross-device session use rejects
+- FLOW-COMMAND: unknown and shell capabilities deny locally
+- FLOW-COMMAND: relay timeout does not fabricate a result
 
 ## Current project state
 
 Next authorized actions:
-- synchronize deterministic Project Truth for Phase 1
-- run exact-SHA Phase 1 acceptance
-- fast-forward accepted Phase 1 SHA to main
+- synchronize deterministic Project Truth for Phase 2
+- run exact-SHA Phase 2 acceptance
+- fast-forward accepted Phase 2 SHA to main
 - revalidate the same SHA on main
 
 Blocked actions:
-- auto-execute write patch process or clone without trusted local approval
-- enable unrestricted shell by default
-- claim remote or physical runtime proven from GitHub-hosted CI
+- expose relay publicly without TLS termination
+- claim relay state survives restart
+- treat bootstrap keys as final device identity
+- auto-execute privileged local capabilities without trusted local approval
 
 Known blockers:
-- Phase 1 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
+- Phase 2 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
 
 ## Proven vs not proven
 
 ### Proven
 
-- Phase 0 exact SHA 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7 passed all five GitHub Actions jobs on main in run 36326604795
-- Phase 1 filesystem source jobs passed Linux Windows macOS and race at run 36326941302 after repair
-- Phase 1 process source jobs passed Linux Windows macOS and race at run 36327158451 after repair
-- Phase 1 Git source jobs passed Linux Windows macOS and race at run 36327292093
-- Phase 1 dispatcher and capability-policy source jobs passed Linux Windows macOS and race at run 36327425533
+- Phase 1 exact SHA 6132e215fb15862471ec5a40acd72ca8d0422f88 passed all five GitHub Actions jobs on work branch run 36328313786 and main run 36328415659
+- Phase 2 relay source jobs passed Linux Windows macOS and race at run 36328789997
+- Relay registration rotates per-device session tokens and old tokens fail closed
+- Device session tokens are isolated by device ID and controller commands use a separate bootstrap authority
+- Per-device command queue and completed-result retention are bounded
 
 ### Not proven
 
-- STRICT governance and cross-platform CI on the exact final Phase 1 closure SHA
-- main-branch revalidation of accepted Phase 1
+- STRICT governance and cross-platform CI on the exact final Phase 2 closure SHA
+- main-branch revalidation of accepted Phase 2
+- durable relay queue/session/result state across relay restart
+- public TLS deployment and reverse-proxy configuration
+- device Ed25519 pairing and per-device controller authorization
 - trusted local approval issuance and binding for privileged capabilities
-- real remote relay behavior
-- physical user-device runtime
+- physical remote-device runtime
 - chat client
 - MCP adapter
-- restart-safe replay protection
+- restart-safe agent replay protection
 
 ## Important limitations
 

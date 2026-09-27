@@ -4,26 +4,26 @@
 
 ## Evidence boundary
 
-Phase 0 is accepted on main at 4fd498d1d69ca1fad1a9e6aecb172fe333cbaaf7. Phase 1 source executor behavior has cross-platform CI evidence, but exact final Phase 1 STRICT governance/main revalidation, trusted local approvals, relay, paired physical devices, production runtime, LLM providers, MCP, and restart-safe replay protection remain NOT_PROVEN.
+Phase 0 and Phase 1 are accepted on main. Phase 2 relay source behavior has GitHub-hosted cross-platform evidence, but exact final Phase 2 STRICT governance/main revalidation, durable relay state, public TLS deployment, Ed25519 pairing, trusted local approvals, physical remote runtime, LLM providers, MCP, and restart-safe agent replay protection remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
-Current source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d3295b9b4c
+Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
-| P0-FINAL-001 | Phase 0 exact accepted SHA passes Linux Windows macOS race and STRICT governance on main. | GitHub Actions main run 36326604795 | PASS |
-| P1-FS-001 | Filesystem read list write and patch stay rooted with os.Root, reject traversal and symlink escape, enforce size bounds, and fail closed on patch mismatch. | GitHub Actions run 36327425533; internal/executor/filesystem_test.go | PASS |
-| P1-PROC-001 | Process execution is argv-only, executable-allowlisted, bounded by trusted workspace timeout output and explicit environment. | GitHub Actions run 36327425533; internal/executor/process_test.go | PASS |
-| P1-GIT-001 | Git status and diff disable external execution paths and clone accepts only credential-free HTTPS into a new direct workspace child. | GitHub Actions run 36327425533; internal/executor/git_test.go | PASS |
-| P1-POLICY-001 | Only read list status and diff auto-execute; write patch process and clone require trusted local approval; shell and unknown tools deny. | GitHub Actions run 36327425533; internal/policy/capability_test.go; internal/executor/dispatcher_test.go | PASS |
-| P1-FINAL-001 | Exact final Phase 1 SHA passes Linux Windows macOS race and STRICT governance, then the identical SHA passes main revalidation. | Pending exact final Phase 1 CI | NOT_PROVEN |
+| P1-FINAL-001 | Phase 1 exact accepted SHA passes Linux Windows macOS race and STRICT governance on work branch and main. | GitHub Actions work run 36328313786 and main run 36328415659 | PASS |
+| P2-SESSION-001 | Authenticated device registration/reconnect rotates short-lived session tokens and rejects old or cross-device session use. | GitHub Actions run 36328789997; internal/relay/store_test.go; internal/relay/http_test.go | PASS |
+| P2-QUEUE-001 | Known-device command queues are bounded, duplicate request IDs reject, and command leases permit bounded redelivery. | GitHub Actions run 36328789997; internal/relay/store_test.go | PASS |
+| P2-RESULT-001 | Only the owning device session can submit results, completed result retention is bounded, and controller-authenticated SSE returns the result. | GitHub Actions run 36328789997; internal/relay/store_test.go; internal/relay/http_test.go | PASS |
+| P2-XOS-001 | Relay source tests pass on Linux Windows macOS and race regression; final closure additionally builds both binaries. | GitHub Actions run 36328789997; cmd/max-relay/main.go | PASS |
+| P2-FINAL-001 | Exact final Phase 2 SHA passes Linux Windows macOS race and STRICT governance, then the identical SHA passes main revalidation. | Pending exact final Phase 2 CI | NOT_PROVEN |
 
 ## Test commands
 
 - go test ./... -count=1
 - go test -race ./... -count=1
 - go vet ./...
-- go build ./cmd/max-agent
+- go build ./cmd/max-agent ./cmd/max-relay
 
 ## Runtime checks
 
@@ -32,7 +32,7 @@ Current source digest: 28c8e66790d8b2c9aa6d46749d8fb25810efecafc4ff7b81c78a78d32
 ## Sequence contract evidence
 
 Sequence mode for this phase/session: DURING
-Sequence session contract: docs/sequence/phase-1.session.json
+Sequence session contract: docs/sequence/phase-2.session.json
 SEQUENCE_SYNC: NOT_PROVEN
 
 ## Project Truth Compiler evidence
