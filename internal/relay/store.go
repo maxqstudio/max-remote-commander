@@ -29,6 +29,8 @@ type Config struct {
 	MaxQueue        int
 	MaxResults      int
 	MaxPairingAttempts int
+	ControllerSessionTTL time.Duration
+	ControllerClockSkew  time.Duration
 }
 
 type Command struct {
@@ -66,6 +68,8 @@ type Store struct {
 	maxQueue         int
 	maxResults       int
 	maxPairingAttempts int
+	controllerSessionTTL time.Duration
+	controllerClockSkew  time.Duration
 
 	knownDevices map[string]struct{}
 	sessions     map[string]sessionState
@@ -78,6 +82,8 @@ type Store struct {
 	pairingOffers map[string]pairingOffer
 	pairings      map[string]Pairing
 	pairingGeneration map[string]uint64
+	controllerSessions map[string]controllerSessionState
+	controllerNonces   map[controllerNonceKey]int64
 }
 
 func NewStore(cfg Config) (*Store, error) {
@@ -102,6 +108,12 @@ func NewStore(cfg Config) (*Store, error) {
 	if cfg.MaxPairingAttempts <= 0 {
 		cfg.MaxPairingAttempts = 5
 	}
+	if cfg.ControllerSessionTTL <= 0 {
+		cfg.ControllerSessionTTL = 5 * time.Minute
+	}
+	if cfg.ControllerClockSkew <= 0 {
+		cfg.ControllerClockSkew = 30 * time.Second
+	}
 	return &Store{
 		registrationHash: sha256.Sum256([]byte(cfg.RegistrationKey)),
 		controllerHash: sha256.Sum256([]byte(cfg.ControllerKey)),
@@ -110,6 +122,8 @@ func NewStore(cfg Config) (*Store, error) {
 		maxQueue: cfg.MaxQueue,
 		maxResults: cfg.MaxResults,
 		maxPairingAttempts: cfg.MaxPairingAttempts,
+		controllerSessionTTL: cfg.ControllerSessionTTL,
+		controllerClockSkew: cfg.ControllerClockSkew,
 		knownDevices: make(map[string]struct{}),
 		sessions: make(map[string]sessionState),
 		queues: make(map[string][]*queuedCommand),
@@ -120,6 +134,8 @@ func NewStore(cfg Config) (*Store, error) {
 		pairingOffers: make(map[string]pairingOffer),
 		pairings: make(map[string]Pairing),
 		pairingGeneration: make(map[string]uint64),
+		controllerSessions: make(map[string]controllerSessionState),
+		controllerNonces: make(map[controllerNonceKey]int64),
 	}, nil
 }
 

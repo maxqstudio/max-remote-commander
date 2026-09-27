@@ -142,6 +142,12 @@ func (s *Store) RevokePairing(deviceID, sessionToken string, now time.Time) erro
 	}
 	delete(s.pairings, deviceID)
 	delete(s.pairingOffers, deviceID)
+	delete(s.controllerSessions, deviceID)
+	for key := range s.controllerNonces {
+		if key.deviceID == deviceID {
+			delete(s.controllerNonces, key)
+		}
+	}
 	s.pairingGeneration[deviceID]++
 	return nil
 }
