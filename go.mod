@@ -1,1 +1,3 @@
-module github.com/maxqstudio/max-remote-commander\n\ngo 1.24.0\n
+module github.com/maxqstudio/max-remote-commander
+
+go 1.24.0
