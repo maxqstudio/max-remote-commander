@@ -27,6 +27,7 @@ type Config struct {
 	SessionTTL      time.Duration
 	LeaseTTL        time.Duration
 	MaxQueue        int
+	MaxResults      int
 }
 
 type Command struct {
@@ -62,6 +63,7 @@ type Store struct {
 	sessionTTL       time.Duration
 	leaseTTL         time.Duration
 	maxQueue         int
+	maxResults       int
 
 	knownDevices map[string]struct{}
 	sessions     map[string]sessionState
@@ -70,11 +72,15 @@ type Store struct {
 	results      map[string]Result
 	queueNotify  map[string]chan struct{}
 	resultNotify map[string]chan struct{}
+	resultOrder  []string
 }
 
 func NewStore(cfg Config) (*Store, error) {
 	if len(cfg.RegistrationKey) < 32 || len(cfg.ControllerKey) < 32 {
 		return nil, errors.New("relay bootstrap keys must be at least 32 bytes")
+	}
+	if cfg.RegistrationKey == cfg.ControllerKey {
+		return nil, errors.New("registration and controller keys must be distinct")
 	}
 	if cfg.SessionTTL <= 0 {
 		cfg.SessionTTL = 15 * time.Minute
@@ -85,12 +91,16 @@ func NewStore(cfg Config) (*Store, error) {
 	if cfg.MaxQueue <= 0 {
 		cfg.MaxQueue = 128
 	}
+	if cfg.MaxResults <= 0 {
+		cfg.MaxResults = 1024
+	}
 	return &Store{
 		registrationHash: sha256.Sum256([]byte(cfg.RegistrationKey)),
 		controllerHash: sha256.Sum256([]byte(cfg.ControllerKey)),
 		sessionTTL: cfg.SessionTTL,
 		leaseTTL: cfg.LeaseTTL,
 		maxQueue: cfg.MaxQueue,
+		maxResults: cfg.MaxResults,
 		knownDevices: make(map[string]struct{}),
 		sessions: make(map[string]sessionState),
 		queues: make(map[string][]*queuedCommand),
@@ -160,11 +170,6 @@ func (s *Store) sessionAuthorizedLocked(deviceID, token string, now time.Time) b
 		return false
 	}
 	return secureEqual(session.tokenHash, token)
-}
-
-func secureEqualHash(expected [32]byte, supplied string) bool {
-	got := sha256.Sum256([]byte(supplied))
-	return subtle.ConstantTimeCompare(expected[:], got[:]) == 1
 }
 
 func (s *Store) QueueCommand(deviceID string, command Command) error {
@@ -240,6 +245,16 @@ func (s *Store) SubmitResult(deviceID, token string, result Result, now time.Tim
 		return ErrWrongDevice
 	}
 	result.Payload = append([]byte(nil), result.Payload...)
+	if _, exists := s.results[result.RequestID]; !exists {
+		for len(s.results) >= s.maxResults && len(s.resultOrder) > 0 {
+			evict := s.resultOrder[0]
+			s.resultOrder = s.resultOrder[1:]
+			delete(s.results, evict)
+			delete(s.requests, evict)
+			delete(s.resultNotify, evict)
+		}
+		s.resultOrder = append(s.resultOrder, result.RequestID)
+	}
 	s.results[result.RequestID] = result
 
 	queue := s.queues[deviceID]
