@@ -1,7 +1,11 @@
 {
   "schema_version": 1,
-  "id": "FLOW-COMMAND",
-  "name": "Remote command authorization flow",
+  "flow_id": "FLOW-COMMAND",
+  "title": "Remote command authorization flow",
+  "purpose": "Verify each remote command, enforce local policy, execute only approved capabilities, and report bounded results.",
+  "critical": true,
+  "entry_condition": "A paired device receives a command request.",
+  "authority": "The local PC agent policy engine is the final execution authority.",
   "states": [
     "requested",
     "verified",
@@ -46,5 +50,29 @@
     "verification precedes execution",
     "policy decision is local authority",
     "denied command has no execution side effect"
-  ]
+  ],
+  "failure_behavior": [
+    "fail closed on invalid envelope",
+    "fail closed on workspace escape",
+    "return a bounded error result without executing denied commands"
+  ],
+  "restart_behavior": [
+    "reconnect outbound session",
+    "discard expired queued commands",
+    "retain no replay nonce beyond its command expiry"
+  ],
+  "rollback_behavior": [
+    "disable affected capability",
+    "revert candidate commit if acceptance regression is confirmed"
+  ],
+  "source_owners": [
+    "internal/protocol",
+    "internal/policy",
+    "future internal/executor"
+  ],
+  "tests": [
+    "internal/protocol/envelope_test.go",
+    "internal/policy/pathguard_test.go"
+  ],
+  "sequence_session": "docs/sequence/phase-0.session.json"
 }
