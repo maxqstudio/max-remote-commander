@@ -53,46 +53,39 @@ func (w *Workspace) Resolve(path string) (string, error) {
 	}
 	candidate = filepath.Clean(candidate)
 
+	canonical, err := canonicalizeCandidate(candidate)
+	if err != nil {
+		return "", err
+	}
 	for _, root := range w.roots {
-		if !within(root, candidate) {
-			continue
+		if within(root, canonical) {
+			return canonical, nil
 		}
-		ancestor, err := deepestExistingAncestor(candidate)
-		if err != nil {
-			return "", err
-		}
-		realAncestor, err := filepath.EvalSymlinks(ancestor)
-		if err != nil {
-			return "", err
-		}
-		realAncestor, err = filepath.Abs(realAncestor)
-		if err != nil {
-			return "", err
-		}
-		if !within(root, filepath.Clean(realAncestor)) {
-			continue
-		}
-
-		if _, err := os.Lstat(candidate); err == nil {
-			realCandidate, err := filepath.EvalSymlinks(candidate)
-			if err != nil {
-				return "", err
-			}
-			realCandidate, err = filepath.Abs(realCandidate)
-			if err != nil {
-				return "", err
-			}
-			if !within(root, filepath.Clean(realCandidate)) {
-				continue
-			}
-			return filepath.Clean(realCandidate), nil
-		} else if !os.IsNotExist(err) {
-			return "", err
-		}
-
-		return candidate, nil
 	}
 	return "", ErrPathOutsideWorkspace
+}
+
+func canonicalizeCandidate(candidate string) (string, error) {
+	ancestor, err := deepestExistingAncestor(candidate)
+	if err != nil {
+		return "", err
+	}
+	realAncestor, err := filepath.EvalSymlinks(ancestor)
+	if err != nil {
+		return "", err
+	}
+	realAncestor, err = filepath.Abs(realAncestor)
+	if err != nil {
+		return "", err
+	}
+	suffix, err := filepath.Rel(ancestor, candidate)
+	if err != nil {
+		return "", err
+	}
+	if suffix == "." {
+		return filepath.Clean(realAncestor), nil
+	}
+	return filepath.Clean(filepath.Join(realAncestor, suffix)), nil
 }
 
 func deepestExistingAncestor(path string) (string, error) {
