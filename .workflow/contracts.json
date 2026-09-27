@@ -37,7 +37,29 @@
       ]
     }
   ],
-  "ui_surfaces": [],
+  "ui_surfaces": [
+    {
+      "name": "Chat client",
+      "status": "PLANNED",
+      "backend_authority": "Future authenticated relay and local PC-agent policy result",
+      "visible_data": [
+        "paired devices",
+        "chat messages",
+        "tool requests",
+        "approval decisions",
+        "bounded execution results"
+      ],
+      "actions": [
+        "select a paired device",
+        "submit a chat request",
+        "approve or deny privileged capability requests"
+      ],
+      "forbidden_actions": [
+        "silently approve privileged shell execution",
+        "represent an unverified runtime result as successful"
+      ]
+    }
+  ],
   "runbook_steps": [
     {
       "name": "Run unit tests",
