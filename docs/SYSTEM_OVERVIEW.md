@@ -27,7 +27,7 @@ Users / External Systems
     -> State / Evidence Authorities
     -> External Runtime / Outputs
 
-Observed source inventory: 59 files, 1 language categories.
+Observed source inventory: 61 files, 1 language categories.
 
 ## Major components
 
@@ -90,9 +90,9 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 ## Lifecycle and state
 
-Current phase: Phase 5A - encrypted relay durability
+Current phase: Phase 5B - canonical protocol and restart vectors
 
-Current status: ACCEPTED_CLOSED
+Current status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -134,9 +134,10 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- start Phase 5B canonical protocol and restart test vectors to complete P5 Protocol & Durability
-- after P5 closure start P6 Transport V2 WebSocket reconnect heartbeat and session rebinding
-- continue roadmap P7 Cloudflare Relay then P8 MCP Gateway only after predecessor acceptance
+- synchronize deterministic Phase 5B Project Truth and sequence evidence
+- obtain exact Phase 5B Linux Windows macOS race and STRICT 5-job PASS on the final work-branch candidate
+- merge or fast-forward the accepted exact Phase 5B SHA to main and revalidate it
+- close P5 Protocol & Durability then start P6 Transport V2
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -162,10 +163,16 @@ Known blockers:
 - Pairing revocation durably removes the revoked device pairing queued requests completed results and replay state before ephemeral sessions are invalidated
 - A fresh agent session after relay restart prunes queued commands signed for a stale agent session
 - Phase 5A exact accepted SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da passed Linux Windows macOS race and STRICT governance on work branch run 36588006526 and identical-SHA main run 36588253106
+- Phase 5A truth-only closure SHA b85a8af38e26046b22c5dc33c686de97dbf558cb passed all five blocking jobs on work run 36588860214 and main run 36589194145
+- Phase 5B source candidate 501cd78a2bfa06825471ae1a45ce64a5647d0807 passed Linux Windows macOS and race source lanes on GitHub Actions run 36589988772; STRICT governance remained stale and is not yet accepted
+- Protocol-v1 language-neutral fixtures lock deterministic Ed25519 public keys canonical JSON SHA-256 digests and signatures for device assertions controller assertions and command envelopes
+- Protocol-v1 restart fixtures prove an unexpired queued command is deliverable only when the reauthenticated agent session ID is unchanged; rotated-session or expired queued commands are pruned and remain absent after another restart
 
 ### Not proven
 
-- canonical cross-client protocol and restart test vectors for P5 closure
+- Phase 5B STRICT governance and exact 5-job work-branch acceptance
+- identical-SHA main revalidation and P5 Protocol & Durability closure
+- cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
 - public TLS deployment and reverse-proxy configuration

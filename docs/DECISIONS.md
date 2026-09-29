@@ -57,3 +57,11 @@ Status: ACCEPTED
 Persist restart-critical relay trust command result and replay state in one bounded AES-256-GCM snapshot keyed by an external 32-byte secret; do not persist bearer sessions leases pairing offers or pairing receipts.
 
 Rationale: The self-hosted relay is currently single-node. A transactional encrypted snapshot is the smallest dependency-free durability mechanism, preserves replay protection across restart, avoids extending bearer-token authority across restart, and keeps a future database migration possible without changing protocol semantics.
+
+## DEC-008 — Protocol-v1 fixtures are the cross-client compatibility boundary
+
+Status: ACCEPTED
+
+Future Cloudflare relay, MCP gateway, and other language/client adapters must conform to the published protocol-v1 canonical signing and restart vectors; they must not weaken device, generation, expiry, replay, or agent-session binding to gain compatibility.
+
+Rationale: A single executable language-neutral compatibility boundary prevents transport or adapter implementations from duplicating or drifting away from the security semantics already proven in the Go core.

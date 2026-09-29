@@ -273,6 +273,13 @@
     },
     {
       "directory": "internal/protocol",
+      "file": "internal/protocol/conformance_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 112
+    },
+    {
+      "directory": "internal/protocol",
       "file": "internal/protocol/envelope.go",
       "is_test": false,
       "language": "Go",
@@ -326,6 +333,13 @@
       "is_test": false,
       "language": "Go",
       "lines": 85
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/conformance_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 206
     },
     {
       "directory": "internal/relay",
@@ -430,13 +444,13 @@
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518",
+  "source_digest": "90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582",
   "source_summary": {
-    "files": 59,
+    "files": 61,
     "languages": {
-      "Go": 59
+      "Go": 61
     },
-    "lines": 9791,
+    "lines": 10109,
     "test_files": 0
   },
   "tests": []

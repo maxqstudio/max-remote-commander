@@ -3,7 +3,7 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518
+Source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
@@ -45,6 +45,7 @@ Generated/refreshed: current compiler run
 | internal/policy/capability_test.go | Go | 40 | internal/policy | NO |
 | internal/policy/pathguard.go | Go | 118 | internal/policy | NO |
 | internal/policy/pathguard_test.go | Go | 54 | internal/policy | NO |
+| internal/protocol/conformance_test.go | Go | 112 | internal/protocol | NO |
 | internal/protocol/envelope.go | Go | 152 | internal/protocol | NO |
 | internal/protocol/envelope_test.go | Go | 93 | internal/protocol | NO |
 | internal/protocol/verifier.go | Go | 65 | internal/protocol | NO |
@@ -53,6 +54,7 @@ Generated/refreshed: current compiler run
 | internal/providers/openaicompat/provider_test.go | Go | 157 | internal/providers/openaicompat | NO |
 | internal/relay/command_auth.go | Go | 95 | internal/relay | NO |
 | internal/relay/command_auth_test.go | Go | 85 | internal/relay | NO |
+| internal/relay/conformance_test.go | Go | 206 | internal/relay | NO |
 | internal/relay/controller_auth.go | Go | 176 | internal/relay | NO |
 | internal/relay/controller_auth_test.go | Go | 166 | internal/relay | NO |
 | internal/relay/device_auth.go | Go | 143 | internal/relay | NO |

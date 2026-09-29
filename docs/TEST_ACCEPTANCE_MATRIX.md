@@ -4,10 +4,10 @@
 
 ## Evidence boundary
 
-Phase 0 through Phase 5A are accepted and revalidated on main. Phase 5A exact SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da passed all five blocking jobs on work branch run 36588006526 and identical-SHA main run 36588253106. GitHub-hosted evidence proves encrypted relay-state restart semantics and fail-closed stale-session pruning; physical deployed crash/power-loss recovery, state-key rotation, WebSocket transport, Cloudflare relay, MCP, packaging, graphical multi-device UI, and physical end-to-end runtime remain NOT_PROVEN.
+Phase 0 through Phase 5A are accepted and revalidated on main, including Phase 5A truth-only closure SHA b85a8af38e26046b22c5dc33c686de97dbf558cb on work run 36588860214 and main run 36589194145. Phase 5B source candidate 501cd78a2bfa06825471ae1a45ce64a5647d0807 passed Linux Windows macOS and race source lanes on GitHub Actions run 36589988772, while STRICT governance is pending. Published protocol-v1 fixtures now exercise deterministic signing/canonicalization and fail-closed restart queue semantics in the Go reference implementation; independent Cloudflare/MCP consumers, WebSocket transport, physical crash/power-loss recovery, packaging, and physical end-to-end runtime remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
-Current source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518
+Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
@@ -32,6 +32,9 @@ Current source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed1
 | P5A-REVOKE-001 | Pairing revocation persists generation advancement and removes the revoked device pairing queue completed results and replay state before restart. | GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableRelayRestartPreservesTrustQueueReplayAndResults | PASS |
 | P5A-SESSION-001 | A fresh agent session after relay restart removes queued commands targeted to a stale agent session and the removal itself survives another restart. | GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableAgentSessionChangeDropsStaleQueuedCommands | PASS |
 | P5A-GOV-001 | Exact Phase 5A candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation. | GitHub Actions work run 36588006526 and main run 36588253106 at exact SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da | PASS |
+| P5B-SIGN-001 | Protocol-v1 language-neutral fixtures lock deterministic Ed25519 identities, canonical JSON, SHA-256 digests, and signatures for device assertion, controller assertion, and command envelope compatibility. | GitHub Actions run 36589988772; testdata/protocol/v1/signing-vectors.json; internal/protocol/conformance_test.go; internal/relay/conformance_test.go | PASS |
+| P5B-RESTART-001 | Protocol-v1 restart fixtures require same-session unexpired queued commands to remain deliverable while rotated-session or expired queued commands are durably pruned. | GitHub Actions run 36589988772; testdata/protocol/v1/restart-semantics.json; internal/relay/conformance_test.go | PASS |
+| P5B-GOV-001 | Exact Phase 5B candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation. | Pending Phase 5B governance closure | NOT_PROVEN |
 
 ## Test commands
 
@@ -47,8 +50,8 @@ Current source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed1
 ## Sequence contract evidence
 
 Sequence mode for this phase/session: DURING
-Sequence session contract: docs/sequence/phase-5a.session.json
-SEQUENCE_SYNC: PASS
+Sequence session contract: docs/sequence/phase-5b.session.json
+SEQUENCE_SYNC: NOT_PROVEN
 
 ## Project Truth Compiler evidence
 

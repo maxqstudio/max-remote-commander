@@ -10,10 +10,10 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/phase-5a-durability
+Active branch: work/phase-5b-protocol-vectors
 Current authoritative SHA: external final acceptance evidence
 Last accepted SHA: f3a2ce567e50a2c0e8b96071a3253644b92d02da
-Current source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518
+Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582
 
 ## Authorities
 Source authority: Canonical source history and releases
