@@ -210,3 +210,28 @@ func TestDurableSnapshotExcludesSessions(t *testing.T) {
 		t.Fatal("session token leaked into durable snapshot")
 	}
 }
+
+
+func TestValidateDurableStateRejectsUnpairedRequestsAndQueueResultOverlap(t *testing.T) {
+	now := time.Now()
+	state := durableTestState(t, now)
+	deviceID := state.Pairings[0].DeviceID
+
+	delete(state.PairingGeneration, deviceID)
+	if err := validateDurableState(&state, now, 4, 4); !errors.Is(err, ErrDurableStateCorrupt) {
+		t.Fatalf("missing generation: %v", err)
+	}
+
+	state = durableTestState(t, now)
+	state.Results["req-queued"] = Result{RequestID:"req-queued", Payload:[]byte(`{"status":"completed"}`)}
+	state.ResultOrder = append(state.ResultOrder, "req-queued")
+	if err := validateDurableState(&state, now, 4, 4); !errors.Is(err, ErrDurableStateCorrupt) {
+		t.Fatalf("queue/result overlap: %v", err)
+	}
+
+	state = durableTestState(t, now)
+	state.Requests["req-result"] = "unpaired-device"
+	if err := validateDurableState(&state, now, 4, 4); !errors.Is(err, ErrDurableStateCorrupt) {
+		t.Fatalf("unpaired request owner: %v", err)
+	}
+}
