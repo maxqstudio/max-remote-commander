@@ -9,7 +9,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -608,17 +607,9 @@ func (s *Store) persistLocked() error {
 	if s.stateFile == nil {
 		return nil
 	}
-	return s.stateFile.Save(s.durableStateLocked())
-}
-
-func cloneDurableState(state durableState) durableState {
-	data, err := json.Marshal(state)
-	if err != nil {
-		panic(fmt.Sprintf("clone durable state: %v", err))
+	state := s.durableStateLocked()
+	if err := validateDurableState(&state, time.Now(), s.maxQueue, s.maxResults); err != nil {
+		return err
 	}
-	var cloned durableState
-	if err := json.Unmarshal(data, &cloned); err != nil {
-		panic(fmt.Sprintf("clone durable state: %v", err))
-	}
-	return cloned
+	return s.stateFile.Save(state)
 }
