@@ -80,3 +80,12 @@ Type: feature
 - Added authenticated outbound WebSocket command delivery with strict versioned framing, heartbeat, bounded reconnect backoff, and long-poll fallback.
 - Kept paired-device session creation and durable result acknowledgement on HTTPS so protocol-v1 authority and persistence semantics are unchanged.
 - Changed relay delivery to FIFO head-of-line lease semantics so reconnect cannot bypass an in-flight command; successful result submission wakes the waiting stream after durable commit.
+
+## 2026-09-30 — Latest Skill_Workflow roadmap-governance migration
+
+Type: governance
+
+- Pinned Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 after upstream main run 36594694151 PASS.
+- Added mandatory .workflow/roadmap.json authority for P0-P19 and ROADMAP_SYNC gate; docs/ROADMAP.md becomes compiler-generated.
+- Vendored the latest project-local governance tool pack. The project-specific Go-aware sequence generator is retained as an extension and updated for deterministic LF output.
+- P6 run 36596829111 remains useful pre-migration evidence but is not final acceptance; P6 must be revalidated under the latest workflow.

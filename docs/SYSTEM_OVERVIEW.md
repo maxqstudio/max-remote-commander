@@ -93,7 +93,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 Current phase: P6 - Transport V2
 
-Current status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
+Current status: GOVERNANCE_MIGRATION_AWAITING_REVALIDATION
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -102,22 +102,24 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 | Concern | Authority | Meaning |
 |---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases |
-| working_candidate | work/phase-5a-durability | Current unaccepted Phase 5A encrypted-durability candidate |
-| governance | maxqstudio/Skill_Workflow@2148313678f476c4990e447b4d657724f071adff | Pinned current project workflow rules and deterministic documentation/sequence validators |
+| working_candidate | work/p6-transport-v2 | Current unaccepted P6 Transport V2 candidate under latest-governance migration |
+| governance | maxqstudio/Skill_Workflow@c1d7e58a0fcadc606c8cf75c6283a17278f99259 | Pinned current STRICT project workflow rules, roadmap contract, and deterministic documentation/sequence validators |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution |
 | cross_platform_acceptance | GitHub Actions matrix | Linux Windows and macOS build/test evidence for GitHub-hosted execution |
+| roadmap | .workflow/roadmap.json | Machine-readable phase plan and current-phase authority; docs/ROADMAP.md is generated and state.json phase must match roadmap current_phase |
 
 ## Mutable vs immutable
 
 ### Mutable current state
 
 - source: Canonical source history and releases
-- working_candidate: Current unaccepted Phase 5A encrypted-durability candidate
+- working_candidate: Current unaccepted P6 Transport V2 candidate under latest-governance migration
+- roadmap: Machine-readable phase plan and current-phase authority; docs/ROADMAP.md is generated and state.json phase must match roadmap current_phase
 
 ### Immutable history / evidence
 
-- governance: Pinned current project workflow rules and deterministic documentation/sequence validators
+- governance: Pinned current STRICT project workflow rules, roadmap contract, and deterministic documentation/sequence validators
 - acceptance: Acceptance never exceeds the strongest executed evidence
 - runtime: Real device behavior; GitHub CI alone does not prove physical-device execution
 - cross_platform_acceptance: Linux Windows and macOS build/test evidence for GitHub-hosted execution
@@ -137,10 +139,10 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- synchronize deterministic P6 Project Truth and sequence evidence
-- obtain exact P6 Linux Windows macOS race and STRICT 5-job PASS on the final work-branch candidate
-- fast-forward the accepted exact P6 SHA to main and revalidate it
-- close P6 Transport V2 then start P7 Cloudflare Relay
+- adopt Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 including mandatory roadmap authority and ROADMAP_SYNC
+- regenerate deterministic P6 Project Truth and sequence evidence with the migrated governance toolchain
+- obtain exact 5-job PASS on the final P6 work-branch SHA under the latest workflow
+- fast-forward that exact P6 SHA to main and revalidate before closing P6
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -176,9 +178,12 @@ Known blockers:
 - Agent command delivery defaults to an authenticated outbound WebSocket stream while paired device session creation and durable result acknowledgement remain HTTPS; long-poll remains an explicit fallback
 - WebSocket reconnect uses bounded exponential backoff, hard authorization failures do not retry indefinitely, heartbeat detects stale sessions, and the runner refreshes device sessions while an idle push stream is blocked
 - Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds
+- P6 pre-migration governance SHA da89c5625d7f78dd9a2941f912cacbf326e29f0a passed all five jobs on GitHub Actions run 36596829111 under prior Skill_Workflow pin 2148313678f476c4990e447b4d657724f071adff; it is not final P6 authority because the Owner requested migration to the latest workflow before merge
+- Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151
 
 ### Not proven
 
+- P6 latest Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 exact 5-job work-branch revalidation
 - P6 exact 5-job work-branch governance acceptance
 - P6 identical-SHA main revalidation
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
@@ -206,6 +211,7 @@ See GLOSSARY.md.
 | Need | Document |
 |---|---|
 | Current state | CURRENT_STATE.md |
+| Roadmap | ROADMAP.md |
 | Project identity | PROJECT_MANIFEST.md |
 | Architecture | ARCHITECTURE.md |
 | Lifecycle | WORKFLOW_STATE_MACHINE.md |

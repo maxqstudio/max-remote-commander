@@ -3,18 +3,20 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: 5c6db407f0ec3061387c5c4a59039ae5431bffb4
+Authority verified at SHA: 5b79d0eab9c9bbcffe7aedb931389399c26d0c99
 Governance profile: strict
 
 ## Current phase
 Phase: P6 - Transport V2
-Status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
+Status: GOVERNANCE_MIGRATION_AWAITING_REVALIDATION
+Roadmap phase: P6 - Transport V2
+ROADMAP_SYNC: PASS
 
 ## Source
 Repository: maxqstudio/max-remote-commander
 Branch: work/p6-transport-v2
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: 5c6db407f0ec3061387c5c4a59039ae5431bffb4
+Last accepted SHA: 5b79d0eab9c9bbcffe7aedb931389399c26d0c99
 Current candidate SHA: external final acceptance evidence
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
@@ -56,8 +58,11 @@ SEQUENCE_SYNC: NOT_PROVEN
 - Agent command delivery defaults to an authenticated outbound WebSocket stream while paired device session creation and durable result acknowledgement remain HTTPS; long-poll remains an explicit fallback
 - WebSocket reconnect uses bounded exponential backoff, hard authorization failures do not retry indefinitely, heartbeat detects stale sessions, and the runner refreshes device sessions while an idle push stream is blocked
 - Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds
+- P6 pre-migration governance SHA da89c5625d7f78dd9a2941f912cacbf326e29f0a passed all five jobs on GitHub Actions run 36596829111 under prior Skill_Workflow pin 2148313678f476c4990e447b4d657724f071adff; it is not final P6 authority because the Owner requested migration to the latest workflow before merge
+- Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151
 
 ## Not proven
+- P6 latest Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 exact 5-job work-branch revalidation
 - P6 exact 5-job work-branch governance acceptance
 - P6 identical-SHA main revalidation
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
@@ -77,10 +82,10 @@ SEQUENCE_SYNC: NOT_PROVEN
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- synchronize deterministic P6 Project Truth and sequence evidence
-- obtain exact P6 Linux Windows macOS race and STRICT 5-job PASS on the final work-branch candidate
-- fast-forward the accepted exact P6 SHA to main and revalidate it
-- close P6 Transport V2 then start P7 Cloudflare Relay
+- adopt Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 including mandatory roadmap authority and ROADMAP_SYNC
+- regenerate deterministic P6 Project Truth and sequence evidence with the migrated governance toolchain
+- obtain exact 5-job PASS on the final P6 work-branch SHA under the latest workflow
+- fast-forward that exact P6 SHA to main and revalidate before closing P6
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination

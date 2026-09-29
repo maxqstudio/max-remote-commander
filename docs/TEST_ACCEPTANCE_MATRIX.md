@@ -4,7 +4,7 @@
 
 ## Evidence boundary
 
-Phase 0 through P5 Protocol & Durability are accepted and revalidated on main. P6 source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418, while STRICT governance is pending. P6 source evidence proves authenticated outbound WebSocket command delivery with HTTPS session/result boundaries, bounded reconnect, heartbeat/session refresh, strict stream framing, and FIFO head-of-line lease behavior in GitHub-hosted tests. Exact P6 work/main acceptance, Cloudflare deployment, physical network E2E, packaging, and physical crash/power-loss behavior remain NOT_PROVEN.
+Phase 0 through P5 are accepted and revalidated on main. P6 pre-migration SHA da89c5625d7f78dd9a2941f912cacbf326e29f0a passed all five jobs on run 36596829111 under the previous Skill_Workflow pin, but the Owner requested migration to latest Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 before P6 acceptance. The latest workflow adds mandatory .workflow/roadmap.json and ROADMAP_SYNC. P6 runtime/source semantics remain unchanged; final latest-governance work/main acceptance remains NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
@@ -39,6 +39,7 @@ Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2dd
 | P6-RECONNECT-001 | WebSocket transport uses bounded reconnect backoff, does not retry hard unauthorized handshakes indefinitely, detects stale sessions, and refreshes the paired device session while idle. | GitHub Actions run 36595825418; internal/agent/ws_transport_test.go; internal/agent/runner_refresh_test.go; internal/relay/stream_test.go | PASS |
 | P6-FIFO-001 | Relay delivery is FIFO head-of-line across command leases so reconnect cannot bypass an in-flight command; successful result submission wakes waiting delivery after durable commit. | GitHub Actions run 36595825418; internal/relay/store_fifo_test.go; internal/relay/stream_test.go | PASS |
 | P6-GOV-001 | Exact P6 candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation. | Pending P6 governance closure | NOT_PROVEN |
+| P6-WORKFLOW-LATEST-001 | P6 adopts Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 with synchronized roadmap authority, generated ROADMAP.md, ROADMAP_SYNC, and project-local vendored governance tools before final acceptance. | Upstream Skill_Workflow main run 36594694151 PASS; target-project revalidation pending. | NOT_PROVEN |
 
 ## Test commands
 
@@ -50,6 +51,11 @@ Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2dd
 ## Runtime checks
 
 - None declared.
+
+## Roadmap synchronization evidence
+
+Roadmap authority: .workflow/roadmap.json
+ROADMAP_SYNC: PASS
 
 ## Sequence contract evidence
 

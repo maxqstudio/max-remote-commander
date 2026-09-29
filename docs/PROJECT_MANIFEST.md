@@ -12,7 +12,7 @@ Governance profile: strict
 Repository: maxqstudio/max-remote-commander
 Active branch: work/p6-transport-v2
 Current authoritative SHA: external final acceptance evidence
-Last accepted SHA: 5c6db407f0ec3061387c5c4a59039ae5431bffb4
+Last accepted SHA: 5b79d0eab9c9bbcffe7aedb931389399c26d0c99
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
 ## Authorities
@@ -45,15 +45,16 @@ Generated from code inventory. See MODULE_MAP.md.
 1. ../PROJECT_PROFILE.yaml
 2. SYSTEM_OVERVIEW.md
 3. CURRENT_STATE.md
-4. PROJECT_MANIFEST.md
-5. profile-required authority / architecture / workflow docs
-6. SEQUENCE_CONTRACTS.md when enabled
-7. MODULE_MAP.md
-8. FLOW_INDEX.md
-9. SYMBOL_INDEX.md
-10. TEST_ACCEPTANCE_MATRIX.md
-11. DOC_SYNC_MATRIX.md
-12. PROJECT_TRUTH_SYNC.md when applicable
+4. ROADMAP.md
+5. PROJECT_MANIFEST.md
+6. profile-required authority / architecture / workflow docs
+7. SEQUENCE_CONTRACTS.md when enabled
+8. MODULE_MAP.md
+9. FLOW_INDEX.md
+10. SYMBOL_INDEX.md
+11. TEST_ACCEPTANCE_MATRIX.md
+12. DOC_SYNC_MATRIX.md
+13. PROJECT_TRUTH_SYNC.md when applicable
 
 ## Profile-specific applicability
 
@@ -71,3 +72,6 @@ Generated from PROJECT_PROFILE.yaml.
 - configured relay durable state must never persist bearer sessions or the state encryption key
 - WebSocket command delivery is transport only and must not alter protocol-v1 signature device generation replay or agent-session authority
 - P6 result submission remains HTTPS so durable result acknowledgement semantics stay unchanged
+- .workflow/roadmap.json is the roadmap authority; docs/ROADMAP.md is generated and must not be maintained independently
+- phase transitions must update state.json and roadmap.json together and ROADMAP_SYNC must pass
+- project-local Skill_Workflow tools are pinned to c1d7e58a0fcadc606c8cf75c6283a17278f99259 except the documented Go-aware sequence extractor extension

@@ -7,11 +7,12 @@ Canonical authority is declared in .workflow/authority.json.
 | Concern | Authority | Meaning | Mutable |
 |---|---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases | YES |
-| working_candidate | work/phase-5a-durability | Current unaccepted Phase 5A encrypted-durability candidate | YES |
-| governance | maxqstudio/Skill_Workflow@2148313678f476c4990e447b4d657724f071adff | Pinned current project workflow rules and deterministic documentation/sequence validators | NO |
+| working_candidate | work/p6-transport-v2 | Current unaccepted P6 Transport V2 candidate under latest-governance migration | YES |
+| governance | maxqstudio/Skill_Workflow@c1d7e58a0fcadc606c8cf75c6283a17278f99259 | Pinned current STRICT project workflow rules, roadmap contract, and deterministic documentation/sequence validators | NO |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence | NO |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution | NO |
 | cross_platform_acceptance | GitHub Actions matrix | Linux Windows and macOS build/test evidence for GitHub-hosted execution | NO |
+| roadmap | .workflow/roadmap.json | Machine-readable phase plan and current-phase authority; docs/ROADMAP.md is generated and state.json phase must match roadmap current_phase | YES |
 
 ## Invariants
 
@@ -19,6 +20,7 @@ Canonical authority is declared in .workflow/authority.json.
 - Within one active agent process a command envelope is rejected after expiry or nonce replay.
 - Filesystem path authorization cannot escape configured workspace roots through lexical traversal or symlink ancestors.
 - No user PC needs an inbound listening port for normal operation.
+- Project phase changes update .workflow/state.json and .workflow/roadmap.json in the same transaction; ROADMAP_SYNC must pass before acceptance.
 
 ## Conflict rule
 

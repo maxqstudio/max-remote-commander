@@ -73,3 +73,11 @@ Status: ACCEPTED
 Use authenticated outbound WebSocket as the default agent command-delivery transport, retain long-poll as an explicit fallback, and keep device-session creation plus result submission on HTTPS so existing durable result acknowledgement semantics remain unchanged.
 
 Rationale: This removes constant polling and prepares the agent for Cloudflare WebSocket/Hibernation without changing protocol-v1 command authority, local policy, or the already-proven persistence boundary. Keeping results on HTTPS avoids introducing a second durability acknowledgement protocol in P6.
+
+## DEC-010 — Adopt latest synchronized roadmap governance
+
+Status: ACCEPTED
+
+Pin Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259, make .workflow/roadmap.json the roadmap authority, generate docs/ROADMAP.md deterministically, and vendor the latest project-local governance tool pack while retaining the repo-specific Go-aware sequence extractor as a documented extension.
+
+Rationale: The latest workflow makes roadmap/state synchronization blocking and provides project-local deterministic tools. Replacing the Go-aware extractor with the generic upstream extractor would regress Go sequence coverage, so the project keeps that extension while adopting the latest contract and LF determinism.
