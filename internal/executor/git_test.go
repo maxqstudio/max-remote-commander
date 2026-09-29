@@ -105,3 +105,46 @@ func TestValidateCloneURLAllowsCredentialFreeHTTPS(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+
+func TestGitEnvironmentDropsCredentialAndUserConfigState(t *testing.T) {
+	root := t.TempDir()
+	git, err := NewGit(root, []string{
+		"PATH=/sensitive/path",
+		"HOME=/home/with-credentials",
+		"USERPROFILE=C:\\Users\\secret",
+		"GITHUB_TOKEN=top-secret",
+		"GIT_ASKPASS=/tmp/steal",
+		"GIT_TERMINAL_PROMPT=1",
+		"TEMP=/tmp/safe",
+		"LANG=C",
+	}, 5*time.Second, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	joined := "\n" + strings.Join(git.runner.env, "\n") + "\n"
+	for _, forbidden := range []string{
+		"PATH=/sensitive/path",
+		"HOME=/home/with-credentials",
+		"USERPROFILE=C:\\Users\\secret",
+		"GITHUB_TOKEN=top-secret",
+		"GIT_ASKPASS=/tmp/steal",
+		"GIT_TERMINAL_PROMPT=1",
+	} {
+		if strings.Contains(joined, "\n"+forbidden+"\n") {
+			t.Fatalf("sensitive environment survived: %q in %#v", forbidden, git.runner.env)
+		}
+	}
+	for _, required := range []string{
+		"TEMP=/tmp/safe",
+		"LANG=C",
+		"GIT_CONFIG_NOSYSTEM=1",
+		"GIT_CONFIG_GLOBAL="+os.DevNull,
+		"GIT_TERMINAL_PROMPT=0",
+		"GIT_ASKPASS=",
+	} {
+		if !strings.Contains(joined, "\n"+required+"\n") {
+			t.Fatalf("required isolated environment missing: %q in %#v", required, git.runner.env)
+		}
+	}
+}
