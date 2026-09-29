@@ -43,8 +43,6 @@ jobs:
   governance:
     name: Skill Workflow STRICT
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -81,30 +79,8 @@ jobs:
       - name: Validate generated docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"
-      - name: Sync deterministic generated truth on Phase 4 work branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/work/phase-4-agent-chat'
-        shell: bash
-        run: |
-          git add .workflow/generated/code_facts.json docs/*.md
-          if ! git diff --cached --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: regenerate Phase 4 project truth"
-            git push origin HEAD:work/phase-4-agent-chat
-          fi
       - name: Verify tracked governance state is deterministic
         shell: bash
         run: |
           git diff --exit-code
           test -z "$(git status --porcelain --untracked-files=all --ignored=no)"
-
-      - name: Upload deterministic governance snapshot
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: phase-4-governance-snapshot
-          if-no-files-found: error
-          path: |
-            .workflow/generated/
-            docs/
-            artifacts/sequence/
