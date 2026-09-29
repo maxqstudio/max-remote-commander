@@ -31,6 +31,7 @@ type Config struct {
 	MaxPairingAttempts int
 	ControllerSessionTTL time.Duration
 	ControllerClockSkew  time.Duration
+	DeviceClockSkew      time.Duration
 }
 
 type Command struct {
@@ -44,8 +45,10 @@ type Result struct {
 }
 
 type Session struct {
-	Token     string    `json:"token"`
-	ExpiresAt time.Time `json:"expires_at"`
+	Token          string    `json:"token"`
+	ExpiresAt      time.Time `json:"expires_at"`
+	AgentSessionID string    `json:"agent_session_id,omitempty"`
+	Generation     uint64    `json:"generation,omitempty"`
 }
 
 type queuedCommand struct {
@@ -54,8 +57,11 @@ type queuedCommand struct {
 }
 
 type sessionState struct {
-	tokenHash [32]byte
-	expiresAt time.Time
+	tokenHash      [32]byte
+	expiresAt      time.Time
+	generation     uint64
+	paired         bool
+	agentSessionID string
 }
 
 type Store struct {
@@ -70,6 +76,7 @@ type Store struct {
 	maxPairingAttempts int
 	controllerSessionTTL time.Duration
 	controllerClockSkew  time.Duration
+	deviceClockSkew      time.Duration
 
 	knownDevices map[string]struct{}
 	sessions     map[string]sessionState
@@ -84,6 +91,7 @@ type Store struct {
 	pairingGeneration map[string]uint64
 	controllerSessions map[string]controllerSessionState
 	controllerNonces   map[controllerNonceKey]int64
+	deviceNonces       map[deviceNonceKey]int64
 }
 
 func NewStore(cfg Config) (*Store, error) {
@@ -114,6 +122,9 @@ func NewStore(cfg Config) (*Store, error) {
 	if cfg.ControllerClockSkew <= 0 {
 		cfg.ControllerClockSkew = 30 * time.Second
 	}
+	if cfg.DeviceClockSkew <= 0 {
+		cfg.DeviceClockSkew = 30 * time.Second
+	}
 	return &Store{
 		registrationHash: sha256.Sum256([]byte(cfg.RegistrationKey)),
 		controllerHash: sha256.Sum256([]byte(cfg.ControllerKey)),
@@ -124,6 +135,7 @@ func NewStore(cfg Config) (*Store, error) {
 		maxPairingAttempts: cfg.MaxPairingAttempts,
 		controllerSessionTTL: cfg.ControllerSessionTTL,
 		controllerClockSkew: cfg.ControllerClockSkew,
+		deviceClockSkew: cfg.DeviceClockSkew,
 		knownDevices: make(map[string]struct{}),
 		sessions: make(map[string]sessionState),
 		queues: make(map[string][]*queuedCommand),
@@ -136,6 +148,7 @@ func NewStore(cfg Config) (*Store, error) {
 		pairingGeneration: make(map[string]uint64),
 		controllerSessions: make(map[string]controllerSessionState),
 		controllerNonces: make(map[controllerNonceKey]int64),
+		deviceNonces: make(map[deviceNonceKey]int64),
 	}, nil
 }
 
@@ -184,10 +197,13 @@ func (s *Store) Register(deviceID, registrationKey string, now time.Time) (Sessi
 	expires := now.Add(s.sessionTTL)
 
 	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, paired := s.pairings[deviceID]; paired {
+		return Session{}, ErrDeviceIdentityRequired
+	}
 	s.knownDevices[deviceID] = struct{}{}
 	s.sessions[deviceID] = sessionState{tokenHash: hash, expiresAt: expires}
 	s.signalQueueLocked(deviceID)
-	s.mu.Unlock()
 
 	return Session{Token: token, ExpiresAt: expires}, nil
 }
@@ -195,6 +211,14 @@ func (s *Store) Register(deviceID, registrationKey string, now time.Time) (Sessi
 func (s *Store) sessionAuthorizedLocked(deviceID, token string, now time.Time) bool {
 	session, ok := s.sessions[deviceID]
 	if !ok || !now.Before(session.expiresAt) {
+		return false
+	}
+	pairing, paired := s.pairings[deviceID]
+	if paired {
+		if !session.paired || session.generation != pairing.Generation {
+			return false
+		}
+	} else if session.paired {
 		return false
 	}
 	return secureEqual(session.tokenHash, token)
