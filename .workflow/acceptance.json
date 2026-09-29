@@ -1,75 +1,93 @@
 {
-  "evidence_boundary": "Phase 0 and Phase 1 are accepted on main. Phase 2 relay source behavior has GitHub-hosted cross-platform evidence, but exact final Phase 2 STRICT governance/main revalidation, durable relay state, public TLS deployment, Ed25519 pairing, trusted local approvals, physical remote runtime, LLM providers, MCP, and restart-safe agent replay protection remain NOT_PROVEN.",
-  "human_comprehension_questions": {},
+  "schema_version": 1,
+  "evidence_boundary": "Phase 0 through Phase 2 are accepted on main. Phase 3 security primitives have GitHub-hosted cross-platform source evidence at run 36549467606, but exact final Phase 3 STRICT governance/main revalidation, user-facing approval runtime, audit runtime integration, durable relay state, public TLS deployment, physical remote runtime, chat providers, and MCP remain NOT_PROVEN.",
+  "runtime_status": "NOT_PROVEN",
   "human_comprehension_status": "NOT_PROVEN",
+  "human_comprehension_questions": {},
+  "sequence_mode": "DURING",
+  "sequence_session": "docs/sequence/phase-3.session.json",
+  "sequence_sync_status": "NOT_PROVEN",
+  "truth_gates": {
+    "SOURCE_TESTS": "PASS",
+    "RUNTIME_E2E": "NOT_PROVEN",
+    "PROVENANCE_SYNC": "NOT_PROVEN",
+    "REFERENCE_SYNC": "NOT_PROVEN",
+    "STRUCTURAL_SYNC": "NOT_PROVEN",
+    "SEMANTIC_SYNC": "NOT_PROVEN",
+    "BEHAVIORAL_SYNC": "NOT_PROVEN",
+    "CROSS_DOCUMENT_CONSISTENCY": "NOT_PROVEN",
+    "DOC_SOURCE_TRACEABILITY": "NOT_PROVEN",
+    "DOC_TEST_TRACEABILITY": "NOT_PROVEN",
+    "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN",
+    "PROJECT_STATE_SYNC": "NOT_PROVEN",
+    "PROJECT_DOCS_SYNC": "PASS",
+    "DOC_LAYOUT": "PASS",
+    "PROJECT_DOCS_NORMALIZED": "PASS",
+    "DOC_READABILITY": "PASS",
+    "SEQUENCE_SYNC": "NOT_PROVEN",
+    "HUMAN_COMPREHENSION": "NOT_PROVEN"
+  },
   "requirements": [
     {
-      "evidence": "GitHub Actions work run 36328313786 and main run 36328415659",
-      "id": "P1-FINAL-001",
-      "requirement": "Phase 1 exact accepted SHA passes Linux Windows macOS race and STRICT governance on work branch and main.",
-      "status": "PASS"
-    },
-    {
-      "evidence": "GitHub Actions run 36328789997; internal/relay/store_test.go; internal/relay/http_test.go",
-      "id": "P2-SESSION-001",
-      "requirement": "Authenticated device registration/reconnect rotates short-lived session tokens and rejects old or cross-device session use.",
-      "status": "PASS"
-    },
-    {
-      "evidence": "GitHub Actions run 36328789997; internal/relay/store_test.go",
-      "id": "P2-QUEUE-001",
-      "requirement": "Known-device command queues are bounded, duplicate request IDs reject, and command leases permit bounded redelivery.",
-      "status": "PASS"
-    },
-    {
-      "evidence": "GitHub Actions run 36328789997; internal/relay/store_test.go; internal/relay/http_test.go",
-      "id": "P2-RESULT-001",
-      "requirement": "Only the owning device session can submit results, completed result retention is bounded, and controller-authenticated SSE returns the result.",
-      "status": "PASS"
-    },
-    {
-      "evidence": "GitHub Actions run 36328789997; cmd/max-relay/main.go",
-      "id": "P2-XOS-001",
-      "requirement": "Relay source tests pass on Linux Windows macOS and race regression; final closure additionally builds both binaries.",
-      "status": "PASS"
-    },
-    {
-      "evidence": "Pending exact final Phase 2 CI",
       "id": "P2-FINAL-001",
-      "requirement": "Exact final Phase 2 SHA passes Linux Windows macOS race and STRICT governance, then the identical SHA passes main revalidation.",
-      "status": "NOT_PROVEN"
+      "requirement": "Phase 2 exact accepted SHA passes Linux Windows macOS race and STRICT governance on work branch and main.",
+      "status": "PASS",
+      "evidence": "GitHub Actions work run 36329243639 and main run 36329323271 at c0dfc797509c5afadd8f6cc847cdd45fb5ecf513"
+    },
+    {
+      "id": "P3-IDENTITY-001",
+      "requirement": "Device identity is persistent Ed25519 and concurrent first-start converges without overwrite or partial target visibility.",
+      "status": "PASS",
+      "evidence": "GitHub Actions run 36549467606; internal/identity/device_test.go"
+    },
+    {
+      "id": "P3-PAIRING-001",
+      "requirement": "Pairing binds device/controller keys with expiring attempt-bounded one-use codes generations and revocation.",
+      "status": "PASS",
+      "evidence": "GitHub Actions run 36549467606; internal/relay/pairing_test.go"
+    },
+    {
+      "id": "P3-DEVICE-AUTH-001",
+      "requirement": "Paired device sessions require Ed25519 proof and shared registration bootstrap cannot mint or retain authority after pairing.",
+      "status": "PASS",
+      "evidence": "GitHub Actions run 36549467606; internal/relay/device_auth_test.go; internal/relay/http_test.go"
+    },
+    {
+      "id": "P3-CONTROLLER-001",
+      "requirement": "Controller sessions require paired Ed25519 proof and are invalidated by device generation or agent-session change.",
+      "status": "PASS",
+      "evidence": "GitHub Actions run 36549467606; internal/relay/controller_auth_test.go; internal/relay/command_auth_test.go"
+    },
+    {
+      "id": "P3-COMMAND-001",
+      "requirement": "Relay accepts only controller-signed CommandEnvelope payloads bound to current device and agent session and rejects nonce replay.",
+      "status": "PASS",
+      "evidence": "GitHub Actions run 36549467606; internal/relay/command_auth_test.go; internal/relay/http_test.go"
+    },
+    {
+      "id": "P3-APPROVAL-001",
+      "requirement": "Privileged approvals are one-use short-lived and exact-request bound and cannot be self-asserted by remote request payload.",
+      "status": "PASS",
+      "evidence": "GitHub Actions run 36549467606; internal/approval/store_test.go; internal/executor/dispatcher_test.go"
+    },
+    {
+      "id": "P3-AUDIT-001",
+      "requirement": "Audit primitive is structured secret-safe bounded and rejects symlink/free-form misuse.",
+      "status": "PASS",
+      "evidence": "GitHub Actions run 36549467606; internal/audit/log_test.go"
+    },
+    {
+      "id": "P3-FINAL-001",
+      "requirement": "Exact final Phase 3 SHA passes Linux Windows macOS race and STRICT governance then identical SHA passes main revalidation.",
+      "status": "NOT_PROVEN",
+      "evidence": "Pending exact final Phase 3 CI"
     }
   ],
-  "runtime_checks": [],
-  "runtime_status": "NOT_PROVEN",
-  "schema_version": 1,
-  "sequence_mode": "DURING",
-  "sequence_session": "docs/sequence/phase-2.session.json",
-  "sequence_sync_status": "NOT_PROVEN",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
     "go vet ./...",
     "go build ./cmd/max-agent ./cmd/max-relay"
   ],
-  "truth_gates": {
-    "BEHAVIORAL_SYNC": "NOT_PROVEN",
-    "CROSS_DOCUMENT_CONSISTENCY": "NOT_PROVEN",
-    "DOC_LAYOUT": "PASS",
-    "DOC_READABILITY": "PASS",
-    "DOC_SOURCE_TRACEABILITY": "NOT_PROVEN",
-    "DOC_TEST_TRACEABILITY": "NOT_PROVEN",
-    "HUMAN_COMPREHENSION": "NOT_PROVEN",
-    "PROJECT_DOCS_NORMALIZED": "PASS",
-    "PROJECT_DOCS_SYNC": "PASS",
-    "PROJECT_STATE_SYNC": "NOT_PROVEN",
-    "PROVENANCE_SYNC": "NOT_PROVEN",
-    "REFERENCE_SYNC": "NOT_PROVEN",
-    "RUNTIME_E2E": "NOT_PROVEN",
-    "SEMANTIC_SYNC": "NOT_PROVEN",
-    "SEQUENCE_SYNC": "NOT_PROVEN",
-    "SOURCE_TESTS": "PASS",
-    "STRUCTURAL_SYNC": "NOT_PROVEN",
-    "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"
-  }
+  "runtime_checks": []
 }

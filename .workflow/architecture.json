@@ -15,42 +15,65 @@
     {
       "id": "relay_server",
       "name": "Relay Server",
-      "purpose": "Routes controller commands to outbound-connected device sessions",
+      "purpose": "Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results",
       "owns": [
-        "bootstrap authentication",
-        "session rotation",
+        "pre-pairing registration bootstrap",
+        "pairing generations",
+        "device and controller sessions",
+        "signed command validation",
         "bounded command leases",
         "bounded result retention",
         "SSE result stream"
       ],
       "depends_on": [
+        "identity",
+        "protocol",
         "agent"
       ]
     },
     {
       "id": "agent",
       "name": "PC Agent",
-      "purpose": "Polls outbound for commands, verifies signed requests, and delegates only locally authorized capabilities",
+      "purpose": "Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities",
       "owns": [
         "device identity",
+        "agent session identity",
         "policy enforcement",
-        "executor"
+        "approval store",
+        "executor",
+        "audit integration boundary"
       ],
       "depends_on": [
+        "identity",
         "protocol",
         "policy",
+        "approval",
         "executor",
+        "audit",
         "relay_server"
       ]
     },
     {
+      "id": "identity",
+      "name": "Identity",
+      "purpose": "Persists device Ed25519 identity and derives deterministic device IDs and pairing codes",
+      "owns": [
+        "device private seed",
+        "device public key",
+        "device ID",
+        "pairing code generation"
+      ],
+      "depends_on": []
+    },
+    {
       "id": "protocol",
       "name": "Command Protocol",
-      "purpose": "Defines signed expiring command envelopes and active-process replay checks",
+      "purpose": "Defines signed expiring command envelopes, per-start session binding, and replay checks",
       "owns": [
         "envelope format",
         "signature verification",
-        "nonce replay state"
+        "nonce replay state",
+        "agent session ID"
       ],
       "depends_on": []
     },
@@ -65,40 +88,89 @@
       "depends_on": []
     },
     {
-      "id": "executor",
-      "name": "Local Capability Executor",
-      "purpose": "Executes bounded filesystem process and Git operations after policy authorization",
+      "id": "approval",
+      "name": "Local Approval Store",
+      "purpose": "Issues one-use short-lived local approval grants bound to exact privileged requests",
       "owns": [
-        "os.Root filesystem access",
-        "allowlisted argv process execution",
-        "constrained Git operations",
-        "automatic capability dispatcher"
+        "approval token hashes",
+        "request capability and argument bindings"
       ],
       "depends_on": [
         "policy"
       ]
+    },
+    {
+      "id": "executor",
+      "name": "Local Capability Executor",
+      "purpose": "Executes bounded filesystem process and Git operations after policy and approval authorization",
+      "owns": [
+        "os.Root filesystem access",
+        "allowlisted argv process execution",
+        "constrained Git operations",
+        "dispatcher"
+      ],
+      "depends_on": [
+        "policy",
+        "approval"
+      ]
+    },
+    {
+      "id": "audit",
+      "name": "Audit Logger",
+      "purpose": "Records bounded structured security events without secret-bearing raw payloads",
+      "owns": [
+        "JSONL audit schema",
+        "size bound",
+        "secret-safe fields"
+      ],
+      "depends_on": []
     }
   ],
   "data_flows": [
     {
+      "from": "agent",
+      "to": "relay_server",
+      "meaning": "pre-pairing bootstrap session then Ed25519 device assertion for paired sessions"
+    },
+    {
       "from": "llm_client",
       "to": "relay_server",
-      "meaning": "controller-authenticated structured command"
+      "meaning": "paired controller assertion and short-lived controller session"
+    },
+    {
+      "from": "llm_client",
+      "to": "relay_server",
+      "meaning": "controller-signed CommandEnvelope bound to device and active agent session"
     },
     {
       "from": "relay_server",
       "to": "agent",
-      "meaning": "outbound long-poll command delivery under device session token"
+      "meaning": "outbound long-poll delivery of already relay-validated signed command envelope"
     },
     {
       "from": "agent",
+      "to": "protocol",
+      "meaning": "agent re-verifies controller signature device session freshness and replay before local policy"
+    },
+    {
+      "from": "protocol",
       "to": "policy",
-      "meaning": "untrusted structured capability intent after future envelope verification"
+      "meaning": "verified structured capability intent"
     },
     {
       "from": "policy",
+      "to": "approval",
+      "meaning": "privileged capability requires trusted local approval"
+    },
+    {
+      "from": "approval",
       "to": "executor",
-      "meaning": "automatic allow only; privileged requests remain approval-required"
+      "meaning": "one-use exact-request approval enables privileged execution"
+    },
+    {
+      "from": "executor",
+      "to": "audit",
+      "meaning": "structured decision and outcome metadata without raw secret-bearing payloads"
     },
     {
       "from": "executor",
@@ -108,30 +180,38 @@
     {
       "from": "agent",
       "to": "relay_server",
-      "meaning": "device-session-authenticated result submission"
+      "meaning": "paired-device-session-authenticated result submission"
     },
     {
       "from": "relay_server",
       "to": "llm_client",
-      "meaning": "controller-authenticated SSE result event"
+      "meaning": "paired-controller-session-authenticated SSE result event"
     }
   ],
   "external_boundaries": [
     {
       "name": "Public network",
-      "contract": "Device traffic is outbound from the agent. Phase 2 relay binds loopback by default; public deployment requires external TLS termination and is not yet proven."
+      "contract": "Device traffic is outbound from the agent. Relay binds loopback by default; public deployment requires external TLS termination and remains unproven."
     },
     {
-      "name": "Relay bootstrap credentials",
-      "contract": "Registration and controller keys are distinct secrets of at least 32 bytes; session tokens are random, short-lived, hashed in memory, and rotated on reconnect."
+      "name": "Initial bootstrap",
+      "contract": "The shared registration bootstrap key is only for an unpaired device to create a temporary pre-pairing session; it is rejected for paired devices and is not controller command authority."
     },
     {
-      "name": "Local filesystem and process boundary",
-      "contract": "Filesystem operations use Go os.Root; process execution requires an executable allowlist, bounded output and timeout, trusted workspace CWD, and explicit environment."
+      "name": "Paired identity",
+      "contract": "Paired device and controller sessions require Ed25519 proof-of-possession, pairing generation, freshness, nonce replay checks, and current agent session binding."
     },
     {
-      "name": "LLM provider API",
-      "contract": "Provider output is untrusted intent and cannot directly authorize privileged device operations."
+      "name": "Local privileged execution",
+      "contract": "Remote payloads cannot self-approve. Privileged capability grants are local one-use short-lived exact-request bindings."
+    },
+    {
+      "name": "Local secrets",
+      "contract": "Device private identity persists locally; POSIX permissions and symlink safety are enforced, while OS-native Windows key protection remains future hardening."
+    },
+    {
+      "name": "Audit data",
+      "contract": "Audit schema excludes raw arguments tokens stdout stderr and free-form messages; only bounded structured metadata and digests are accepted."
     }
   ]
 }

@@ -2,34 +2,46 @@
   "schema_version": 1,
   "defects": [
     {
-      "id": "SEC-REPLAY-RESTART-001",
+      "id": "SEC-REPLAY-RUNTIME-001",
       "status": "OPEN",
-      "summary": "Agent nonce replay state is in-memory; restarting the agent loses unexpired nonce history.",
-      "evidence": "internal/protocol/envelope.go::MemoryReplayStore"
+      "summary": "Per-start agent session binding and replay checks exist in source, but the final running agent loop that creates a fresh session each start is not yet implemented/proven.",
+      "evidence": "internal/protocol/verifier.go and internal/relay/device_auth.go"
     },
     {
-      "id": "P1-APPROVAL-001",
+      "id": "P3-APPROVAL-UI-001",
       "status": "OPEN",
-      "summary": "Trusted local approval issuance and binding are not implemented; privileged executor primitives are not reachable through automatic remote dispatch.",
-      "evidence": "internal/policy/capability.go and internal/executor/dispatcher.go"
+      "summary": "Approval store and privileged dispatcher binding are implemented, but the user-facing trusted local approval prompt/issuer is not yet integrated.",
+      "evidence": "internal/approval/store.go and internal/executor/dispatcher.go"
     },
     {
       "id": "P2-DURABILITY-001",
       "status": "OPEN",
-      "summary": "Relay sessions queues leases and completed results are in-memory and are lost on relay restart.",
+      "summary": "Relay pairings sessions queues leases nonces and completed results are in-memory and are lost on relay restart.",
       "evidence": "internal/relay/store.go"
     },
     {
       "id": "P2-IDENTITY-001",
-      "status": "OPEN",
-      "summary": "Phase 2 uses separate symmetric bootstrap registration/controller keys; final Ed25519 device pairing and per-device controller authorization are deferred to Phase 3.",
-      "evidence": "internal/relay/store.go Config and Register"
+      "status": "RESOLVED_SOURCE",
+      "summary": "Phase 3 replaces controller bootstrap authority with paired Ed25519 controller identity and requires Ed25519 device proof for paired-device sessions; only initial unpaired device bootstrap still uses the registration key.",
+      "evidence": "internal/relay/pairing.go internal/relay/device_auth.go internal/relay/controller_auth.go"
     },
     {
       "id": "P2-TLS-001",
       "status": "OPEN",
       "summary": "max-relay serves HTTP and defaults to loopback; public TLS termination/deployment is not yet implemented or proven.",
       "evidence": "cmd/max-relay/main.go"
+    },
+    {
+      "id": "P3-WINDOWS-KEYSTORE-001",
+      "status": "OPEN",
+      "summary": "Device identity rejects symlinks and enforces POSIX permissions, but Windows OS-native protected key storage or explicit ACL hardening is not yet implemented.",
+      "evidence": "internal/identity/device.go"
+    },
+    {
+      "id": "P3-AUDIT-INTEGRATION-001",
+      "status": "OPEN",
+      "summary": "Secret-safe bounded audit logger is implemented, but final agent/relay runtime event integration is deferred.",
+      "evidence": "internal/audit/log.go"
     }
   ]
 }

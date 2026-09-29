@@ -1,121 +1,70 @@
 {
   "schema_version": 1,
   "flow_id": "FLOW-COMMAND",
-  "title": "Remote command relay and local authorization flow",
-  "purpose": "Route a controller-authenticated command through a device-isolated outbound relay session, then preserve local policy as final execution authority and stream the bounded result back.",
+  "title": "Paired remote capability command",
+  "purpose": "Carry a controller-signed capability request from paired controller through relay and local verification/policy without letting remote input grant privilege.",
   "critical": true,
-  "entry_condition": "A controller queues a structured command for a known device.",
-  "authority": "Relay authentication controls transport access; the local PC agent policy remains final execution authority.",
+  "entry_condition": "Device and controller are paired; device has an active Ed25519-authenticated relay session; controller has an active paired session bound to the same agent session.",
+  "authority": "Paired Ed25519 identities plus local PC-agent policy and trusted local approval",
   "states": [
-    "controller_submitted",
-    "relay_queued",
-    "device_session_polled",
-    "command_leased",
-    "locally_verified",
-    "policy_checked",
-    "executed_or_rejected",
-    "result_submitted",
-    "result_streamed"
+    "CONTROLLER_SIGNED",
+    "RELAY_VERIFIED",
+    "QUEUED",
+    "DEVICE_POLLED",
+    "AGENT_VERIFIED",
+    "POLICY_CHECKED",
+    "APPROVAL_REQUIRED",
+    "APPROVED",
+    "EXECUTED",
+    "DENIED",
+    "RESULT_SUBMITTED"
   ],
   "transitions": [
-    {
-      "from": "controller_submitted",
-      "to": "relay_queued",
-      "action": "authenticate controller and enqueue bounded request",
-      "side_effects": [
-        "append request to bounded in-memory device queue"
-      ]
-    },
-    {
-      "from": "relay_queued",
-      "to": "device_session_polled",
-      "action": "authenticate current device session on outbound long poll",
-      "side_effects": []
-    },
-    {
-      "from": "device_session_polled",
-      "to": "command_leased",
-      "action": "lease first available command for bounded interval",
-      "side_effects": [
-        "set in-memory lease deadline"
-      ]
-    },
-    {
-      "from": "command_leased",
-      "to": "locally_verified",
-      "action": "future agent verifies signed envelope freshness and replay state",
-      "side_effects": [
-        "record nonce only after valid verification"
-      ]
-    },
-    {
-      "from": "locally_verified",
-      "to": "policy_checked",
-      "action": "evaluate local capability policy",
-      "side_effects": []
-    },
-    {
-      "from": "policy_checked",
-      "to": "executed_or_rejected",
-      "action": "automatic dispatcher executes only read-only allowed tools; privileged tools stop at approval-required",
-      "side_effects": [
-        "bounded local read-only effects only for automatic tools"
-      ]
-    },
-    {
-      "from": "executed_or_rejected",
-      "to": "result_submitted",
-      "action": "owning device session submits bounded result",
-      "side_effects": [
-        "complete queued request and retain bounded result"
-      ]
-    },
-    {
-      "from": "result_submitted",
-      "to": "result_streamed",
-      "action": "controller-authenticated SSE emits one result event",
-      "side_effects": []
-    }
+    "CONTROLLER_SIGNED->RELAY_VERIFIED",
+    "RELAY_VERIFIED->QUEUED",
+    "QUEUED->DEVICE_POLLED",
+    "DEVICE_POLLED->AGENT_VERIFIED",
+    "AGENT_VERIFIED->POLICY_CHECKED",
+    "POLICY_CHECKED->DENIED",
+    "POLICY_CHECKED->APPROVAL_REQUIRED",
+    "POLICY_CHECKED->EXECUTED",
+    "APPROVAL_REQUIRED->APPROVED",
+    "APPROVED->EXECUTED",
+    "EXECUTED->RESULT_SUBMITTED"
   ],
   "invariants": [
-    "registration and controller bootstrap secrets are distinct",
-    "session token is bound to one device ID",
-    "old token is invalid after reconnect rotation",
-    "controller cannot use device session token as controller authority",
-    "cross-device result submission rejects",
-    "local policy remains final execution authority",
-    "remote payload cannot self-assert trusted local approval"
+    "Shared bootstrap registration key cannot mint paired-device sessions.",
+    "Global symmetric controller command authority does not exist.",
+    "Relay and agent both require the signed command to target the current device and agent session.",
+    "Command nonce replay rejects.",
+    "Remote request cannot self-assert local approval.",
+    "Shell and unknown capabilities deny by default.",
+    "Privileged approval is one-use and exact-request bound."
   ],
   "failure_behavior": [
-    "invalid or expired credentials fail closed",
-    "unknown devices and requests reject",
-    "full device queues reject",
-    "cross-device session use rejects",
-    "unknown and shell capabilities deny locally",
-    "relay timeout does not fabricate a result"
+    "Fail closed before side effects on auth signature session replay policy or approval failure.",
+    "No fabricated result is emitted."
   ],
   "restart_behavior": [
-    "relay restart loses in-memory sessions queues and results and therefore requires device reconnect; durability is OPEN",
-    "agent restart-safe nonce replay remains OPEN"
+    "Fresh agent session ID makes old signed commands stale; final running agent integration remains to be proven.",
+    "Relay in-memory state is lost on relay restart and durability is not claimed."
   ],
   "rollback_behavior": [
-    "stop relay listener",
-    "rotate bootstrap secrets",
-    "revert candidate commit if acceptance regression is confirmed"
+    "No automatic rollback of completed external side effects.",
+    "Revocation invalidates paired controller/device sessions for the revoked generation."
   ],
   "source_owners": [
-    "internal/relay",
-    "cmd/max-relay",
-    "internal/protocol",
-    "internal/policy",
-    "internal/executor"
+    "internal/relay/pairing.go",
+    "internal/relay/device_auth.go",
+    "internal/relay/controller_auth.go",
+    "internal/relay/command_auth.go",
+    "internal/protocol/verifier.go",
+    "internal/policy/capability.go",
+    "internal/approval/store.go",
+    "internal/executor/dispatcher.go"
   ],
   "tests": [
-    "internal/relay/store_test.go",
-    "internal/relay/http_test.go",
-    "internal/protocol/envelope_test.go",
-    "internal/policy/capability_test.go",
-    "internal/executor/dispatcher_test.go"
+    "go test ./internal/relay ./internal/protocol ./internal/policy ./internal/approval ./internal/executor ./internal/identity ./internal/audit"
   ],
-  "sequence_session": "docs/sequence/phase-2.session.json"
+  "sequence_session": "docs/sequence/phase-3.session.json"
 }

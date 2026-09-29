@@ -3,104 +3,141 @@
   "claims": [
     {
       "id": "TRUTH-PROTOCOL-SIGNED-001",
-      "claim": "Command requests are signed with Ed25519 and verification covers all authority-bearing envelope fields.",
+      "claim": "Command requests are Ed25519-signed and verification covers authority-bearing envelope fields including device and agent session.",
       "documents": [
         "API_CONTRACTS.md"
       ],
       "source_owners": [
         "internal/protocol/envelope.go::Sign(",
-        "internal/protocol/envelope.go::Verify("
+        "internal/protocol/envelope.go::Verify(",
+        "internal/protocol/verifier.go::Verifier.Verify("
       ],
       "tests": [
-        "internal/protocol/envelope_test.go"
+        "internal/protocol/envelope_test.go",
+        "internal/protocol/verifier_test.go"
       ],
       "runtime_evidence": [],
       "status": "PASS"
     },
     {
-      "id": "TRUTH-EXEC-FS-001",
-      "claim": "Filesystem operations use Go os.Root and local paths so lexical and symlink traversal cannot escape the workspace root.",
+      "id": "TRUTH-IDENTITY-001",
+      "claim": "A device has a persistent Ed25519 identity with deterministic device ID and concurrent first-start cannot overwrite an existing identity.",
       "documents": [
         "ARCHITECTURE.md",
         "DATA_CONTRACTS.md"
       ],
       "source_owners": [
-        "internal/executor/filesystem.go::OpenFilesystem(",
-        "internal/executor/filesystem.go::Read(",
-        "internal/executor/filesystem.go::Write("
+        "internal/identity/device.go::LoadOrCreate(",
+        "internal/identity/device.go::DeviceID("
       ],
       "tests": [
-        "internal/executor/filesystem_test.go"
+        "internal/identity/device_test.go"
       ],
       "runtime_evidence": [],
       "status": "PASS"
     },
     {
-      "id": "TRUTH-POLICY-DEFAULT-001",
-      "claim": "Automatic dispatch allows only read list status and diff; write patch process and clone require trusted local approval; shell and unknown capabilities deny.",
+      "id": "TRUTH-PAIRING-001",
+      "claim": "Pairing binds device and controller Ed25519 keys using a high-entropy one-use expiring attempt-bounded code and generation counter.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/relay/pairing.go::Store.PublishPairingOffer(",
+        "internal/relay/pairing.go::Store.RedeemPairing(",
+        "internal/relay/pairing.go::Store.RevokePairing("
+      ],
+      "tests": [
+        "internal/relay/pairing_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-DEVICE-AUTH-001",
+      "claim": "After pairing the shared registration bootstrap key cannot mint device sessions; paired device sessions require Ed25519 proof bound to generation and agent session.",
+      "documents": [
+        "API_CONTRACTS.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/relay/device_auth.go::Store.AuthenticateDevice(",
+        "internal/relay/store.go::Store.Register("
+      ],
+      "tests": [
+        "internal/relay/device_auth_test.go",
+        "internal/relay/http_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-CONTROLLER-AUTH-001",
+      "claim": "Controller sessions require paired Ed25519 proof and are bound to the active device generation and agent session.",
+      "documents": [
+        "API_CONTRACTS.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/relay/controller_auth.go::Store.AuthenticateController(",
+        "internal/relay/controller_auth.go::Store.PairedControllerAuthorized("
+      ],
+      "tests": [
+        "internal/relay/controller_auth_test.go",
+        "internal/relay/command_auth_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-COMMAND-AUTH-001",
+      "claim": "Relay queues only controller-signed command envelopes targeted to the current device and agent session and rejects command nonce replay.",
       "documents": [
         "API_CONTRACTS.md",
         "WORKFLOW_STATE_MACHINE.md"
       ],
       "source_owners": [
-        "internal/policy/capability.go::DecideCapability(",
-        "internal/executor/dispatcher.go::Dispatch("
+        "internal/relay/command_auth.go::Store.QueuePairedCommand("
       ],
       "tests": [
-        "internal/policy/capability_test.go",
+        "internal/relay/command_auth_test.go",
+        "internal/relay/http_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-APPROVAL-001",
+      "claim": "Privileged local approvals are one-use short-lived and bound to request ID capability and exact argument digest.",
+      "documents": [
+        "API_CONTRACTS.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/approval/store.go::Store.Issue(",
+        "internal/approval/store.go::Store.Consume(",
+        "internal/executor/dispatcher.go::Dispatcher.DispatchApproved("
+      ],
+      "tests": [
+        "internal/approval/store_test.go",
         "internal/executor/dispatcher_test.go"
       ],
       "runtime_evidence": [],
       "status": "PASS"
     },
     {
-      "id": "TRUTH-RELAY-SESSION-001",
-      "claim": "Relay reconnect rotates a random per-device session token and old or cross-device tokens fail closed.",
+      "id": "TRUTH-AUDIT-001",
+      "claim": "Audit primitive accepts only bounded structured secret-safe fields and never stores raw arguments tokens stdout stderr or free-form messages.",
       "documents": [
-        "ARCHITECTURE.md",
         "DATA_CONTRACTS.md"
       ],
       "source_owners": [
-        "internal/relay/store.go::Register(",
-        "internal/relay/store.go::NextCommand("
+        "internal/audit/log.go::Open(",
+        "internal/audit/log.go::Logger.Append("
       ],
       "tests": [
-        "internal/relay/store_test.go",
-        "internal/relay/http_test.go"
-      ],
-      "runtime_evidence": [],
-      "status": "PASS"
-    },
-    {
-      "id": "TRUTH-RELAY-QUEUE-001",
-      "claim": "Relay command queues are bounded per device and duplicate request IDs reject.",
-      "documents": [
-        "API_CONTRACTS.md",
-        "DATA_CONTRACTS.md"
-      ],
-      "source_owners": [
-        "internal/relay/store.go::QueueCommand("
-      ],
-      "tests": [
-        "internal/relay/store_test.go"
-      ],
-      "runtime_evidence": [],
-      "status": "PASS"
-    },
-    {
-      "id": "TRUTH-RELAY-RESULT-001",
-      "claim": "Only the owning authenticated device can submit a request result and completed result retention is bounded.",
-      "documents": [
-        "API_CONTRACTS.md",
-        "DATA_CONTRACTS.md"
-      ],
-      "source_owners": [
-        "internal/relay/store.go::SubmitResult(",
-        "internal/relay/store.go::WaitResult("
-      ],
-      "tests": [
-        "internal/relay/store_test.go",
-        "internal/relay/http_test.go"
+        "internal/audit/log_test.go"
       ],
       "runtime_evidence": [],
       "status": "PASS"

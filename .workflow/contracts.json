@@ -4,166 +4,260 @@
     {
       "method": "VERIFY",
       "path": "CommandEnvelope",
-      "purpose": "Authenticate and freshness-check a typed remote command before local policy evaluation.",
-      "authority": "PC agent protocol verifier",
-      "mutation": "Records nonce only after signature and time checks pass.",
-      "error_behavior": "Fail closed on malformed expired future-issued overlong invalid-signature or replayed envelopes."
+      "purpose": "Authenticate freshness device/session binding and replay before local policy.",
+      "authority": "Paired controller Ed25519 public key plus active agent session",
+      "mutation": "Records nonce in replay state only after verification.",
+      "error_behavior": "Fail closed on malformed expired future-issued overlong wrong-device wrong-session invalid-signature or replayed envelopes."
     },
     {
       "method": "DISPATCH",
       "path": "CapabilityRequest",
-      "purpose": "Route automatically allowed structured capabilities to bounded local executors.",
-      "authority": "Local capability policy",
-      "mutation": "Automatic dispatch remains read-only; mutating or execution capabilities stop at approval-required.",
-      "error_behavior": "Unknown and shell capabilities deny; write patch process and clone return approval-required before side effects."
+      "purpose": "Route automatically allowed structured capabilities or consume a trusted local approval for privileged capabilities.",
+      "authority": "Local capability policy and local approval store",
+      "mutation": "Read-only capabilities may auto-dispatch; privileged capabilities require one-use exact-request approval.",
+      "error_behavior": "Unknown and shell capabilities deny; missing expired mismatched or replayed approvals fail closed."
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/{device}/bootstrap-session",
+      "purpose": "Create a temporary pre-pairing device session.",
+      "authority": "Shared relay registration bootstrap key",
+      "mutation": "Creates or rotates an unpaired in-memory session token.",
+      "error_behavior": "Paired devices reject bootstrap session issuance."
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/{device}/pairing-offer",
+      "purpose": "Publish a one-use pairing offer that binds the device ID to its Ed25519 public key.",
+      "authority": "Current pre-pairing device session",
+      "mutation": "Stores hashed pairing code device key expiry and attempt count.",
+      "error_behavior": "Mismatched device key existing pairing invalid TTL or unauthorized session reject."
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/{device}/pairing/redeem",
+      "purpose": "Redeem a high-entropy pairing code and bind one controller Ed25519 public key to the device.",
+      "authority": "One-use pairing code",
+      "mutation": "Creates pairing generation and invalidates bootstrap session.",
+      "error_behavior": "Expired wrong replayed or exhausted codes reject."
     },
     {
       "method": "POST",
       "path": "/v1/devices/{device}/session",
-      "purpose": "Register or reconnect an outbound device and rotate its short-lived relay session token.",
-      "authority": "Relay registration key",
-      "mutation": "Replaces the active in-memory session token hash for the device.",
-      "error_behavior": "Invalid device IDs or bad registration credentials fail closed."
+      "purpose": "Mint a short-lived paired device relay session.",
+      "authority": "Device Ed25519 assertion bound to pairing generation and per-start agent session ID",
+      "mutation": "Replaces active paired device session and records device assertion nonce.",
+      "error_behavior": "Bad key stale generation expired/future assertion or replay rejects."
+    },
+    {
+      "method": "POST",
+      "path": "/v1/devices/{device}/controller-session",
+      "purpose": "Mint a short-lived paired controller session.",
+      "authority": "Controller Ed25519 assertion for current pairing generation plus active device session",
+      "mutation": "Replaces controller session and records controller assertion nonce.",
+      "error_behavior": "Bad key stale generation offline device expired/future assertion or replay rejects."
     },
     {
       "method": "POST",
       "path": "/v1/devices/{device}/commands",
-      "purpose": "Queue a bounded command for a known device.",
-      "authority": "Relay controller key",
-      "mutation": "Adds one request to the bounded per-device queue.",
-      "error_behavior": "Unknown devices duplicate request IDs and full queues reject."
+      "purpose": "Queue a signed command for the active device session.",
+      "authority": "Current paired controller session plus controller-signed CommandEnvelope",
+      "mutation": "Adds one request to bounded queue and records command nonce.",
+      "error_behavior": "Unauthorized controller malformed signature stale agent session duplicate request replayed nonce or full queue reject."
     },
     {
       "method": "GET",
       "path": "/v1/devices/{device}/commands/next",
-      "purpose": "Long-poll the next available command from an outbound device connection.",
-      "authority": "Current per-device session token",
-      "mutation": "Leases a command for bounded time; it remains eligible for redelivery after lease expiry until a result is submitted.",
-      "error_behavior": "Expired rotated or cross-device session tokens reject."
+      "purpose": "Long-poll the next available command from an outbound paired device connection.",
+      "authority": "Current paired device session token",
+      "mutation": "Leases a command for bounded time.",
+      "error_behavior": "Expired rotated cross-device or pre-pairing sessions reject once paired."
     },
     {
       "method": "POST",
       "path": "/v1/devices/{device}/results",
-      "purpose": "Submit a result for a request owned by the authenticated device.",
-      "authority": "Current per-device session token",
-      "mutation": "Completes the queued request and stores a bounded retained result.",
+      "purpose": "Submit a result for a request owned by the authenticated paired device.",
+      "authority": "Current paired device session token",
+      "mutation": "Completes queued request and stores bounded retained result.",
       "error_behavior": "Unknown requests and cross-device submissions reject."
     },
     {
       "method": "GET",
       "path": "/v1/results/{request}/events",
-      "purpose": "Stream the completed result as one SSE event.",
-      "authority": "Relay controller key",
+      "purpose": "Stream completed result as one SSE event.",
+      "authority": "Current paired controller session bound to the active agent session",
       "mutation": "No source mutation.",
-      "error_behavior": "Unknown requests reject and waits time out without fabricating results."
+      "error_behavior": "Unknown requests stale controller sessions and waits time out without fabricating results."
+    },
+    {
+      "method": "APPEND",
+      "path": "AuditEvent",
+      "purpose": "Append secret-safe structured security metadata to a bounded JSONL audit file.",
+      "authority": "Local runtime only",
+      "mutation": "Appends one validated event and fsyncs.",
+      "error_behavior": "Symlink path invalid fields free-form values closed logger or size exhaustion reject."
     }
   ],
   "data_contracts": [
     {
-      "name": "Workspace root",
-      "source_of_truth": "Local PC agent configuration",
-      "mutability": "User-controlled configuration",
+      "name": "Device identity seed",
+      "source_of_truth": "internal/identity/device.go",
+      "mutability": "Created once locally then stable",
       "legal_writes": [
-        "Explicit local configuration"
+        "Exclusive first-start creation only"
       ],
-      "retention": "Until user changes configuration",
+      "retention": "Until user removes device identity",
       "invariants": [
-        "Filesystem operations are relative to os.Root and cannot resolve outside it through lexical or symlink traversal.",
-        "Process working directory is the trusted workspace root."
+        "Ed25519 seed is 32 bytes.",
+        "Device ID is SHA-256-derived from public key.",
+        "Target path may not be a symlink.",
+        "Concurrent first-start converges on one identity.",
+        "POSIX group/other permissions are rejected."
+      ]
+    },
+    {
+      "name": "Pairing",
+      "source_of_truth": "internal/relay/pairing.go",
+      "mutability": "Ephemeral relay memory in current phase",
+      "legal_writes": [
+        "Successful one-use pairing redeem",
+        "Device-authenticated revocation"
+      ],
+      "retention": "Until revoke or relay restart",
+      "invariants": [
+        "Device public key must derive the device ID.",
+        "Controller public key is bound to one pairing generation.",
+        "Pairing codes are high entropy hashed expiring attempt-bounded and one-use."
+      ]
+    },
+    {
+      "name": "Paired device session",
+      "source_of_truth": "internal/relay/device_auth.go",
+      "mutability": "Ephemeral relay memory",
+      "legal_writes": [
+        "Valid device Ed25519 assertion"
+      ],
+      "retention": "Until expiry replacement revoke or relay restart",
+      "invariants": [
+        "Shared registration bootstrap cannot mint a paired-device session.",
+        "Assertion is generation-bound freshness-bounded nonce-protected and tied to an agent session ID.",
+        "Session token hash only is retained."
+      ]
+    },
+    {
+      "name": "Paired controller session",
+      "source_of_truth": "internal/relay/controller_auth.go",
+      "mutability": "Ephemeral relay memory",
+      "legal_writes": [
+        "Valid paired controller Ed25519 assertion"
+      ],
+      "retention": "Until expiry device-session change pairing revoke replacement or relay restart",
+      "invariants": [
+        "Controller session is device-generation-bound.",
+        "Controller session is bound to the active agent session ID.",
+        "Agent session rotation invalidates old controller authority."
+      ]
+    },
+    {
+      "name": "Signed command queue",
+      "source_of_truth": "internal/relay/command_auth.go and internal/relay/store.go",
+      "mutability": "Ephemeral relay memory",
+      "legal_writes": [
+        "Current paired controller session presenting a valid controller-signed CommandEnvelope"
+      ],
+      "retention": "Until completion result eviction or relay restart",
+      "invariants": [
+        "Envelope device and request IDs match route/request.",
+        "Envelope session ID equals active agent session.",
+        "Signature verifies against paired controller key.",
+        "Command nonce replay rejects.",
+        "Queue remains bounded per device."
       ]
     },
     {
       "name": "Capability authorization",
-      "source_of_truth": "internal/policy/capability.go",
-      "mutability": "Source-controlled policy",
+      "source_of_truth": "internal/policy/capability.go and internal/approval/store.go",
+      "mutability": "Source policy plus ephemeral local approval state",
       "legal_writes": [
-        "Reviewed source changes"
+        "Reviewed policy changes",
+        "Trusted local approval issuance"
       ],
-      "retention": "Versioned with source",
+      "retention": "Approval until one consume or expiry",
       "invariants": [
-        "filesystem.read filesystem.list git.status and git.diff may auto-execute.",
-        "filesystem.write filesystem.patch process.run and git.clone require trusted local approval.",
-        "shell.exec powershell.exec bash.exec and unknown capabilities deny by default.",
-        "Remote request payloads cannot self-assert trusted approval."
+        "Read list status and diff may auto-execute.",
+        "Write patch process and clone require trusted local approval.",
+        "Shell and unknown capabilities deny.",
+        "Approval binds request ID capability exact arguments and expiry and is consumed on first attempt."
       ]
     },
     {
-      "name": "Relay device session",
+      "name": "Audit event",
+      "source_of_truth": "internal/audit/log.go",
+      "mutability": "Append-only local file until configured bound",
+      "legal_writes": [
+        "Validated local structured event append"
+      ],
+      "retention": "Until external rotation/retention policy; append rejects at configured bound",
+      "invariants": [
+        "No raw argument/token/stdout/stderr/free-form message fields exist.",
+        "Arguments may be represented only by SHA-256 digest.",
+        "Audit path symlinks reject."
+      ]
+    },
+    {
+      "name": "Relay ephemeral state",
       "source_of_truth": "internal/relay/store.go",
       "mutability": "Ephemeral server memory",
       "legal_writes": [
-        "Successful authenticated register/reconnect"
+        "Authenticated session pairing command result operations"
       ],
-      "retention": "Until expiry restart or replacement by reconnect",
+      "retention": "Lost on relay restart",
       "invariants": [
-        "Registration and controller bootstrap keys are distinct.",
-        "Session token is random and only its hash is stored.",
-        "A rotated session invalidates the prior token.",
-        "A session token authenticates only its device ID."
-      ]
-    },
-    {
-      "name": "Relay command queue",
-      "source_of_truth": "internal/relay/store.go",
-      "mutability": "Ephemeral server memory",
-      "legal_writes": [
-        "Controller-authenticated queue request",
-        "Device-authenticated result completion"
-      ],
-      "retention": "Until completion or relay restart",
-      "invariants": [
-        "Queue length is bounded per device.",
-        "Request IDs are unique while retained.",
-        "Leased commands may redeliver after lease expiry until completion."
-      ]
-    },
-    {
-      "name": "Relay completed results",
-      "source_of_truth": "internal/relay/store.go",
-      "mutability": "Ephemeral server memory",
-      "legal_writes": [
-        "Device-authenticated result submission"
-      ],
-      "retention": "Bounded by maximum retained result count or relay restart",
-      "invariants": [
-        "Result request must belong to submitting device.",
-        "Old completed results are evicted when the configured bound is reached."
-      ]
-    },
-    {
-      "name": "Active-process nonce replay cache",
-      "source_of_truth": "PC agent process memory",
-      "mutability": "Ephemeral runtime state",
-      "legal_writes": [
-        "Successful command-envelope verification"
-      ],
-      "retention": "Until command expiry or process exit",
-      "invariants": [
-        "A deviceID+nonce pair is accepted at most once within one active process before expiry.",
-        "Restart-safe replay prevention is not yet implemented."
+        "Command queue and result retention are bounded.",
+        "Durability is not claimed."
       ]
     }
   ],
   "ui_surfaces": [
     {
+      "name": "Local approval prompt",
+      "status": "PLANNED_RUNTIME_INTEGRATION",
+      "backend_authority": "Local capability policy plus local approval store",
+      "visible_data": [
+        "device/controller identity",
+        "request ID",
+        "capability",
+        "human-readable bounded argument summary produced locally"
+      ],
+      "actions": [
+        "approve once",
+        "deny"
+      ],
+      "forbidden_actions": [
+        "accept approval asserted by remote payload",
+        "display or persist secrets by default",
+        "silently grant shell"
+      ]
+    },
+    {
       "name": "Chat client",
-      "status": "PLANNED",
-      "backend_authority": "Future paired controller plus relay plus local PC-agent policy result",
+      "status": "PLANNED_PHASE_4",
+      "backend_authority": "Paired controller session plus relay plus local PC-agent verification/policy",
       "visible_data": [
         "paired devices",
         "chat messages",
         "tool requests",
-        "approval decisions",
+        "approval state",
         "bounded execution results"
       ],
       "actions": [
-        "select a paired device",
-        "submit a chat request",
-        "approve or deny privileged capability requests"
+        "select paired device",
+        "submit chat request",
+        "observe tool state"
       ],
       "forbidden_actions": [
         "silently approve privileged execution",
-        "represent an unverified runtime result as successful"
+        "represent unverified runtime result as successful"
       ]
     }
   ],

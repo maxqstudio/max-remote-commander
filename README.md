@@ -2,9 +2,9 @@
 
 Secure, self-hosted, cross-platform remote computer agent gateway for LLM clients.
 
-Phase 0 and Phase 1 are accepted. The Phase 2 candidate adds an authenticated outbound relay: device reconnect rotates a short-lived session token, controller and registration bootstrap authorities are separate, command queues and completed results are bounded, devices long-poll outbound for work, and results are returned through controller-authenticated SSE.
+Current accepted main includes Phase 0-2. Phase 3 candidate adds persistent Ed25519 device identity, one-use device/controller pairing, Ed25519-authenticated device and controller sessions, active agent-session binding, controller-signed command envelopes, one-use local approval primitives, and bounded secret-safe audit logging.
 
-Phase 2 relay state is still in-memory. The relay binds to `127.0.0.1:8787` by default and public TLS deployment is not yet proven. Final Ed25519 pairing, per-device controller identity, trusted local approval, and durable restart-safe state remain later phases.
+The project is **not yet production-ready**: the runnable outbound agent/chat client, public TLS deployment, durable relay state, MCP adapter, OS-native key protection hardening, and physical-device end-to-end acceptance remain future phases.
 
 ## Project documentation
 
@@ -23,21 +23,7 @@ go vet ./...
 go build ./cmd/max-agent ./cmd/max-relay
 ```
 
-Minimum Go version: 1.24.
-
-## Relay development configuration
-
-The relay refuses to start unless both secrets are at least 32 bytes and distinct:
-
-```text
-MAXRC_REGISTRATION_KEY=<secret>
-MAXRC_CONTROLLER_KEY=<different-secret>
-MAXRC_LISTEN=127.0.0.1:8787
-```
-
-Do not expose the Phase 2 HTTP listener directly to the public internet. TLS termination and production deployment are not yet part of accepted scope.
-
-Governance uses the STRICT profile and pinned Skill Workflow authority. Normal CI is read-only. Deterministic tracked governance output is synchronized only on dedicated `sync/**` branches and must then pass normal exact-SHA CI before acceptance.
+Governance uses the STRICT profile and pinned Skill_Workflow authority.
 
 ## Support
 
