@@ -165,7 +165,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	controllerKey, err := identity.LoadOrCreate(filepath.Join(dataDir, "controller.seed"))
+	statePath := filepath.Join(dataDir, "controller.json")
+	controllerKey, err := controller.LoadIdentityForState(filepath.Join(dataDir, "controller.seed"), statePath)
 	if err != nil {
 		return err
 	}
@@ -174,7 +175,7 @@ func run() error {
 		ctx,
 		relayClient,
 		controllerKey,
-		filepath.Join(dataDir, "controller.json"),
+		statePath,
 		*deviceID,
 		input,
 		os.Stderr,
