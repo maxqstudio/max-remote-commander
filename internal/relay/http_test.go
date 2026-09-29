@@ -85,9 +85,25 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	offerResp.Body.Close()
 	if offerResp.StatusCode != http.StatusCreated {
+		offerResp.Body.Close()
 		t.Fatalf("offer status %d", offerResp.StatusCode)
+	}
+	var offerResult map[string]any
+	decodeJSONResponse(t, offerResp, &offerResult)
+	receiptToken, ok := offerResult["receipt_token"].(string)
+	if !ok || receiptToken == "" {
+		t.Fatalf("missing pairing receipt: %#v", offerResult)
+	}
+
+	pendingReq := authRequest(t, http.MethodGet, server.URL+"/v1/devices/"+deviceID+"/pairing/status", receiptToken, nil)
+	pendingResp, err := http.DefaultClient.Do(pendingReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pendingResp.Body.Close()
+	if pendingResp.StatusCode != http.StatusNoContent {
+		t.Fatalf("pending pairing status %d", pendingResp.StatusCode)
 	}
 
 	controllerPub, controllerPriv, err := ed25519.GenerateKey(rand.Reader)
@@ -107,7 +123,27 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 	}
 	var paired map[string]any
 	decodeJSONResponse(t, redeemResp, &paired)
-	generation := uint64(paired["generation"].(float64))
+	redeemGeneration := uint64(paired["generation"].(float64))
+
+	statusReq := authRequest(t, http.MethodGet, server.URL+"/v1/devices/"+deviceID+"/pairing/status", receiptToken, nil)
+	statusResp, err := http.DefaultClient.Do(statusReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if statusResp.StatusCode != http.StatusOK {
+		statusResp.Body.Close()
+		t.Fatalf("paired status %d", statusResp.StatusCode)
+	}
+	var pairStatus map[string]any
+	decodeJSONResponse(t, statusResp, &pairStatus)
+	generation := uint64(pairStatus["generation"].(float64))
+	if generation != redeemGeneration {
+		t.Fatalf("status generation %d redeem generation %d", generation, redeemGeneration)
+	}
+	gotControllerKey, _ := pairStatus["controller_public_key"].(string)
+	if gotControllerKey != base64.RawURLEncoding.EncodeToString(controllerPub) {
+		t.Fatalf("controller public key mismatch: %q", gotControllerKey)
+	}
 
 	bootstrapPoll := authRequest(t, http.MethodGet, server.URL+"/v1/devices/"+deviceID+"/commands/next?wait_ms=1", bootstrapSession.Token, nil)
 	bootstrapPollResp, err := http.DefaultClient.Do(bootstrapPoll)
