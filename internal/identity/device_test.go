@@ -95,3 +95,34 @@ func TestPairingCodeIsHighEntropyAndHashed(t *testing.T) {
 		t.Fatal("different pairing code matched")
 	}
 }
+
+
+func TestConcurrentLoadOrCreateConvergesOnOneIdentity(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "device.seed")
+	type result struct {
+		id  string
+		err error
+	}
+	start := make(chan struct{})
+	results := make(chan result, 2)
+	for i := 0; i < 2; i++ {
+		go func() {
+			<-start
+			device, err := LoadOrCreate(path)
+			if err != nil {
+				results <- result{err: err}
+				return
+			}
+			results <- result{id: device.ID()}
+		}()
+	}
+	close(start)
+	first := <-results
+	second := <-results
+	if first.err != nil || second.err != nil {
+		t.Fatalf("concurrent load/create errors: %v / %v", first.err, second.err)
+	}
+	if first.id == "" || first.id != second.id {
+		t.Fatalf("identity diverged: %q vs %q", first.id, second.id)
+	}
+}
