@@ -92,7 +92,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 Current phase: Phase 5A - encrypted relay durability
 
-Current status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
+Current status: ACCEPTED_CLOSED
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -134,10 +134,9 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- synchronize deterministic Phase 5A Project Truth and sequence evidence using Skill_Workflow 2148313678f476c4990e447b4d657724f071adff
-- obtain exact Phase 5A work-branch Linux Windows macOS race and STRICT 5-job PASS
-- merge accepted Phase 5A candidate to main and revalidate the identical SHA
-- start Phase 5B TLS deployment and packaging work
+- start Phase 5B canonical protocol and restart test vectors to complete P5 Protocol & Durability
+- after P5 closure start P6 Transport V2 WebSocket reconnect heartbeat and session rebinding
+- continue roadmap P7 Cloudflare Relay then P8 MCP Gateway only after predecessor acceptance
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -157,17 +156,16 @@ Known blockers:
 - Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192 and identical-SHA main run 36558681560
 - Phase 4 truth-only closure SHA 6520f50d6b1f8c470265fee6de6a296d754997a3 passed Linux Windows macOS race and STRICT governance on work branch run 36559020716 and main run 36559186242
 - Current main baseline b64c7cb7cc47e4aed5c29a53e2ae9a228df47910 passed all five GitHub Actions jobs on main run 36559650527
-- Phase 5A source candidate a0fc977588a12acd69b82cca1acff6c8884745a2 passed Linux Windows macOS and race source lanes on GitHub Actions run 36565884484; STRICT governance remained stale and is not yet accepted
 - Configured relay durability encrypts a versioned bounded state snapshot with AES-256-GCM using an externally supplied 32-byte key and atomic file replacement
 - Pairings generations queued commands request ownership completed results and unexpired replay nonces survive Store recreation while device/controller session tokens leases pairing offers and pairing receipts intentionally remain ephemeral
 - Durable mutations fail closed and roll back in-memory durable maps when the encrypted state write fails
 - Pairing revocation durably removes the revoked device pairing queued requests completed results and replay state before ephemeral sessions are invalidated
 - A fresh agent session after relay restart prunes queued commands signed for a stale agent session
+- Phase 5A exact accepted SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da passed Linux Windows macOS race and STRICT governance on work branch run 36588006526 and identical-SHA main run 36588253106
 
 ### Not proven
 
-- Phase 5A STRICT governance and exact 5-job work-branch acceptance
-- identical-SHA main revalidation for Phase 5A
+- canonical cross-client protocol and restart test vectors for P5 closure
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
 - public TLS deployment and reverse-proxy configuration
@@ -175,6 +173,8 @@ Known blockers:
 - graphical multi-device chat UI and device selector
 - MCP adapter
 - OS-native protected key storage or explicit Windows ACL hardening for device/controller identity seeds
+- WebSocket transport and reconnect/session-rebinding behavior
+- Cloudflare Worker Durable Object relay deployment
 
 ## Important limitations
 
