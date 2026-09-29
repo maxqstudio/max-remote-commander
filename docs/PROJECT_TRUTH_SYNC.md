@@ -20,7 +20,7 @@ HEAD is recorded externally after the commit exists.
 | BEHAVIORAL_SYNC | PASS | |
 | CROSS_DOCUMENT_CONSISTENCY | PASS | |
 | HUMAN_COMPREHENSION | NOT_PROVEN | |
-| SEQUENCE_SYNC | PASS | |
+| SEQUENCE_SYNC | NOT_PROVEN | |
 | DOC_LAYOUT | PASS | |
 | PROJECT_DOCS_NORMALIZED | PASS | |
 | DOC_READABILITY | PASS | |
@@ -28,7 +28,7 @@ HEAD is recorded externally after the commit exists.
 | DOC_SOURCE_TRACEABILITY | PASS | |
 | DOC_TEST_TRACEABILITY | PASS | |
 | TEST_RUNTIME_TRACEABILITY | NOT_PROVEN | |
-| PROJECT_STATE_SYNC | PASS | |
+| PROJECT_STATE_SYNC | NOT_PROVEN | |
 
 ## Critical claim traceability
 
@@ -47,6 +47,9 @@ HEAD is recorded externally after the commit exists.
 | TRUTH-P4-CHAT-001 | The chat core is provider-neutral, exposes only declared structured tools, validates tool-call/result JSON, and enforces a bounded round limit. | ARCHITECTURE.md; API_CONTRACTS.md | internal/chat/chat.go::Session.Run(; internal/chat/chat.go::RemoteTools( | internal/chat/chat_test.go | NOT_APPLICABLE | PASS |
 | TRUTH-P4-PROVIDER-001 | The OpenAI-compatible adapter requires HTTPS except loopback, refuses redirects by default, bounds responses, and rejects malformed tool calls. | API_CONTRACTS.md; RUNBOOK.md | internal/providers/openaicompat/provider.go::New(; internal/providers/openaicompat/provider.go::Provider.Complete( | internal/providers/openaicompat/provider_test.go | NOT_APPLICABLE | PASS |
 | TRUTH-P4-LOCAL-APPROVAL-001 | The implemented terminal approval path defaults to deny and can issue one-use local approval only after explicit local yes input; remote requests cannot carry trusted approval. | DATA_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | cmd/max-agent/main.go::consoleApprover.Approve(; internal/agent/runner.go::Runner.handleCommand( | cmd/max-agent/main_test.go; internal/agent/runner_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P5A-DURABILITY-001 | When configured with a durable state path and external 32-byte key, the relay atomically persists encrypted pairings generations queued commands completed results and unexpired replay guards while bearer sessions remain ephemeral. | ARCHITECTURE.md; DATA_CONTRACTS.md; RUNBOOK.md | internal/relay/persistence.go::stateFile.Load(; internal/relay/persistence.go::stateFile.Save(; internal/relay/durable_mutation.go::Store.commitDurableLocked( | internal/relay/persistence_test.go; internal/relay/durability_test.go; cmd/max-relay/main_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P5A-RESTART-001 | Relay Store recreation restores durable trust queue result and replay state, invalidates old bearer sessions, rejects replayed assertions/commands, and requires fresh device/controller authentication. | DATA_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | internal/relay/store.go::NewStore(; internal/relay/device_auth.go::Store.AuthenticateDevice(; internal/relay/controller_auth.go::Store.AuthenticateController( | internal/relay/durability_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P5A-REVOKE-001 | Pairing revocation durably advances generation and removes the revoked device pairing queue results and replay guards before ephemeral sessions are invalidated. | DATA_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | internal/relay/pairing.go::Store.RevokePairing(; internal/relay/durable_mutation.go::Store.removeDurableDeviceLocked( | internal/relay/durability_test.go | NOT_APPLICABLE | PASS |
 
 ## Claim relations
 

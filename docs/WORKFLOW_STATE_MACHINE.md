@@ -2,9 +2,9 @@
 
 # WORKFLOW STATE MACHINE
 
-## FLOW-COMMAND — Phase 4 paired chat-to-capability command
+## FLOW-COMMAND — Phase 5A durable paired chat-to-capability command
 
-Purpose: Carry a provider-neutral structured tool request through paired controller signing, relay validation, outbound agent verification, local policy/approval/audit, and bounded result return without letting remote input grant privilege.
+Purpose: Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, outbound agent verification, local policy/approval/audit, durable result retention, and bounded result return without letting remote input grant privilege.
 Critical: TRUE
 Entry condition: Device/controller pairing is persisted locally; device has an active paired session; max-chat has a paired controller identity; provider emits only a declared structured tool call.
 Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
@@ -32,8 +32,8 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 |---|---|---|---|---|
 | CHAT_TOOL_REQUESTED | CONTROLLER_SESSION_BOUND | provider-neutral chat core validates declared tool name and JSON arguments then obtains a controller session bound to the active agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
 | CONTROLLER_SESSION_BOUND | CONTROLLER_SIGNED | controller creates a fresh request ID and Ed25519-signed CommandEnvelope for the relay-provided agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record no persistent provider secret |
-| CONTROLLER_SIGNED | RELAY_VERIFIED | relay authenticates paired controller session and verifies signed envelope for current device and agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record command nonce only after verification |
-| RELAY_VERIFIED | QUEUED | enqueue bounded verified request for the owning device | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append request to bounded in-memory device queue |
+| CONTROLLER_SIGNED | RELAY_VERIFIED | relay authenticates paired controller session and verifies signed envelope for current device and agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record command nonce in durable state only after successful verification when durability is configured |
+| RELAY_VERIFIED | QUEUED | enqueue bounded verified request for the owning device and atomically persist queue request ownership and command replay guard when durability is configured | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append request to bounded relay queue, commit encrypted durable snapshot before acknowledgement when configured |
 | QUEUED | DEVICE_POLLED | authenticate current paired device session on outbound long poll | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
 | DEVICE_POLLED | AGENT_VERIFIED | agent re-verifies controller signature freshness device/session binding and replay | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record local replay nonce after valid verification |
 | AGENT_VERIFIED | POLICY_CHECKED | evaluate local capability policy and write required audit decision before privileged side effects | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append bounded secret-safe audit metadata |
@@ -42,7 +42,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 | POLICY_CHECKED | EXECUTED | execute only automatically allowed read-only capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded local read-only effects |
 | APPROVAL_REQUIRED | APPROVED | explicit local yes issues and consumes one-use short-lived exact-request approval | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | consume local approval token |
 | APPROVED | EXECUTED | execute approved privileged capability through bounded executor | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded locally approved side effect |
-| EXECUTED | RESULT_SUBMITTED | owning paired device session submits bounded result | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | complete queued request and retain bounded result |
+| EXECUTED | RESULT_SUBMITTED | owning paired device session submits bounded result; relay atomically persists completed result and queue removal before acknowledgement when durability is configured | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | complete queued request, retain bounded result, commit encrypted durable snapshot before acknowledgement when configured |
 | RESULT_SUBMITTED | CHAT_TOOL_RESULT | paired controller receives SSE result and returns validated JSON tool result to the chat loop | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append tool result to in-process conversation history |
 
 ### Invariants
@@ -55,6 +55,8 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 - Shell and unknown capabilities deny by default.
 - Privileged approval is one-use exact-request bound and defaults to deny.
 - Provider API key is not persisted by max-chat.
+- Configured durable state never persists device/controller bearer sessions, leases, pairing offers, pairing receipts, or the state encryption key.
+- A durable mutation is acknowledged only after the encrypted snapshot commit succeeds; failed commits restore the prior in-memory durable maps.
 
 ### Failure behavior
 
@@ -63,8 +65,10 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 ### Restart behavior
 
-- Fresh agent session ID invalidates old controller sessions and stale signed commands; RemoteExecutor refreshes and re-signs a new request.
-- Relay in-memory state is lost on relay restart and durability is not claimed.
+- Configured durable pairings generation counters queued commands request ownership completed results and unexpired replay nonces survive relay Store recreation.
+- Device/controller bearer sessions leases pairing offers and pairing receipts do not survive restart and must be re-established.
+- A fresh agent session prunes queued commands targeted to the prior agent session before new command delivery.
+- Physical process crash/power-loss recovery remains runtime-unproven despite GitHub-hosted restart tests.
 
 ### Rollback behavior
 

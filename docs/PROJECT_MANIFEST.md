@@ -10,10 +10,10 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/phase-4-finalize
+Active branch: work/phase-5a-durability
 Current authoritative SHA: external final acceptance evidence
 Last accepted SHA: 8c205dd1b1ee01fe3c73d44264493610a2704666
-Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
+Current source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518
 
 ## Authorities
 Source authority: Canonical source history and releases
@@ -26,7 +26,7 @@ Historical/reference authority: see SOURCE_AUTHORITY_MAP.md
 ## Technology
 Languages: Go
 Frameworks: Go standard library
-Persistence: create-once local device and controller Ed25519 identity seeds, create-once local device/controller pairing state, bounded append-only local audit JSONL, relay operational state remains in-memory
+Persistence: create-once local device and controller Ed25519 identity seeds, create-once local device/controller pairing state, bounded append-only local audit JSONL, optional bounded AES-256-GCM relay durable state snapshot keyed by external MAXRC_STATE_KEY; bearer sessions remain ephemeral
 External systems: GitHub Actions, OpenAI-compatible LLM provider APIs, MCP clients (planned)
 
 ## Entry points
@@ -68,3 +68,4 @@ Generated from PROJECT_PROFILE.yaml.
 - relay public exposure requires TLS termination and is not yet proven
 - no PASS claim without executed evidence
 - cross-platform behavior must be tested on Linux Windows and macOS
+- configured relay durable state must never persist bearer sessions or the state encryption key

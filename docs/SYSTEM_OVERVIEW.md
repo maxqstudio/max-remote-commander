@@ -27,7 +27,7 @@ Users / External Systems
     -> State / Evidence Authorities
     -> External Runtime / Outputs
 
-Observed source inventory: 54 files, 1 language categories.
+Observed source inventory: 59 files, 1 language categories.
 
 ## Major components
 
@@ -37,7 +37,7 @@ Observed source inventory: 54 files, 1 language categories.
 | Paired Controller Client | Persists local controller trust state, authenticates controller sessions, signs remote commands, refreshes stale sessions, and consumes results | controller Ed25519 identity, controller pairing state, controller session refresh, signed command submission | relay_server, protocol |
 | OpenAI-compatible Provider Adapter | Maps provider-neutral chat messages/tools to an OpenAI-compatible chat-completions boundary | HTTPS/loopback provider transport, API-key header injection from runtime environment, provider response bounds and tool-call parsing | chat_core |
 | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
-| Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results | pre-pairing registration bootstrap, pairing generations, device and controller sessions, signed command validation, bounded command leases, bounded result retention, SSE result stream | identity, protocol, agent |
+| Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results, and optionally persists durable trust/command state as an encrypted atomic snapshot | pre-pairing registration bootstrap, pairing generations, ephemeral device and controller sessions, signed command validation, bounded command leases, bounded result retention, encrypted durable pairings generations queues results and replay nonces when configured, SSE result stream | identity, protocol, agent, durable_state |
 | PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
 | Identity | Persists device Ed25519 identity and derives deterministic device IDs and pairing codes | device private seed, device public key, device ID, pairing code generation |  |
 | Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID |  |
@@ -45,6 +45,7 @@ Observed source inventory: 54 files, 1 language categories.
 | Local Approval Store | Issues one-use short-lived local approval grants bound to exact privileged requests | approval token hashes, request capability and argument bindings | policy |
 | Local Capability Executor | Executes bounded filesystem process and Git operations after policy and approval authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, dispatcher | policy, approval |
 | Audit Logger | Records bounded structured security events without secret-bearing raw payloads | JSONL audit schema, size bound, secret-safe fields |  |
+| Encrypted Relay Durable State | Atomically persists restart-critical relay trust command result and replay state without persisting bearer sessions | AES-256-GCM state envelope, pairings and generation counters, queued commands and request ownership, completed retained results, unexpired device controller and command replay nonces |  |
 
 ## Main data flow
 
@@ -61,19 +62,21 @@ Observed source inventory: 54 files, 1 language categories.
 - agent -> relay_server: paired-device-session-authenticated result submission
 - relay_server -> controller_client: paired-controller-session-authenticated SSE result event
 - controller_client -> chat_core: validated JSON tool result returned to conversation
+- relay_server -> durable_state: transactionally commit restart-critical state before acknowledging durable mutations
+- durable_state -> relay_server: restore pairings queues results and unexpired replay guards at relay startup; bearer sessions are never restored
 
 ## Main user workflows
 
-### FLOW-COMMAND — Phase 4 paired chat-to-capability command
+### FLOW-COMMAND — Phase 5A durable paired chat-to-capability command
 
-Carry a provider-neutral structured tool request through paired controller signing, relay validation, outbound agent verification, local policy/approval/audit, and bounded result return without letting remote input grant privilege.
+Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, outbound agent verification, local policy/approval/audit, durable result retention, and bounded result return without letting remote input grant privilege.
 
 Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
 
 - CHAT_TOOL_REQUESTED -> CONTROLLER_SESSION_BOUND : provider-neutral chat core validates declared tool name and JSON arguments then obtains a controller session bound to the active agent session
 - CONTROLLER_SESSION_BOUND -> CONTROLLER_SIGNED : controller creates a fresh request ID and Ed25519-signed CommandEnvelope for the relay-provided agent session
 - CONTROLLER_SIGNED -> RELAY_VERIFIED : relay authenticates paired controller session and verifies signed envelope for current device and agent session
-- RELAY_VERIFIED -> QUEUED : enqueue bounded verified request for the owning device
+- RELAY_VERIFIED -> QUEUED : enqueue bounded verified request for the owning device and atomically persist queue request ownership and command replay guard when durability is configured
 - QUEUED -> DEVICE_POLLED : authenticate current paired device session on outbound long poll
 - DEVICE_POLLED -> AGENT_VERIFIED : agent re-verifies controller signature freshness device/session binding and replay
 - AGENT_VERIFIED -> POLICY_CHECKED : evaluate local capability policy and write required audit decision before privileged side effects
@@ -82,14 +85,14 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 - POLICY_CHECKED -> EXECUTED : execute only automatically allowed read-only capability
 - APPROVAL_REQUIRED -> APPROVED : explicit local yes issues and consumes one-use short-lived exact-request approval
 - APPROVED -> EXECUTED : execute approved privileged capability through bounded executor
-- EXECUTED -> RESULT_SUBMITTED : owning paired device session submits bounded result
+- EXECUTED -> RESULT_SUBMITTED : owning paired device session submits bounded result; relay atomically persists completed result and queue removal before acknowledgement when durability is configured
 - RESULT_SUBMITTED -> CHAT_TOOL_RESULT : paired controller receives SSE result and returns validated JSON tool result to the chat loop
 
 ## Lifecycle and state
 
-Current phase: Phase 4 - runnable agent and terminal chat integration
+Current phase: Phase 5A - encrypted relay durability
 
-Current status: ACCEPTED_CLOSED
+Current status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -98,8 +101,8 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 | Concern | Authority | Meaning |
 |---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases |
-| working_candidate | work/phase-4-finalize | Status-only Phase 4 finalization candidate; product source and closure already accepted on main |
-| governance | maxqstudio/Skill_Workflow@9e22feddb8f94e8c0f1af6a33e14b64de5068f8f | Pinned project workflow rules and deterministic documentation compiler |
+| working_candidate | work/phase-5a-durability | Current unaccepted Phase 5A encrypted-durability candidate |
+| governance | maxqstudio/Skill_Workflow@2148313678f476c4990e447b4d657724f071adff | Pinned current project workflow rules and deterministic documentation/sequence validators |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution |
 | cross_platform_acceptance | GitHub Actions matrix | Linux Windows and macOS build/test evidence for GitHub-hosted execution |
@@ -109,11 +112,11 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 ### Mutable current state
 
 - source: Canonical source history and releases
-- working_candidate: Status-only Phase 4 finalization candidate; product source and closure already accepted on main
+- working_candidate: Current unaccepted Phase 5A encrypted-durability candidate
 
 ### Immutable history / evidence
 
-- governance: Pinned project workflow rules and deterministic documentation compiler
+- governance: Pinned current project workflow rules and deterministic documentation/sequence validators
 - acceptance: Acceptance never exceeds the strongest executed evidence
 - runtime: Real device behavior; GitHub CI alone does not prove physical-device execution
 - cross_platform_acceptance: Linux Windows and macOS build/test evidence for GitHub-hosted execution
@@ -131,13 +134,16 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- start Phase 5 graphical multi-device UI MCP durability TLS packaging protected-key-storage and physical E2E work
+- synchronize deterministic Phase 5A Project Truth and sequence evidence using Skill_Workflow 2148313678f476c4990e447b4d657724f071adff
+- obtain exact Phase 5A work-branch Linux Windows macOS race and STRICT 5-job PASS
+- merge accepted Phase 5A candidate to main and revalidate the identical SHA
+- start Phase 5B TLS deployment and packaging work
 
 Blocked actions:
 - expose relay publicly without TLS termination
-- claim relay state survives restart
+- claim physical crash or power-loss recovery beyond GitHub-hosted restart evidence
+- claim state-key rotation or OS-native secret storage is implemented
 - allow controller bootstrap secrets as command authority
-- mint paired-device sessions from the shared registration bootstrap key
 - auto-execute privileged local capabilities without trusted local approval
 - claim graphical multi-device UI physical runtime live provider behavior or MCP as proven
 
@@ -148,26 +154,27 @@ Known blockers:
 
 ### Proven
 
-- Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed all five GitHub Actions jobs on work branch run 36550259782 and main run 36550406590
-- Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192
-- The identical Phase 4 SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on main run 36558681560
+- Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192 and identical-SHA main run 36558681560
 - Phase 4 truth-only closure SHA 6520f50d6b1f8c470265fee6de6a296d754997a3 passed Linux Windows macOS race and STRICT governance on work branch run 36559020716 and main run 36559186242
-- max-agent is a runnable outbound-only client that loads persistent identity and pairing state, authenticates a fresh per-start agent session, long-polls commands, re-verifies signed envelopes, applies local policy and approval, audits decisions/outcomes, and submits results
-- Interactive local approval is opt-in and defaults to deny; privileged execution requires a one-use exact-request local approval issued on the remote PC
-- Git execution isolates user credential/config environment and disables credential helpers, askpass, and terminal prompts for remote clone operations
-- Controller pairing state is create-once local state; controller sessions refresh across agent-session changes and commands are signed for the relay-provided active agent session
-- Provider-neutral chat loop advertises only structured remote tools, rejects unadvertised calls, validates JSON arguments/results, and enforces a bounded tool-round limit
-- OpenAI-compatible provider adapter requires HTTPS except loopback, refuses redirects by default, bounds responses, and supports local OpenAI-compatible servers without changing the core chat contract
-- max-chat terminal client keeps provider API keys in environment only, prompts pairing codes via stdin, and is built/tested on Linux Windows and macOS
+- Current main baseline b64c7cb7cc47e4aed5c29a53e2ae9a228df47910 passed all five GitHub Actions jobs on main run 36559650527
+- Phase 5A source candidate a0fc977588a12acd69b82cca1acff6c8884745a2 passed Linux Windows macOS and race source lanes on GitHub Actions run 36565884484; STRICT governance remained stale and is not yet accepted
+- Configured relay durability encrypts a versioned bounded state snapshot with AES-256-GCM using an externally supplied 32-byte key and atomic file replacement
+- Pairings generations queued commands request ownership completed results and unexpired replay nonces survive Store recreation while device/controller session tokens leases pairing offers and pairing receipts intentionally remain ephemeral
+- Durable mutations fail closed and roll back in-memory durable maps when the encrypted state write fails
+- Pairing revocation durably removes the revoked device pairing queued requests completed results and replay state before ephemeral sessions are invalidated
+- A fresh agent session after relay restart prunes queued commands signed for a stale agent session
 
 ### Not proven
 
-- physical remote-device runtime and live external LLM-provider end-to-end behavior
-- graphical multi-device chat UI and device selector
-- durable relay pairing queue session result and nonce state across relay restart
+- Phase 5A STRICT governance and exact 5-job work-branch acceptance
+- identical-SHA main revalidation for Phase 5A
+- physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
+- state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
 - public TLS deployment and reverse-proxy configuration
-- OS-native protected key storage or explicit Windows ACL hardening for device/controller identity seeds
+- cross-platform installers and service integration
+- graphical multi-device chat UI and device selector
 - MCP adapter
+- OS-native protected key storage or explicit Windows ACL hardening for device/controller identity seeds
 
 ## Important limitations
 

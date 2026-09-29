@@ -38,3 +38,12 @@ Type: feature
 - Added runnable outbound max-agent integration with local terminal approval, audit integration, persisted pairing state, and Git credential-environment isolation.
 - Added paired controller bridge, provider-neutral bounded chat loop, OpenAI-compatible/local-provider adapter, and cross-platform max-chat terminal client.
 - Graphical multi-device chat UI/device selector remains explicitly deferred to Phase 5.
+
+## 2026-09-29 — Phase 5A encrypted relay durability source candidate
+
+Type: security
+
+- Source candidate a0fc977588a12acd69b82cca1acff6c8884745a2 passed Linux Windows macOS and race source lanes on GitHub Actions run 36565884484; STRICT governance and main acceptance remain pending.
+- Added bounded strict AES-256-GCM relay state snapshots with atomic replace, externally supplied 32-byte key, symlink/permission/size checks, and pre-save invariant validation.
+- Pairings generations queues request ownership completed results and unexpired replay guards survive Store recreation while bearer sessions leases pairing offers and pairing receipts remain ephemeral.
+- Durable mutations roll back on persistence failure; pairing revocation durably removes old-generation queue/results/replay state; stale-session queued commands are pruned after agent-session rotation.

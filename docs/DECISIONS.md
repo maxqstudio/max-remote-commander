@@ -49,3 +49,11 @@ Status: ACCEPTED
 Close Phase 4 on the secure runnable outbound agent plus max-chat terminal client; move graphical multi-device chat UI/device selector to Phase 5.
 
 Rationale: The terminal surface proves the cryptographic controller/provider/tool path with a smaller attack surface and no new web auth/session layer. Graphical multi-device UI remains explicitly unproven rather than being conflated with source-complete terminal control.
+
+## DEC-007 — Encrypted single-node relay snapshot with ephemeral bearer sessions
+
+Status: ACCEPTED
+
+Persist restart-critical relay trust command result and replay state in one bounded AES-256-GCM snapshot keyed by an external 32-byte secret; do not persist bearer sessions leases pairing offers or pairing receipts.
+
+Rationale: The self-hosted relay is currently single-node. A transactional encrypted snapshot is the smallest dependency-free durability mechanism, preserves replay protection across restart, avoids extending bearer-token authority across restart, and keeps a future database migration possible without changing protocol semantics.

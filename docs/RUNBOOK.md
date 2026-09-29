@@ -6,3 +6,4 @@
 2. Run race tests — go test -race ./... -count=1 — expected: all Go packages pass without detected data races
 3. Run static vet — go vet ./... — expected: no vet diagnostics
 4. Build binaries — go build ./cmd/max-agent ./cmd/max-relay ./cmd/max-chat — expected: agent relay and chat client build on current runner OS
+5. Configure durable relay state — Set MAXRC_STATE_FILE to a protected local path and MAXRC_STATE_KEY to unpadded base64url of exactly 32 random bytes before launching max-relay — expected: Both variables are configured together; relay loads or atomically updates encrypted durable state. If both are unset the relay starts in explicit ephemeral mode with a warning.

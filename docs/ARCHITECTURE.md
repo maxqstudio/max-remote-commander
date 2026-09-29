@@ -2,7 +2,7 @@
 
 # ARCHITECTURE
 
-Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
+Current source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518
 
 ## Components
 
@@ -12,7 +12,7 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 | controller_client | Paired Controller Client | Persists local controller trust state, authenticates controller sessions, signs remote commands, refreshes stale sessions, and consumes results | controller Ed25519 identity, controller pairing state, controller session refresh, signed command submission | relay_server, protocol |
 | llm_provider_adapter | OpenAI-compatible Provider Adapter | Maps provider-neutral chat messages/tools to an OpenAI-compatible chat-completions boundary | HTTPS/loopback provider transport, API-key header injection from runtime environment, provider response bounds and tool-call parsing | chat_core |
 | llm_client | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
-| relay_server | Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results | pre-pairing registration bootstrap, pairing generations, device and controller sessions, signed command validation, bounded command leases, bounded result retention, SSE result stream | identity, protocol, agent |
+| relay_server | Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results, and optionally persists durable trust/command state as an encrypted atomic snapshot | pre-pairing registration bootstrap, pairing generations, ephemeral device and controller sessions, signed command validation, bounded command leases, bounded result retention, encrypted durable pairings generations queues results and replay nonces when configured, SSE result stream | identity, protocol, agent, durable_state |
 | agent | PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
 | identity | Identity | Persists device Ed25519 identity and derives deterministic device IDs and pairing codes | device private seed, device public key, device ID, pairing code generation |  |
 | protocol | Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID |  |
@@ -20,6 +20,7 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 | approval | Local Approval Store | Issues one-use short-lived local approval grants bound to exact privileged requests | approval token hashes, request capability and argument bindings | policy |
 | executor | Local Capability Executor | Executes bounded filesystem process and Git operations after policy and approval authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, dispatcher | policy, approval |
 | audit | Audit Logger | Records bounded structured security events without secret-bearing raw payloads | JSONL audit schema, size bound, secret-safe fields |  |
+| durable_state | Encrypted Relay Durable State | Atomically persists restart-critical relay trust command result and replay state without persisting bearer sessions | AES-256-GCM state envelope, pairings and generation counters, queued commands and request ownership, completed retained results, unexpired device controller and command replay nonces |  |
 
 ## Data flow
 
@@ -36,6 +37,8 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 - agent -> relay_server: paired-device-session-authenticated result submission
 - relay_server -> controller_client: paired-controller-session-authenticated SSE result event
 - controller_client -> chat_core: validated JSON tool result returned to conversation
+- relay_server -> durable_state: transactionally commit restart-critical state before acknowledging durable mutations
+- durable_state -> relay_server: restore pairings queues results and unexpired replay guards at relay startup; bearer sessions are never restored
 
 ## External boundaries
 
@@ -46,12 +49,13 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 - Local secrets: Device private identity persists locally; POSIX permissions and symlink safety are enforced, while OS-native Windows key protection remains future hardening.
 - Audit data: Audit schema excludes raw arguments tokens stdout stderr and free-form messages; only bounded structured metadata and digests are accepted.
 - LLM provider: Provider API key is supplied at runtime and not persisted by max-chat. Non-loopback provider endpoints require HTTPS and default HTTP redirects are refused.
+- Relay durable state: When MAXRC_STATE_FILE and MAXRC_STATE_KEY are configured together, restart-critical relay state is stored as an AES-256-GCM encrypted bounded versioned snapshot. MAXRC_STATE_KEY is an external 32-byte runtime secret and is not written into the snapshot. Device/controller sessions, command leases, pairing offers, and pairing receipts remain ephemeral.
 
 ## Observed implementation inventory
 
-Source files: 54
-Source lines: 8477
-Languages: Go=54
+Source files: 59
+Source lines: 9791
+Languages: Go=59
 
 Structural facts come from the code extractor. Component meaning comes from
 .workflow/architecture.json.

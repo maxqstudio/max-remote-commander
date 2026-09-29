@@ -45,7 +45,14 @@
       "file": "cmd/max-relay/main.go",
       "is_test": false,
       "language": "Go",
-      "lines": 43
+      "lines": 71
+    },
+    {
+      "directory": "cmd/max-relay",
+      "file": "cmd/max-relay/main_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 55
     },
     {
       "directory": "internal/agent",
@@ -311,7 +318,7 @@
       "file": "internal/relay/command_auth.go",
       "is_test": false,
       "language": "Go",
-      "lines": 91
+      "lines": 95
     },
     {
       "directory": "internal/relay",
@@ -325,7 +332,7 @@
       "file": "internal/relay/controller_auth.go",
       "is_test": false,
       "language": "Go",
-      "lines": 172
+      "lines": 176
     },
     {
       "directory": "internal/relay",
@@ -339,7 +346,7 @@
       "file": "internal/relay/device_auth.go",
       "is_test": false,
       "language": "Go",
-      "lines": 133
+      "lines": 143
     },
     {
       "directory": "internal/relay",
@@ -347,6 +354,20 @@
       "is_test": false,
       "language": "Go",
       "lines": 130
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/durability_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 222
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/durable_mutation.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 77
     },
     {
       "directory": "internal/relay",
@@ -367,7 +388,7 @@
       "file": "internal/relay/pairing.go",
       "is_test": false,
       "language": "Go",
-      "lines": 227
+      "lines": 231
     },
     {
       "directory": "internal/relay",
@@ -378,10 +399,24 @@
     },
     {
       "directory": "internal/relay",
+      "file": "internal/relay/persistence.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 626
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/persistence_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 237
+    },
+    {
+      "directory": "internal/relay",
       "file": "internal/relay/store.go",
       "is_test": false,
       "language": "Go",
-      "lines": 386
+      "lines": 433
     },
     {
       "directory": "internal/relay",
@@ -395,13 +430,13 @@
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e",
+  "source_digest": "c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518",
   "source_summary": {
-    "files": 54,
+    "files": 59,
     "languages": {
-      "Go": 54
+      "Go": 59
     },
-    "lines": 8477,
+    "lines": 9791,
     "test_files": 0
   },
   "tests": []

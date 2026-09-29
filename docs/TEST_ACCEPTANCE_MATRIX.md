@@ -4,10 +4,10 @@
 
 ## Evidence boundary
 
-Phase 0 through Phase 4 source are accepted and revalidated on main. Phase 4 exact SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed all five blocking jobs on work branch run 36558524192 and identical-SHA main run 36558681560. Physical remote runtime, live external provider E2E, graphical multi-device UI, relay durability, public TLS deployment, OS-native key protection, and MCP remain NOT_PROVEN.
+Phase 0 through Phase 4 are accepted and revalidated on main. Phase 5A source candidate a0fc977588a12acd69b82cca1acff6c8884745a2 passed Linux Windows macOS and race source lanes on GitHub Actions run 36565884484, while STRICT governance is pending. The CI evidence proves encrypted relay-state restart semantics in GitHub-hosted processes; physical deployed crash/power-loss recovery, state-key rotation, public TLS, packaging, graphical multi-device UI, MCP, and physical end-to-end runtime remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
-Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
+Current source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
@@ -26,6 +26,12 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 | P4-PROVIDER-001 | OpenAI-compatible adapter is HTTPS-by-default except loopback, redirect-refusing by default, response-bounded, and rejects malformed tool calls. | GitHub Actions run 36555366255; internal/providers/openaicompat/provider_test.go | PASS |
 | P4-CLI-001 | max-chat uses local controller identity/state, stdin pairing code, environment-only provider key, and builds across Linux Windows and macOS. | GitHub Actions run 36555366255; cmd/max-chat/main_test.go | PASS |
 | P4-GOV-001 | Exact Phase 4 candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation. | GitHub Actions work run 36558524192 and main run 36558681560 at exact SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 | PASS |
+| P5A-STATE-001 | Configured relay durability stores only bounded versioned encrypted durable state, rejects wrong keys corruption symlinks unsafe permissions and oversized snapshots, and excludes session tokens. | GitHub Actions run 36565884484; internal/relay/persistence_test.go; cmd/max-relay/main_test.go | PASS |
+| P5A-RESTART-001 | Pairing trust generations queued commands completed results and unexpired replay guards survive relay Store recreation while device/controller sessions must reauthenticate. | GitHub Actions run 36565884484; internal/relay/durability_test.go | PASS |
+| P5A-ROLLBACK-001 | A durable state write failure rejects the mutation and restores the in-memory durable maps so the same authorized request can be retried safely. | GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableMutationRollsBackWhenStateWriteFails | PASS |
+| P5A-REVOKE-001 | Pairing revocation persists generation advancement and removes the revoked device pairing queue completed results and replay state before restart. | GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableRelayRestartPreservesTrustQueueReplayAndResults | PASS |
+| P5A-SESSION-001 | A fresh agent session after relay restart removes queued commands targeted to a stale agent session and the removal itself survives another restart. | GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableAgentSessionChangeDropsStaleQueuedCommands | PASS |
+| P5A-GOV-001 | Exact Phase 5A candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation. | Pending Phase 5A governance closure | NOT_PROVEN |
 
 ## Test commands
 
@@ -41,8 +47,8 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 ## Sequence contract evidence
 
 Sequence mode for this phase/session: DURING
-Sequence session contract: docs/sequence/phase-4.session.json
-SEQUENCE_SYNC: PASS
+Sequence session contract: docs/sequence/phase-5a.session.json
+SEQUENCE_SYNC: NOT_PROVEN
 
 ## Project Truth Compiler evidence
 

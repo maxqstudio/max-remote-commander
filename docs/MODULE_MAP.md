@@ -3,7 +3,7 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
+Source digest: c662b4d71006e68efe952580da0feebf9049dfe7ee9b00e9ffc660ed10fca518
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
@@ -12,7 +12,8 @@ Generated/refreshed: current compiler run
 | cmd/max-agent/main_test.go | Go | 76 | cmd/max-agent | NO |
 | cmd/max-chat/main.go | Go | 216 | cmd/max-chat | NO |
 | cmd/max-chat/main_test.go | Go | 100 | cmd/max-chat | NO |
-| cmd/max-relay/main.go | Go | 43 | cmd/max-relay | NO |
+| cmd/max-relay/main.go | Go | 71 | cmd/max-relay | NO |
+| cmd/max-relay/main_test.go | Go | 55 | cmd/max-relay | NO |
 | internal/agent/client.go | Go | 263 | internal/agent | NO |
 | internal/agent/runner.go | Go | 341 | internal/agent | NO |
 | internal/agent/runner_test.go | Go | 235 | internal/agent | NO |
@@ -50,17 +51,21 @@ Generated/refreshed: current compiler run
 | internal/protocol/verifier_test.go | Go | 103 | internal/protocol | NO |
 | internal/providers/openaicompat/provider.go | Go | 242 | internal/providers/openaicompat | NO |
 | internal/providers/openaicompat/provider_test.go | Go | 157 | internal/providers/openaicompat | NO |
-| internal/relay/command_auth.go | Go | 91 | internal/relay | NO |
+| internal/relay/command_auth.go | Go | 95 | internal/relay | NO |
 | internal/relay/command_auth_test.go | Go | 85 | internal/relay | NO |
-| internal/relay/controller_auth.go | Go | 172 | internal/relay | NO |
+| internal/relay/controller_auth.go | Go | 176 | internal/relay | NO |
 | internal/relay/controller_auth_test.go | Go | 166 | internal/relay | NO |
-| internal/relay/device_auth.go | Go | 133 | internal/relay | NO |
+| internal/relay/device_auth.go | Go | 143 | internal/relay | NO |
 | internal/relay/device_auth_test.go | Go | 130 | internal/relay | NO |
+| internal/relay/durability_test.go | Go | 222 | internal/relay | NO |
+| internal/relay/durable_mutation.go | Go | 77 | internal/relay | NO |
 | internal/relay/http.go | Go | 418 | internal/relay | NO |
 | internal/relay/http_test.go | Go | 354 | internal/relay | NO |
-| internal/relay/pairing.go | Go | 227 | internal/relay | NO |
+| internal/relay/pairing.go | Go | 231 | internal/relay | NO |
 | internal/relay/pairing_test.go | Go | 212 | internal/relay | NO |
-| internal/relay/store.go | Go | 386 | internal/relay | NO |
+| internal/relay/persistence.go | Go | 626 | internal/relay | NO |
+| internal/relay/persistence_test.go | Go | 237 | internal/relay | NO |
+| internal/relay/store.go | Go | 433 | internal/relay | NO |
 | internal/relay/store_test.go | Go | 149 | internal/relay | NO |
 
 Machine-derived facts do not invent semantic ownership.
