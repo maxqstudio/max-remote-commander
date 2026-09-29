@@ -7,3 +7,7 @@
 # Sequence actuals are per-SHA CI evidence, not tracked self-referential state.
 /docs/sequence/generated/
 /artifacts/sequence/
+
+# Project-local governance/runtime Python cache.
+__pycache__/
+*.py[cod]
