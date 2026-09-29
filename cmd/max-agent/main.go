@@ -162,6 +162,7 @@ func run() error {
 	var allowed executableFlags
 	showVersion := flag.Bool("version", false, "print version")
 	relayURL := flag.String("relay", "", "relay base URL; HTTPS required except loopback")
+	transportMode := flag.String("transport", "websocket", "command transport: websocket or long-poll")
 	workspace := flag.String("workspace", "", "explicit workspace root exposed to the agent")
 	dataDirFlag := flag.String("data-dir", "", "agent state directory")
 	interactiveApprovals := flag.Bool("interactive-approvals", false, "ask on local stdin before each privileged capability")
@@ -255,10 +256,24 @@ func run() error {
 		approver = &consoleApprover{reader: bufio.NewReader(os.Stdin), writer: os.Stderr}
 	}
 
+	var commandTransport agent.CommandTransport
+	switch *transportMode {
+	case "websocket":
+		wsTransport, err := agent.NewWebSocketTransport(*relayURL, agent.WebSocketTransportConfig{})
+		if err != nil {
+			return err
+		}
+		commandTransport = wsTransport
+	case "long-poll":
+		commandTransport = client
+	default:
+		return errors.New("--transport must be websocket or long-poll")
+	}
+
 	runner, err := agent.NewRunner(agent.RunnerConfig{
 		Device: device,
 		Pairing: pairing,
-		Transport: client,
+		Transport: commandTransport,
 		Dispatcher: dispatcher,
 		Audit: auditLog,
 		Approver: approver,
@@ -266,7 +281,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	_, _ = fmt.Fprintf(os.Stderr, "max-agent connected identity=%s workspace=%s session=%s\n", device.ID(), workspaceAbs, runner.SessionID())
+	_, _ = fmt.Fprintf(os.Stderr, "max-agent connected identity=%s workspace=%s transport=%s session=%s\n", device.ID(), workspaceAbs, *transportMode, runner.SessionID())
 	err = runner.Run(ctx)
 	if errors.Is(err, context.Canceled) {
 		return nil

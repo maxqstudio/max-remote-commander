@@ -246,6 +246,12 @@ func (s *Store) sessionAuthorizedLocked(deviceID, token string, now time.Time) b
 	return secureEqual(session.tokenHash, token)
 }
 
+func (s *Store) DeviceSessionAuthorized(deviceID, token string, now time.Time) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.sessionAuthorizedLocked(deviceID, token, now)
+}
+
 func (s *Store) QueueCommand(deviceID string, command Command) error {
 	if !validID(deviceID, 64) || !validID(command.RequestID, 128) || len(command.Payload) == 0 {
 		return ErrInvalidIdentifier
@@ -282,21 +288,52 @@ func (s *Store) NextCommand(ctx context.Context, deviceID, token string, now fun
 			s.mu.Unlock()
 			return Command{}, ErrUnauthorized
 		}
-		for _, item := range s.queues[deviceID] {
+		queue := s.queues[deviceID]
+		var leaseWake time.Time
+		if len(queue) > 0 {
+			item := queue[0]
 			if item.leasedTill.IsZero() || !current.Before(item.leasedTill) {
 				item.leasedTill = current.Add(s.leaseTTL)
 				command := Command{RequestID: item.command.RequestID, Payload: append([]byte(nil), item.command.Payload...)}
 				s.mu.Unlock()
 				return command, nil
 			}
+			leaseWake = item.leasedTill
 		}
 		ch := s.queueChannelLocked(deviceID)
 		s.mu.Unlock()
 
+		if leaseWake.IsZero() {
+			select {
+			case <-ctx.Done():
+				return Command{}, ctx.Err()
+			case <-ch:
+			}
+			continue
+		}
+
+		delay := leaseWake.Sub(current)
+		if delay <= 0 {
+			continue
+		}
+		timer := time.NewTimer(delay)
 		select {
 		case <-ctx.Done():
+			if !timer.Stop() {
+				select {
+				case <-timer.C:
+				default:
+				}
+			}
 			return Command{}, ctx.Err()
 		case <-ch:
+			if !timer.Stop() {
+				select {
+				case <-timer.C:
+				default:
+				}
+			}
+		case <-timer.C:
 		}
 	}
 }
@@ -340,12 +377,14 @@ func (s *Store) SubmitResult(deviceID, token string, result Result, now time.Tim
 	s.results[result.RequestID] = result
 
 	queue := s.queues[deviceID]
+	removedFromQueue := false
 	for i, item := range queue {
 		if item.command.RequestID == result.RequestID {
 			s.queues[deviceID] = append(queue[:i], queue[i+1:]...)
 			if len(s.queues[deviceID]) == 0 {
 				delete(s.queues, deviceID)
 			}
+			removedFromQueue = true
 			break
 		}
 	}
@@ -353,6 +392,9 @@ func (s *Store) SubmitResult(deviceID, token string, result Result, now time.Tim
 		if err := s.commitDurableLocked(before); err != nil {
 			return err
 		}
+	}
+	if removedFromQueue {
+		s.signalQueueLocked(deviceID)
 	}
 	for _, requestID := range evicted {
 		s.signalResultLocked(requestID)

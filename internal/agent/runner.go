@@ -140,14 +140,30 @@ func (r *Runner) Run(ctx context.Context) error {
 			return err
 		}
 		now := r.now()
-		if !now.Before(session.ExpiresAt.Add(-5 * time.Second)) {
+		refreshAt := session.ExpiresAt.Add(-5 * time.Second)
+		if !now.Before(refreshAt) {
 			session, err = r.openSession(ctx)
 			if err != nil {
 				return err
 			}
+			now = r.now()
+			refreshAt = session.ExpiresAt.Add(-5 * time.Second)
 		}
-		envelope, ok, err := r.transport.NextCommand(ctx, r.pairing.DeviceID, session.Token, r.pollWait)
+		refreshIn := refreshAt.Sub(now)
+		if refreshIn <= 0 {
+			return ErrSessionBinding
+		}
+		nextCtx, cancelNext := context.WithTimeout(ctx, refreshIn)
+		envelope, ok, err := r.transport.NextCommand(nextCtx, r.pairing.DeviceID, session.Token, r.pollWait)
+		cancelNext()
 		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) && ctx.Err() == nil {
+				session, err = r.openSession(ctx)
+				if err != nil {
+					return err
+				}
+				continue
+			}
 			var relayErr *RelayError
 			if errors.As(err, &relayErr) && relayErr.Status == 401 {
 				session, err = r.openSession(ctx)

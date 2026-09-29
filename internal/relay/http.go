@@ -17,8 +17,10 @@ import (
 const maxRequestBytes int64 = 1 << 20
 
 type HTTPServer struct {
-	Store *Store
-	Now   func() time.Time
+	Store             *Store
+	Now               func() time.Time
+	HeartbeatInterval time.Duration
+	HeartbeatTimeout  time.Duration
 }
 
 type commandBody struct {
@@ -57,6 +59,7 @@ func (s *HTTPServer) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/devices/{device}/controller-session", s.controllerSession)
 	mux.HandleFunc("DELETE /v1/devices/{device}/pairing", s.revokePairing)
 	mux.HandleFunc("POST /v1/devices/{device}/commands", s.queueCommand)
+	mux.HandleFunc("GET /v1/devices/{device}/stream", s.deviceStream)
 	mux.HandleFunc("GET /v1/devices/{device}/commands/next", s.nextCommand)
 	mux.HandleFunc("POST /v1/devices/{device}/results", s.submitResult)
 	mux.HandleFunc("GET /v1/results/{request}/events", s.resultEvents)

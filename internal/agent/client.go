@@ -207,6 +207,23 @@ func (c *RelayClient) DeviceSession(ctx context.Context, assertion relay.DeviceA
 	return session, err
 }
 
+func decodeRelayCommand(requestID string, payload json.RawMessage) (protocol.CommandEnvelope, error) {
+	var envelope protocol.CommandEnvelope
+	decoder := json.NewDecoder(bytes.NewReader(payload))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&envelope); err != nil {
+		return protocol.CommandEnvelope{}, fmt.Errorf("%w: invalid command envelope", ErrRelayResponse)
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); !errors.Is(err, io.EOF) {
+		return protocol.CommandEnvelope{}, fmt.Errorf("%w: invalid command envelope", ErrRelayResponse)
+	}
+	if envelope.RequestID != requestID {
+		return protocol.CommandEnvelope{}, fmt.Errorf("%w: command request id mismatch", ErrRelayResponse)
+	}
+	return envelope, nil
+}
+
 func (c *RelayClient) NextCommand(ctx context.Context, deviceID, sessionToken string, wait time.Duration) (protocol.CommandEnvelope, bool, error) {
 	ms := wait.Milliseconds()
 	if ms < 0 {
@@ -248,11 +265,9 @@ func (c *RelayClient) NextCommand(ctx context.Context, deviceID, sessionToken st
 	if err := json.Unmarshal(data, &body); err != nil {
 		return protocol.CommandEnvelope{}, false, fmt.Errorf("%w: invalid command response", ErrRelayResponse)
 	}
-	var envelope protocol.CommandEnvelope
-	decoder := json.NewDecoder(bytes.NewReader(body.Payload))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&envelope); err != nil || envelope.RequestID != body.RequestID {
-		return protocol.CommandEnvelope{}, false, fmt.Errorf("%w: invalid command envelope", ErrRelayResponse)
+	envelope, err := decodeRelayCommand(body.RequestID, body.Payload)
+	if err != nil {
+		return protocol.CommandEnvelope{}, false, err
 	}
 	return envelope, true, nil
 }
