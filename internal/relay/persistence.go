@@ -137,7 +137,7 @@ func (f *stateFile) ensureParent() error {
 		if err != nil {
 			return err
 		}
-		if info.Mode().Perm()&0o077 != 0 {
+		if info.Mode().Perm()&0o022 != 0 {
 			return ErrDurableStatePerms
 		}
 	}
