@@ -57,10 +57,36 @@ jobs:
         shell: bash
         run: |
           git clone https://github.com/maxqstudio/Skill_Workflow.git "$RUNNER_TEMP/Skill_Workflow"
-          git -C "$RUNNER_TEMP/Skill_Workflow" checkout 2148313678f476c4990e447b4d657724f071adff
+          git -C "$RUNNER_TEMP/Skill_Workflow" checkout c1d7e58a0fcadc606c8cf75c6283a17278f99259
+      - name: Verify vendored Skill_Workflow tools
+        shell: bash
+        run: |
+          for name in \
+            extract_project_facts.py \
+            generate_module_map.py \
+            generate_project_docs.py \
+            generate_sequence_plan.py \
+            generate_symbol_index.py \
+            project_profile.py \
+            selftest_strict_project_workflow.py \
+            sequence_contract.py \
+            sync_project_truth.py \
+            validate_cross_document_consistency.py \
+            validate_doc_quality.py \
+            validate_handoff.py \
+            validate_human_comprehension.py \
+            validate_project_docs.py \
+            validate_project_truth.py \
+            validate_sequence_contract.py \
+            validate_sequence_sessions.py
+          do
+            cmp ".workflow/tools/$name" "$RUNNER_TEMP/Skill_Workflow/scripts/$name"
+          done
+          grep -Fq "Compatible with Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259." .workflow/tools/generate_sequence_actual.py
+
       - name: Generate deterministic Project Truth docs
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/sync_project_truth.py" --root "$GITHUB_WORKSPACE"
+        run: python .workflow/tools/sync_project_truth.py --root "$GITHUB_WORKSPACE"
       - name: Generate Go-aware DURING actual sequence evidence
         shell: bash
         run: |
@@ -77,15 +103,15 @@ jobs:
             --entry "internal/relay/store.go::Store.SubmitResult"
       - name: Validate sequence contract
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/p6.session.json
+        run: python .workflow/tools/validate_sequence_contract.py --root "$GITHUB_WORKSPACE" --session docs/sequence/p6.session.json
       - name: Validate generated docs
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"
+        run: python .workflow/tools/validate_project_docs.py --root "$GITHUB_WORKSPACE"
       - name: Sync deterministic generated truth on P6 work branch
         if: github.event_name == 'push' && github.ref == 'refs/heads/work/p6-transport-v2'
         shell: bash
         run: |
-          git add .workflow/generated/code_facts.json docs/*.md
+          git add .workflow/acceptance.json .workflow/generated/code_facts.json docs/*.md
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

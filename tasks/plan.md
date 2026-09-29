@@ -13,7 +13,7 @@ Build a secure self-hosted cross-platform remote computer agent gateway for LLM 
 - Configured relay restart-critical state is stored in a bounded AES-256-GCM snapshot; bearer sessions and transient pairing/lease state remain ephemeral.
 - Agent command delivery defaults to outbound WebSocket; signed command authority and local execution policy are transport-independent, and durable results remain HTTPS-acknowledged in P6.
 - Public relay deployment remains blocked until TLS configuration is implemented/proven.
-- Skill_Workflow STRICT is pinned to 2148313678f476c4990e447b4d657724f071adff.
+- Skill_Workflow STRICT is pinned to c1d7e58a0fcadc606c8cf75c6283a17278f99259; `.workflow/roadmap.json` is the roadmap authority and `ROADMAP_SYNC` is blocking.
 
 ## Task List
 
@@ -69,7 +69,7 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [x] Add bounded reconnect backoff, heartbeat/stale-session handling, and idle session refresh.
 - [x] Enforce FIFO head-of-line lease semantics across reconnect.
 - [x] Linux/Windows/macOS/race source lanes PASS for candidate 5412f3111723834176adad1e35c46bbbe2f06c7b on run 36595825418.
-- [ ] Exact P6 5-job STRICT work-branch acceptance.
+- [ ] Exact P6 5-job STRICT work-branch acceptance under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259.
 - [ ] Identical-SHA main revalidation and P6 closure.
 
 ### P7-P19 production roadmap
@@ -87,7 +87,7 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [ ] P18 Physical E2E.
 - [ ] P19 Public Release.
 
-See `docs/ROADMAP.md` for phase boundaries and exit gates.
+See generated `docs/ROADMAP.md`; edit `.workflow/roadmap.json`, not the generated Markdown, when roadmap authority changes.
 
 ## Residual Risks
 | Risk | Current control |

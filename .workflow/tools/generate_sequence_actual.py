@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Project-local Go-aware static sequence generator.
 
-Emits the Skill_Workflow actual-graph contract while delegating Go AST extraction
-to go_sequence_ast.go. This file is intentionally under .workflow/tools so it
-does not alter the application source digest it measures.
+Compatible with Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259.
+It preserves the actual-graph contract while extending extraction to Go through
+go_sequence_ast.go. This project-specific extension remains under .workflow/tools
+so it does not alter the application source digest it measures.
 """
 from __future__ import annotations
 
@@ -181,15 +182,14 @@ def main() -> int:
         out_mmd = root / out_mmd
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_mmd.parent.mkdir(parents=True, exist_ok=True)
-    out_json.write_text(json.dumps(graph, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    out_mmd.write_text(
+    out_json.write_bytes((json.dumps(graph, indent=2, sort_keys=True) + "\n").encode("utf-8"))
+    out_mmd.write_bytes((
         "%% GENERATED FILE - DO NOT EDIT\n"
         f"%% SOURCE_DIGEST: {digest}\n"
         f"%% OBSERVED_HEAD: {head}\n"
         "%% GENERATED_BY: generate_sequence_actual.py\n"
-        + render_mermaid(graph),
-        encoding="utf-8",
-    )
+        + render_mermaid(graph)
+    ).encode("utf-8"))
     print("OBSERVED_HEAD=" + head)
     print("SOURCE_DIGEST=" + digest)
     print("NODES=" + str(len(nodes)))

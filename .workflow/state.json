@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "phase": "P6 - Transport V2",
-  "status": "SOURCE_COMPLETE_AWAITING_GOVERNANCE",
+  "status": "GOVERNANCE_MIGRATION_AWAITING_REVALIDATION",
   "working_branch": "work/p6-transport-v2",
-  "last_accepted_sha": "5c6db407f0ec3061387c5c4a59039ae5431bffb4",
+  "last_accepted_sha": "5b79d0eab9c9bbcffe7aedb931389399c26d0c99",
   "last_accepted_branch": "main",
   "proven": [
     "Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192 and identical-SHA main run 36558681560",
@@ -24,9 +24,12 @@
     "P6 source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418; STRICT governance remained stale and is not yet accepted",
     "Agent command delivery defaults to an authenticated outbound WebSocket stream while paired device session creation and durable result acknowledgement remain HTTPS; long-poll remains an explicit fallback",
     "WebSocket reconnect uses bounded exponential backoff, hard authorization failures do not retry indefinitely, heartbeat detects stale sessions, and the runner refreshes device sessions while an idle push stream is blocked",
-    "Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds"
+    "Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds",
+    "P6 pre-migration governance SHA da89c5625d7f78dd9a2941f912cacbf326e29f0a passed all five jobs on GitHub Actions run 36596829111 under prior Skill_Workflow pin 2148313678f476c4990e447b4d657724f071adff; it is not final P6 authority because the Owner requested migration to the latest workflow before merge",
+    "Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151"
   ],
   "not_proven": [
+    "P6 latest Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 exact 5-job work-branch revalidation",
     "P6 exact 5-job work-branch governance acceptance",
     "P6 identical-SHA main revalidation",
     "cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures",
@@ -41,10 +44,10 @@
   ],
   "blockers": [],
   "next_authorized_actions": [
-    "synchronize deterministic P6 Project Truth and sequence evidence",
-    "obtain exact P6 Linux Windows macOS race and STRICT 5-job PASS on the final work-branch candidate",
-    "fast-forward the accepted exact P6 SHA to main and revalidate it",
-    "close P6 Transport V2 then start P7 Cloudflare Relay"
+    "adopt Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 including mandatory roadmap authority and ROADMAP_SYNC",
+    "regenerate deterministic P6 Project Truth and sequence evidence with the migrated governance toolchain",
+    "obtain exact 5-job PASS on the final P6 work-branch SHA under the latest workflow",
+    "fast-forward that exact P6 SHA to main and revalidate before closing P6"
   ],
   "blocked_actions": [
     "expose relay publicly without TLS termination",

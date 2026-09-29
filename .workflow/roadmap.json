@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "current_phase": "P6 - Transport V2",
+  "phases": [
+    {
+      "id": "P0 - Governance Foundation",
+      "title": "Governance Foundation",
+      "status": "CLOSED",
+      "objective": "Establish repository authority, security boundaries, CI, and deterministic project governance.",
+      "exit_criteria": [
+        "Exact governed candidate passes blocking GitHub Actions lanes and is revalidated on main."
+      ]
+    },
+    {
+      "id": "P1 - Local Capability Executor",
+      "title": "Local Capability Executor",
+      "status": "CLOSED",
+      "objective": "Implement bounded local filesystem, process, Git, policy, and approval-aware execution primitives.",
+      "exit_criteria": [
+        "Structured capability tests pass cross-platform and raw shell remains default-denied."
+      ]
+    },
+    {
+      "id": "P2 - Remote Relay",
+      "title": "Authenticated Remote Relay",
+      "status": "CLOSED",
+      "objective": "Add outbound-only relay command/result routing with bounded queues and sessions.",
+      "exit_criteria": [
+        "Cross-platform relay tests pass and no inbound PC listener is required."
+      ]
+    },
+    {
+      "id": "P3 - Pairing & Identity",
+      "title": "Pairing, Trusted Approval, and Identity",
+      "status": "CLOSED",
+      "objective": "Bind persistent device/controller identities, replay protection, session generations, local approvals, and audit.",
+      "exit_criteria": [
+        "Exact Phase 3 work SHA and identical main SHA pass Linux, Windows, macOS, race, and governance."
+      ]
+    },
+    {
+      "id": "P4 - Agent & Chat",
+      "title": "Runnable Agent and Terminal Chat",
+      "status": "CLOSED",
+      "objective": "Integrate runnable outbound agent, controller bridge, provider-neutral chat loop, and terminal max-chat.",
+      "exit_criteria": [
+        "Exact Phase 4 work SHA and identical main SHA pass all five blocking lanes."
+      ]
+    },
+    {
+      "id": "P5 - Protocol & Durability",
+      "title": "Protocol & Durability",
+      "status": "CLOSED",
+      "objective": "Persist restart-critical relay state and publish protocol-v1 signing/restart compatibility vectors without weakening session binding.",
+      "exit_criteria": [
+        "Encrypted durability, restart/replay semantics, protocol vectors, exact work acceptance, and main revalidation pass."
+      ]
+    },
+    {
+      "id": "P6 - Transport V2",
+      "title": "Transport V2",
+      "status": "CURRENT",
+      "objective": "Add outbound WebSocket command delivery with reconnect, heartbeat, bounded backoff, session refresh, FIFO lease safety, and long-poll fallback while preserving protocol-v1 authority.",
+      "exit_criteria": [
+        "Linux, Windows, macOS, race, and latest Skill_Workflow governance pass on the exact final work SHA.",
+        "Identical final P6 SHA is revalidated on main.",
+        "No inbound PC listener or transport-level privilege authority is introduced."
+      ]
+    },
+    {
+      "id": "P7 - Cloudflare Relay",
+      "title": "Cloudflare Relay",
+      "status": "PLANNED",
+      "objective": "Add Worker + Durable Object relay path with WebSocket/Hibernation and Cloudflare-appropriate durable routing.",
+      "exit_criteria": [
+        "Deployed Cloudflare test environment preserves shared protocol vectors and outbound-only device connectivity.",
+        "Free-tier/resource behavior is measured without weakening security."
+      ]
+    },
+    {
+      "id": "P8 - MCP Gateway",
+      "title": "MCP Gateway",
+      "status": "PLANNED",
+      "objective": "Expose the existing structured capability protocol through an MCP adapter.",
+      "exit_criteria": [
+        "Discovery and calls map only to declared capabilities; unknown and unrestricted shell calls fail closed."
+      ]
+    },
+    {
+      "id": "P9 - Multi-client Compatibility",
+      "title": "Multi-client Compatibility",
+      "status": "PLANNED",
+      "objective": "Validate one backend contract across ChatGPT-compatible, Codex/IDE, and generic MCP clients.",
+      "exit_criteria": [
+        "Shared conformance suite passes without client-specific protocol forks."
+      ]
+    },
+    {
+      "id": "P10 - Device & Permission Model",
+      "title": "Device & Permission Model",
+      "status": "PLANNED",
+      "objective": "Add multi-device naming, selection, revocation, scopes, and per-device policy.",
+      "exit_criteria": [
+        "Device isolation, revocation, and scope regressions pass."
+      ]
+    },
+    {
+      "id": "P11 - Desktop Agent UX",
+      "title": "Desktop Agent UX",
+      "status": "PLANNED",
+      "objective": "Add desktop/tray pairing, status, approval, and audit experience while keeping privilege authority local.",
+      "exit_criteria": [
+        "Normal operation no longer requires terminal interaction and approval boundaries remain local."
+      ]
+    },
+    {
+      "id": "P12 - Web Dashboard",
+      "title": "Web Dashboard",
+      "status": "PLANNED",
+      "objective": "Add device, session, audit, and revocation administration UI.",
+      "exit_criteria": [
+        "Dashboard management cannot bypass agent policy and management E2E tests pass."
+      ]
+    },
+    {
+      "id": "P13 - ChatGPT Integration",
+      "title": "ChatGPT Integration",
+      "status": "PLANNED",
+      "objective": "Package the MCP-backed integration for the supported ChatGPT app/plugin surface without coupling the core to OpenAI-specific behavior.",
+      "exit_criteria": [
+        "ChatGPT to MCP to relay to agent to result E2E is proven on a supported surface."
+      ]
+    },
+    {
+      "id": "P14 - Extended Capabilities",
+      "title": "Extended Capabilities",
+      "status": "PLANNED",
+      "objective": "Expand bounded filesystem, Git, process, app, and optional screen/GUI capabilities.",
+      "exit_criteria": [
+        "Every capability has explicit schema, bounds, policy, approval class, audit shape, and adversarial tests."
+      ]
+    },
+    {
+      "id": "P15 - Security Hardening",
+      "title": "Security Hardening",
+      "status": "PLANNED",
+      "objective": "Refresh threat model and run fuzzing, injection, replay, downgrade, secret, and dependency reviews.",
+      "exit_criteria": [
+        "No unresolved release-blocking security findings remain."
+      ]
+    },
+    {
+      "id": "P16 - Packaging",
+      "title": "Packaging",
+      "status": "PLANNED",
+      "objective": "Provide Windows, Linux, and macOS installers, service integration, protected key storage, and update strategy.",
+      "exit_criteria": [
+        "Fresh-machine install, uninstall, service lifecycle, and protected-key behavior pass on all supported OS families."
+      ]
+    },
+    {
+      "id": "P17 - Scale & Reliability",
+      "title": "Scale & Reliability",
+      "status": "PLANNED",
+      "objective": "Prove load, reconnect/offline behavior, retention, recovery, and Cloudflare/self-hosted resource budgets.",
+      "exit_criteria": [
+        "Published limits and repeatable reliability/load suites pass for both deployment modes."
+      ]
+    },
+    {
+      "id": "P18 - Physical E2E",
+      "title": "Physical E2E",
+      "status": "PLANNED",
+      "objective": "Validate real internet, real devices, relay modes, MCP clients, restart/recovery, and approval flows.",
+      "exit_criteria": [
+        "Physical production-matrix evidence passes on supported devices and deployment modes."
+      ]
+    },
+    {
+      "id": "P19 - Public Release",
+      "title": "Public Release",
+      "status": "PLANNED",
+      "objective": "Finalize onboarding, release artifacts, security process, documentation, and versioned public release.",
+      "exit_criteria": [
+        "v1.0.0 artifacts and final main validation pass."
+      ]
+    }
+  ]
+}
