@@ -9,14 +9,12 @@ import (
 
 const (
 	testRegistrationKey = "registration-key-0123456789-abcdef"
-	testControllerKey   = "controller-key-0123456789-abcdefgh"
 )
 
 func testStore(t *testing.T) *Store {
 	t.Helper()
 	store, err := NewStore(Config{
 		RegistrationKey: testRegistrationKey,
-		ControllerKey: testControllerKey,
 		SessionTTL: time.Minute,
 		LeaseTTL: 50 * time.Millisecond,
 		MaxQueue: 2,
@@ -105,20 +103,16 @@ func TestQueueBoundsAndDuplicateRequest(t *testing.T) {
 }
 
 
-func TestStoreRejectsSharedBootstrapKeys(t *testing.T) {
-	_, err := NewStore(Config{
-		RegistrationKey: testRegistrationKey,
-		ControllerKey: testRegistrationKey,
-	})
+func TestStoreRejectsShortRegistrationBootstrapKey(t *testing.T) {
+	_, err := NewStore(Config{RegistrationKey: "too-short"})
 	if err == nil {
-		t.Fatal("shared registration/controller key was accepted")
+		t.Fatal("short registration bootstrap key was accepted")
 	}
 }
 
 func TestResultRetentionIsBounded(t *testing.T) {
 	store, err := NewStore(Config{
 		RegistrationKey: testRegistrationKey,
-		ControllerKey: testControllerKey,
 		SessionTTL: time.Minute,
 		LeaseTTL: 50 * time.Millisecond,
 		MaxQueue: 4,
