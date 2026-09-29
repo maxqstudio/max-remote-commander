@@ -166,3 +166,47 @@ func TestRevocationRequiresDeviceSessionAndAllowsFreshPairing(t *testing.T) {
 		t.Fatalf("generation did not advance: %d -> %d", first.Generation, second.Generation)
 	}
 }
+
+
+func TestPairingReceiptSurvivesBootstrapInvalidation(t *testing.T) {
+	store := testStore(t)
+	now := time.Unix(1_800_000_000, 0)
+	device, deviceID := pairingDevice(t)
+	bootstrap := registerPairingDevice(t, store, deviceID, now)
+	code, hash, err := identity.GeneratePairingCode()
+	if err != nil {
+		t.Fatal(err)
+	}
+	receipt, err := store.PublishPairingOfferWithReceipt(deviceID, bootstrap.Token, hash, device.PublicKey(), time.Minute, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if receipt.Token == "" || !receipt.ExpiresAt.After(now) {
+		t.Fatalf("receipt %#v", receipt)
+	}
+	if _, paired, err := store.PairingStatus(deviceID, receipt.Token, now); err != nil || paired {
+		t.Fatalf("pending status paired=%v err=%v", paired, err)
+	}
+
+	controller := controllerPublicKey(t)
+	pairing, err := store.RedeemPairing(deviceID, code, controller, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if store.sessionAuthorizedLocked(deviceID, bootstrap.Token, now) {
+		t.Fatal("bootstrap session remained authorized after redeem")
+	}
+	status, paired, err := store.PairingStatus(deviceID, receipt.Token, now)
+	if err != nil || !paired {
+		t.Fatalf("paired status paired=%v err=%v", paired, err)
+	}
+	if status.Generation != pairing.Generation || string(status.ControllerPublicKey) != string(controller) {
+		t.Fatalf("status %#v pairing %#v", status, pairing)
+	}
+	if _, _, err := store.PairingStatus(deviceID, "wrong-receipt", now); !errors.Is(err, ErrPairingReceipt) {
+		t.Fatalf("wrong receipt: %v", err)
+	}
+	if _, _, err := store.PairingStatus(deviceID, receipt.Token, receipt.ExpiresAt); !errors.Is(err, ErrPairingReceipt) {
+		t.Fatalf("expired receipt: %v", err)
+	}
+}
