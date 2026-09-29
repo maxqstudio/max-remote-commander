@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/maxqstudio/max-remote-commander/internal/audit"
@@ -34,6 +35,7 @@ type AuditSink interface {
 type ApprovalPrompt struct {
 	RequestID       string
 	Capability      string
+	Summary         string
 	ArgumentsSHA256 string
 }
 
@@ -213,6 +215,35 @@ func argsDigest(raw json.RawMessage) string {
 	return hex.EncodeToString(sum[:])
 }
 
+func approvalSummary(tool string, raw json.RawMessage) string {
+	switch tool {
+	case "filesystem.write", "filesystem.patch":
+		var args struct {
+			Path string `json:"path"`
+		}
+		if json.Unmarshal(raw, &args) == nil && args.Path != "" {
+			return fmt.Sprintf("%s %q", tool, args.Path)
+		}
+	case "process.run":
+		var args struct {
+			Executable string   `json:"executable"`
+			Args       []string `json:"args"`
+		}
+		if json.Unmarshal(raw, &args) == nil && args.Executable != "" {
+			return fmt.Sprintf("process %q with %d argument(s)", args.Executable, len(args.Args))
+		}
+	case "git.clone":
+		var args struct {
+			URL         string `json:"url"`
+			Destination string `json:"destination"`
+		}
+		if json.Unmarshal(raw, &args) == nil && args.URL != "" {
+			return fmt.Sprintf("git clone %q into %q", args.URL, args.Destination)
+		}
+	}
+	return tool
+}
+
 func (r *Runner) auditDecision(envelope protocol.CommandEnvelope, decision, outcome string) error {
 	return r.audit.Append(audit.Event{
 		Time: r.now(), Kind: "command_decision", DeviceID: envelope.DeviceID,
@@ -271,6 +302,7 @@ func (r *Runner) handleCommand(ctx context.Context, envelope protocol.CommandEnv
 		approved, err := r.approver.Approve(ctx, ApprovalPrompt{
 			RequestID: envelope.RequestID,
 			Capability: envelope.Tool,
+			Summary: approvalSummary(envelope.Tool, envelope.Arguments),
 			ArgumentsSHA256: argsDigest(envelope.Arguments),
 		})
 		if err != nil {
