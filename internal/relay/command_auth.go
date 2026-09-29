@@ -41,18 +41,18 @@ func (s *Store) QueuePairedCommand(deviceID, controllerToken string, command Com
 	if !validID(deviceID, 64) || !validID(command.RequestID, 128) || len(command.Payload) == 0 {
 		return ErrInvalidIdentifier
 	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.pairedControllerAuthorizedLocked(deviceID, controllerToken, now) {
+		return ErrUnauthorized
+	}
 	envelope, err := decodeCommandEnvelope(command.Payload)
 	if err != nil {
 		return err
 	}
 	if envelope.RequestID != command.RequestID || envelope.DeviceID != deviceID {
 		return ErrInvalidCommandEnvelope
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !s.pairedControllerAuthorizedLocked(deviceID, controllerToken, now) {
-		return ErrUnauthorized
 	}
 	pairing := s.pairings[deviceID]
 	deviceSession := s.sessions[deviceID]
