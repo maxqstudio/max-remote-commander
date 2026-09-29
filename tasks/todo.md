@@ -13,7 +13,7 @@
 - [x] Provider-neutral bounded chat tool loop
 - [x] OpenAI-compatible / loopback-local provider adapter
 - [x] Cross-platform max-chat terminal client
-- [ ] Revalidate truth-only Phase 4 closure on work branch and main
+- [x] Revalidate truth-only Phase 4 closure on work run 36559020716 and main run 36559186242
 - [ ] Phase 5 graphical multi-device UI/device selector
 - [ ] Phase 5 MCP adapter
 - [ ] Phase 5 durable relay state/replay strategy

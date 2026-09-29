@@ -9,8 +9,8 @@
     },
     {
       "concern": "working_candidate",
-      "authority": "work/phase-4-closure",
-      "meaning": "Truth-only Phase 4 closure candidate; product source already accepted on main",
+      "authority": "work/phase-4-finalize",
+      "meaning": "Status-only Phase 4 finalization candidate; product source and closure already accepted on main",
       "mutable": true
     },
     {

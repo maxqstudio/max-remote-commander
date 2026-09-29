@@ -43,6 +43,8 @@ jobs:
   governance:
     name: Skill Workflow STRICT
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -79,6 +81,17 @@ jobs:
       - name: Validate generated docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"
+      - name: Sync deterministic generated truth on Phase 4 finalization branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/work/phase-4-finalize'
+        shell: bash
+        run: |
+          git add .workflow/generated/code_facts.json docs/*.md
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: regenerate Phase 4 final truth"
+            git push origin HEAD:work/phase-4-finalize
+          fi
       - name: Verify tracked governance state is deterministic
         shell: bash
         run: |
