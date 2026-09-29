@@ -63,3 +63,11 @@ Type: security
 - Added language-neutral protocol-v1 fixtures for deterministic Ed25519 identities canonical signing bytes signatures and SHA-256 digests.
 - Added executable restart vectors for same-session delivery and fail-closed rotated-session or expired queue pruning.
 - Fixture private seeds are intentionally public deterministic test material and are explicitly forbidden for production identity use.
+
+## 2026-09-29 — P5 Protocol and Durability accepted
+
+Type: security
+
+- Phase 5B exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed all five blocking jobs on work branch run 36591264102 and identical-SHA main run 36591432809.
+- P5 now has accepted encrypted relay durability, fail-closed stale-session/expiry/replay semantics, and language-neutral protocol-v1 conformance vectors for future transports and adapters.
+- Cloudflare, MCP, WebSocket transport, physical crash/power-loss recovery, and physical end-to-end behavior remain explicitly unproven and belong to later roadmap phases.

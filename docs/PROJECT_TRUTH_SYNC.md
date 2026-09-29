@@ -20,7 +20,7 @@ HEAD is recorded externally after the commit exists.
 | BEHAVIORAL_SYNC | PASS | |
 | CROSS_DOCUMENT_CONSISTENCY | PASS | |
 | HUMAN_COMPREHENSION | NOT_PROVEN | |
-| SEQUENCE_SYNC | NOT_PROVEN | |
+| SEQUENCE_SYNC | PASS | |
 | DOC_LAYOUT | PASS | |
 | PROJECT_DOCS_NORMALIZED | PASS | |
 | DOC_READABILITY | PASS | |
@@ -28,7 +28,7 @@ HEAD is recorded externally after the commit exists.
 | DOC_SOURCE_TRACEABILITY | PASS | |
 | DOC_TEST_TRACEABILITY | PASS | |
 | TEST_RUNTIME_TRACEABILITY | NOT_PROVEN | |
-| PROJECT_STATE_SYNC | NOT_PROVEN | |
+| PROJECT_STATE_SYNC | PASS | |
 
 ## Critical claim traceability
 
