@@ -85,6 +85,7 @@ type Store struct {
 	resultNotify map[string]chan struct{}
 	resultOrder  []string
 	pairingOffers map[string]pairingOffer
+	pairingReceipts map[string]pairingReceiptState
 	pairings      map[string]Pairing
 	pairingGeneration map[string]uint64
 	controllerSessions map[string]controllerSessionState
@@ -139,6 +140,7 @@ func NewStore(cfg Config) (*Store, error) {
 		queueNotify: make(map[string]chan struct{}),
 		resultNotify: make(map[string]chan struct{}),
 		pairingOffers: make(map[string]pairingOffer),
+		pairingReceipts: make(map[string]pairingReceiptState),
 		pairings: make(map[string]Pairing),
 		pairingGeneration: make(map[string]uint64),
 		controllerSessions: make(map[string]controllerSessionState),
