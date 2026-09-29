@@ -41,3 +41,11 @@ Status: ACCEPTED
 CapabilityRequest contains no trusted approval boolean or token in Phase 1; privileged capabilities stop at APPROVAL_REQUIRED.
 
 Rationale: An LLM or compromised relay must not self-authorize mutation process execution or network clone.
+
+## DEC-006 — Terminal-first Phase 4 control surface
+
+Status: ACCEPTED
+
+Close Phase 4 on the secure runnable outbound agent plus max-chat terminal client; move graphical multi-device chat UI/device selector to Phase 5.
+
+Rationale: The terminal surface proves the cryptographic controller/provider/tool path with a smaller attack surface and no new web auth/session layer. Graphical multi-device UI remains explicitly unproven rather than being conflated with source-complete terminal control.

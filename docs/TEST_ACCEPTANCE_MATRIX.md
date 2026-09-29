@@ -4,10 +4,10 @@
 
 ## Evidence boundary
 
-Phase 0 through Phase 3 source are accepted and revalidated on main. Phase 3 exact source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed all five blocking jobs on work branch run 36550259782 and main run 36550406590. User-facing approval runtime, audit runtime integration, durable relay state, public TLS deployment, physical remote runtime, chat providers, and MCP remain NOT_PROVEN.
+Phase 0 through Phase 3 are accepted and revalidated on main. Phase 4 source candidate 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race source lanes on GitHub Actions run 36555366255, but STRICT governance is still pending. Physical remote runtime, live external provider E2E, graphical multi-device UI, relay durability, public TLS deployment, OS-native key protection, and MCP remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
-Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
+Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
@@ -20,13 +20,19 @@ Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162
 | P3-APPROVAL-001 | Privileged approvals are one-use short-lived and exact-request bound and cannot be self-asserted by remote request payload. | GitHub Actions run 36549467606; internal/approval/store_test.go; internal/executor/dispatcher_test.go | PASS |
 | P3-AUDIT-001 | Audit primitive is structured secret-safe bounded and rejects symlink/free-form misuse. | GitHub Actions run 36549467606; internal/audit/log_test.go | PASS |
 | P3-FINAL-001 | Exact final Phase 3 SHA passes Linux Windows macOS race and STRICT governance then identical SHA passes main revalidation. | GitHub Actions work run 36550259782 and main run 36550406590 at exact SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 | PASS |
+| P4-RUNNER-001 | Runnable outbound agent integrates identity session verification local policy approval executor and audit without allowing remote self-approval. | GitHub Actions run 36555366255; internal/agent/runner_test.go; cmd/max-agent/main_test.go | PASS |
+| P4-CONTROLLER-001 | Controller bridge uses paired Ed25519 authority, signs commands for the relay-provided active agent session, and refreshes after agent-session change. | GitHub Actions run 36555366255; internal/controller/client_test.go; internal/controller/executor_test.go | PASS |
+| P4-CHAT-001 | Provider-neutral chat loop exposes only declared structured tools, validates tool JSON, and bounds tool rounds. | GitHub Actions run 36555366255; internal/chat/chat_test.go | PASS |
+| P4-PROVIDER-001 | OpenAI-compatible adapter is HTTPS-by-default except loopback, redirect-refusing by default, response-bounded, and rejects malformed tool calls. | GitHub Actions run 36555366255; internal/providers/openaicompat/provider_test.go | PASS |
+| P4-CLI-001 | max-chat uses local controller identity/state, stdin pairing code, environment-only provider key, and builds across Linux Windows and macOS. | GitHub Actions run 36555366255; cmd/max-chat/main_test.go | PASS |
+| P4-GOV-001 | Exact Phase 4 candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation. | Pending Phase 4 governance closure | NOT_PROVEN |
 
 ## Test commands
 
 - go test ./... -count=1
 - go test -race ./... -count=1
 - go vet ./...
-- go build ./cmd/max-agent ./cmd/max-relay
+- go build ./cmd/max-agent ./cmd/max-relay ./cmd/max-chat
 
 ## Runtime checks
 
@@ -35,8 +41,8 @@ Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162
 ## Sequence contract evidence
 
 Sequence mode for this phase/session: DURING
-Sequence session contract: docs/sequence/phase-3.session.json
-SEQUENCE_SYNC: PASS
+Sequence session contract: docs/sequence/phase-4.session.json
+SEQUENCE_SYNC: NOT_PROVEN
 
 ## Project Truth Compiler evidence
 

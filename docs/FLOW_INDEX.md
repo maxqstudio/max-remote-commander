@@ -3,13 +3,13 @@
 # FLOW INDEX
 
 Authority SHA: external final acceptance evidence
-Source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
+Source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
 
 ## Flow inventory
 
 | Flow | Entry | Authority symbol | State mutation | Tests | Sequence session | Sequence status |
 |---|---|---|---|---|---|---|
-| FLOW-COMMAND | Device and controller are paired; device has an active Ed25519-authenticated relay session; controller has an active paired session bound to the same agent session. | internal/relay/pairing.go, internal/relay/device_auth.go, internal/relay/controller_auth.go, internal/relay/command_auth.go, internal/protocol/verifier.go, internal/policy/capability.go, internal/approval/store.go, internal/executor/dispatcher.go | RELAY_VERIFIED, QUEUED, DEVICE_POLLED, AGENT_VERIFIED, POLICY_CHECKED, DENIED, APPROVAL_REQUIRED, EXECUTED, APPROVED, EXECUTED, RESULT_SUBMITTED | internal/relay/pairing_test.go, internal/relay/device_auth_test.go, internal/relay/controller_auth_test.go, internal/relay/command_auth_test.go, internal/relay/http_test.go, internal/protocol/verifier_test.go, internal/policy/capability_test.go, internal/approval/store_test.go, internal/executor/dispatcher_test.go, internal/audit/log_test.go | docs/sequence/phase-3.session.json | DECLARED |
+| FLOW-COMMAND | Device/controller pairing is persisted locally; device has an active paired session; max-chat has a paired controller identity; provider emits only a declared structured tool call. | internal/chat/chat.go, internal/controller/client.go, internal/controller/executor.go, internal/relay/controller_auth.go, internal/relay/command_auth.go, internal/agent/runner.go, internal/protocol/verifier.go, internal/policy/capability.go, internal/approval/store.go, internal/executor/dispatcher.go, internal/audit/log.go | CONTROLLER_SESSION_BOUND, CONTROLLER_SIGNED, RELAY_VERIFIED, QUEUED, DEVICE_POLLED, AGENT_VERIFIED, POLICY_CHECKED, DENIED, APPROVAL_REQUIRED, EXECUTED, APPROVED, EXECUTED, RESULT_SUBMITTED, CHAT_TOOL_RESULT | internal/chat/chat_test.go, internal/controller/client_test.go, internal/controller/executor_test.go, internal/relay/controller_auth_test.go, internal/relay/command_auth_test.go, internal/agent/runner_test.go, cmd/max-agent/main_test.go, cmd/max-chat/main_test.go | docs/sequence/phase-4.session.json | DECLARED |
 
 ## Observed Python HTTP routes
 

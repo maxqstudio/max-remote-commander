@@ -7,7 +7,7 @@ Canonical authority is declared in .workflow/authority.json.
 | Concern | Authority | Meaning | Mutable |
 |---|---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases | YES |
-| working_candidate | work/phase-0-foundation until Phase 0 acceptance | Current unaccepted candidate | YES |
+| working_candidate | work/phase-4-agent-chat | Current unaccepted Phase 4 governance candidate | YES |
 | governance | maxqstudio/Skill_Workflow@9e22feddb8f94e8c0f1af6a33e14b64de5068f8f | Pinned project workflow rules and deterministic documentation compiler | NO |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence | NO |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution | NO |

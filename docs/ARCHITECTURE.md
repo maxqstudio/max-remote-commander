@@ -2,12 +2,15 @@
 
 # ARCHITECTURE
 
-Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
+Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
 
 ## Components
 
 | ID | Component | Purpose | Owns | Depends On |
 |---|---|---|---|---|
+| chat_core | Provider-neutral Chat Core | Runs a bounded structured tool-call loop without binding the command protocol to one LLM provider | conversation tool loop, declared remote tool schemas, tool-call validation and round limit | controller_client, llm_provider_adapter |
+| controller_client | Paired Controller Client | Persists local controller trust state, authenticates controller sessions, signs remote commands, refreshes stale sessions, and consumes results | controller Ed25519 identity, controller pairing state, controller session refresh, signed command submission | relay_server, protocol |
+| llm_provider_adapter | OpenAI-compatible Provider Adapter | Maps provider-neutral chat messages/tools to an OpenAI-compatible chat-completions boundary | HTTPS/loopback provider transport, API-key header injection from runtime environment, provider response bounds and tool-call parsing | chat_core |
 | llm_client | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
 | relay_server | Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results | pre-pairing registration bootstrap, pairing generations, device and controller sessions, signed command validation, bounded command leases, bounded result retention, SSE result stream | identity, protocol, agent |
 | agent | PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
@@ -20,18 +23,19 @@ Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162
 
 ## Data flow
 
-- agent -> relay_server: pre-pairing bootstrap session then Ed25519 device assertion for paired sessions
-- llm_client -> relay_server: paired controller assertion and short-lived controller session
-- llm_client -> relay_server: controller-signed CommandEnvelope bound to device and active agent session
-- relay_server -> agent: outbound long-poll delivery of already relay-validated signed command envelope
-- agent -> protocol: agent re-verifies controller signature device session freshness and replay before local policy
+- llm_provider_adapter -> chat_core: assistant text or validated structured tool calls
+- chat_core -> controller_client: declared structured tool request only
+- controller_client -> relay_server: paired controller assertion and controller-signed CommandEnvelope bound to current agent session
+- relay_server -> agent: outbound long-poll delivery of relay-validated signed command envelope
+- agent -> protocol: agent re-verifies controller signature device/session freshness and replay before local policy
 - protocol -> policy: verified structured capability intent
 - policy -> approval: privileged capability requires trusted local approval
 - approval -> executor: one-use exact-request approval enables privileged execution
-- executor -> audit: structured decision and outcome metadata without raw secret-bearing payloads
+- executor -> audit: decision and outcome metadata without raw secret-bearing payloads
 - executor -> agent: bounded local capability result
 - agent -> relay_server: paired-device-session-authenticated result submission
-- relay_server -> llm_client: paired-controller-session-authenticated SSE result event
+- relay_server -> controller_client: paired-controller-session-authenticated SSE result event
+- controller_client -> chat_core: validated JSON tool result returned to conversation
 
 ## External boundaries
 
@@ -41,12 +45,13 @@ Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162
 - Local privileged execution: Remote payloads cannot self-approve. Privileged capability grants are local one-use short-lived exact-request bindings.
 - Local secrets: Device private identity persists locally; POSIX permissions and symlink safety are enforced, while OS-native Windows key protection remains future hardening.
 - Audit data: Audit schema excludes raw arguments tokens stdout stderr and free-form messages; only bounded structured metadata and digests are accepted.
+- LLM provider: Provider API key is supplied at runtime and not persisted by max-chat. Non-loopback provider endpoints require HTTPS and default HTTP redirects are refused.
 
 ## Observed implementation inventory
 
-Source files: 36
-Source lines: 4898
-Languages: Go=36
+Source files: 54
+Source lines: 8477
+Languages: Go=54
 
 Structural facts come from the code extractor. Component meaning comes from
 .workflow/architecture.json.

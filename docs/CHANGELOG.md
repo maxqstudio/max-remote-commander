@@ -29,3 +29,12 @@ Type: security
 - Accepted exact source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 after work-branch run 36550259782 and main run 36550406590 both passed Linux Windows macOS race and STRICT governance.
 - Added persistent Ed25519 device identity, one-use pairing generations, paired device/controller assertions, active agent-session binding, and signed command replay defense.
 - Added one-use exact-request local approval grants and bounded secret-safe audit primitive.
+
+## 2026-09-29 — Phase 4 source candidate complete
+
+Type: feature
+
+- Source candidate 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race lanes on GitHub Actions run 36555366255; STRICT governance closure remains pending.
+- Added runnable outbound max-agent integration with local terminal approval, audit integration, persisted pairing state, and Git credential-environment isolation.
+- Added paired controller bridge, provider-neutral bounded chat loop, OpenAI-compatible/local-provider adapter, and cross-platform max-chat terminal client.
+- Graphical multi-device chat UI/device selector is explicitly deferred to Phase 5.

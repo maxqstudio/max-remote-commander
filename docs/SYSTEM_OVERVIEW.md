@@ -27,12 +27,15 @@ Users / External Systems
     -> State / Evidence Authorities
     -> External Runtime / Outputs
 
-Observed source inventory: 36 files, 1 language categories.
+Observed source inventory: 54 files, 1 language categories.
 
 ## Major components
 
 | Component | Purpose | Owns / Decides | Depends On |
 |---|---|---|---|
+| Provider-neutral Chat Core | Runs a bounded structured tool-call loop without binding the command protocol to one LLM provider | conversation tool loop, declared remote tool schemas, tool-call validation and round limit | controller_client, llm_provider_adapter |
+| Paired Controller Client | Persists local controller trust state, authenticates controller sessions, signs remote commands, refreshes stale sessions, and consumes results | controller Ed25519 identity, controller pairing state, controller session refresh, signed command submission | relay_server, protocol |
+| OpenAI-compatible Provider Adapter | Maps provider-neutral chat messages/tools to an OpenAI-compatible chat-completions boundary | HTTPS/loopback provider transport, API-key header injection from runtime environment, provider response bounds and tool-call parsing | chat_core |
 | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
 | Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results | pre-pairing registration bootstrap, pairing generations, device and controller sessions, signed command validation, bounded command leases, bounded result retention, SSE result stream | identity, protocol, agent |
 | PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
@@ -45,44 +48,48 @@ Observed source inventory: 36 files, 1 language categories.
 
 ## Main data flow
 
-- agent -> relay_server: pre-pairing bootstrap session then Ed25519 device assertion for paired sessions
-- llm_client -> relay_server: paired controller assertion and short-lived controller session
-- llm_client -> relay_server: controller-signed CommandEnvelope bound to device and active agent session
-- relay_server -> agent: outbound long-poll delivery of already relay-validated signed command envelope
-- agent -> protocol: agent re-verifies controller signature device session freshness and replay before local policy
+- llm_provider_adapter -> chat_core: assistant text or validated structured tool calls
+- chat_core -> controller_client: declared structured tool request only
+- controller_client -> relay_server: paired controller assertion and controller-signed CommandEnvelope bound to current agent session
+- relay_server -> agent: outbound long-poll delivery of relay-validated signed command envelope
+- agent -> protocol: agent re-verifies controller signature device/session freshness and replay before local policy
 - protocol -> policy: verified structured capability intent
 - policy -> approval: privileged capability requires trusted local approval
 - approval -> executor: one-use exact-request approval enables privileged execution
-- executor -> audit: structured decision and outcome metadata without raw secret-bearing payloads
+- executor -> audit: decision and outcome metadata without raw secret-bearing payloads
 - executor -> agent: bounded local capability result
 - agent -> relay_server: paired-device-session-authenticated result submission
-- relay_server -> llm_client: paired-controller-session-authenticated SSE result event
+- relay_server -> controller_client: paired-controller-session-authenticated SSE result event
+- controller_client -> chat_core: validated JSON tool result returned to conversation
 
 ## Main user workflows
 
-### FLOW-COMMAND — Paired remote capability command
+### FLOW-COMMAND — Phase 4 paired chat-to-capability command
 
-Carry a controller-signed capability request from paired controller through relay and local verification/policy without letting remote input grant privilege.
+Carry a provider-neutral structured tool request through paired controller signing, relay validation, outbound agent verification, local policy/approval/audit, and bounded result return without letting remote input grant privilege.
 
 Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
 
-- CONTROLLER_SIGNED -> RELAY_VERIFIED : authenticate paired controller session and verify signed CommandEnvelope for current device and agent session
+- CHAT_TOOL_REQUESTED -> CONTROLLER_SESSION_BOUND : provider-neutral chat core validates declared tool name and JSON arguments then obtains a controller session bound to the active agent session
+- CONTROLLER_SESSION_BOUND -> CONTROLLER_SIGNED : controller creates a fresh request ID and Ed25519-signed CommandEnvelope for the relay-provided agent session
+- CONTROLLER_SIGNED -> RELAY_VERIFIED : relay authenticates paired controller session and verifies signed envelope for current device and agent session
 - RELAY_VERIFIED -> QUEUED : enqueue bounded verified request for the owning device
 - QUEUED -> DEVICE_POLLED : authenticate current paired device session on outbound long poll
 - DEVICE_POLLED -> AGENT_VERIFIED : agent re-verifies controller signature freshness device/session binding and replay
-- AGENT_VERIFIED -> POLICY_CHECKED : evaluate local capability policy
-- POLICY_CHECKED -> DENIED : deny shell unknown or policy-denied capability
-- POLICY_CHECKED -> APPROVAL_REQUIRED : stop privileged capability at trusted local approval boundary
+- AGENT_VERIFIED -> POLICY_CHECKED : evaluate local capability policy and write required audit decision before privileged side effects
+- POLICY_CHECKED -> DENIED : deny shell unknown or locally rejected capability
+- POLICY_CHECKED -> APPROVAL_REQUIRED : stop privileged capability at trusted local terminal approval boundary
 - POLICY_CHECKED -> EXECUTED : execute only automatically allowed read-only capability
-- APPROVAL_REQUIRED -> APPROVED : consume one-use short-lived exact-request local approval
+- APPROVAL_REQUIRED -> APPROVED : explicit local yes issues and consumes one-use short-lived exact-request approval
 - APPROVED -> EXECUTED : execute approved privileged capability through bounded executor
 - EXECUTED -> RESULT_SUBMITTED : owning paired device session submits bounded result
+- RESULT_SUBMITTED -> CHAT_TOOL_RESULT : paired controller receives SSE result and returns validated JSON tool result to the chat loop
 
 ## Lifecycle and state
 
-Current phase: Phase 3 - pairing identity and trusted approval
+Current phase: Phase 4 - runnable agent and terminal chat integration
 
-Current status: ACCEPTED_CLOSED
+Current status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -91,7 +98,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 | Concern | Authority | Meaning |
 |---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases |
-| working_candidate | work/phase-0-foundation until Phase 0 acceptance | Current unaccepted candidate |
+| working_candidate | work/phase-4-agent-chat | Current unaccepted Phase 4 governance candidate |
 | governance | maxqstudio/Skill_Workflow@9e22feddb8f94e8c0f1af6a33e14b64de5068f8f | Pinned project workflow rules and deterministic documentation compiler |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution |
@@ -102,7 +109,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 ### Mutable current state
 
 - source: Canonical source history and releases
-- working_candidate: Current unaccepted candidate
+- working_candidate: Current unaccepted Phase 4 governance candidate
 
 ### Immutable history / evidence
 
@@ -124,9 +131,10 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- synchronize this post-acceptance Phase 3 truth closure
-- revalidate truth-only closure on work branch and main
-- start Phase 4 runnable agent and chat integration from accepted Phase 3 main
+- synchronize deterministic Phase 4 Project Truth and sequence evidence
+- obtain exact Phase 4 work-branch Linux Windows macOS race and STRICT 5-job PASS
+- merge accepted Phase 4 candidate to main and revalidate the identical SHA
+- start Phase 5 durability TLS packaging graphical multi-device UI MCP and physical E2E work
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -134,7 +142,7 @@ Blocked actions:
 - allow controller bootstrap secrets as command authority
 - mint paired-device sessions from the shared registration bootstrap key
 - auto-execute privileged local capabilities without trusted local approval
-- claim physical runtime approval UI chat or MCP as proven
+- claim graphical multi-device UI physical runtime live provider behavior or MCP as proven
 
 Known blockers:
 - None declared.
@@ -143,27 +151,25 @@ Known blockers:
 
 ### Proven
 
-- Phase 2 exact SHA c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 passed all five GitHub Actions jobs on work branch run 36329243639 and main run 36329323271
-- Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed Linux Windows macOS race and STRICT governance on work branch run 36550259782
-- The identical Phase 3 source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed Linux Windows macOS race and STRICT governance on main run 36550406590
-- Device identity uses persistent Ed25519 keys with deterministic device IDs, symlink rejection, restricted POSIX permissions, and concurrent first-start convergence
-- Pairing binds one device public key to one controller public key with one-use high-entropy pairing codes, generation counters, attempt limits, expiry, and revocation
-- Paired relay device sessions require short-lived Ed25519 device assertions bound to pairing generation and per-start agent session ID; shared registration bootstrap cannot mint a paired-device session
-- Paired controller sessions require Ed25519 assertions and are bound to device generation plus the active agent session
-- Relay command queue accepts only controller-signed CommandEnvelope payloads bound to current device and agent session and rejects command nonce replay
-- Privileged capability approvals are one-use, short-lived, and bound to request ID, capability, and exact argument digest
-- Secret-safe audit primitive writes bounded structured JSONL without raw arguments tokens stdout stderr or free-form messages
+- Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed all five GitHub Actions jobs on work branch run 36550259782 and main run 36550406590
+- Phase 4 source candidate SHA 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race source lanes on GitHub Actions run 36555366255; STRICT governance remained stale and is not yet accepted
+- max-agent is a runnable outbound-only client that loads persistent identity and pairing state, authenticates a fresh per-start agent session, long-polls commands, re-verifies signed envelopes, applies local policy and approval, audits decisions/outcomes, and submits results
+- Interactive local approval is opt-in and defaults to deny; privileged execution requires a one-use exact-request local approval issued on the remote PC
+- Git execution isolates user credential/config environment and disables credential helpers, askpass, and terminal prompts for remote clone operations
+- Controller pairing state is create-once local state; controller sessions refresh across agent-session changes and commands are signed for the relay-provided active agent session
+- Provider-neutral chat loop advertises only structured remote tools, rejects unadvertised calls, validates JSON arguments/results, and enforces a bounded tool-round limit
+- OpenAI-compatible provider adapter requires HTTPS except loopback, refuses redirects by default, bounds responses, and supports local OpenAI-compatible servers without changing the core chat contract
+- max-chat terminal client keeps provider API keys in environment only, prompts pairing codes via stdin, and is built/tested on Linux Windows and macOS
 
 ### Not proven
 
-- user-facing trusted local approval prompt and issuance workflow
-- integration of audit events across the final running agent and relay lifecycle
+- Phase 4 STRICT governance and exact 5-job work-branch acceptance
+- identical-SHA main revalidation for Phase 4
+- physical remote-device runtime and live external LLM-provider end-to-end behavior
+- graphical multi-device chat UI and device selector
 - durable relay pairing queue session result and nonce state across relay restart
 - public TLS deployment and reverse-proxy configuration
-- OS-native protected key storage or explicit Windows ACL hardening for the device identity seed
-- physical remote-device runtime
-- runnable outbound agent loop
-- chat client and LLM provider runtime
+- OS-native protected key storage or explicit Windows ACL hardening for device/controller identity seeds
 - MCP adapter
 
 ## Important limitations

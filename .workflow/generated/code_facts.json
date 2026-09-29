@@ -17,7 +17,28 @@
       "file": "cmd/max-agent/main.go",
       "is_test": false,
       "language": "Go",
-      "lines": 20
+      "lines": 282
+    },
+    {
+      "directory": "cmd/max-agent",
+      "file": "cmd/max-agent/main_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 76
+    },
+    {
+      "directory": "cmd/max-chat",
+      "file": "cmd/max-chat/main.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 216
+    },
+    {
+      "directory": "cmd/max-chat",
+      "file": "cmd/max-chat/main_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 100
     },
     {
       "directory": "cmd/max-relay",
@@ -25,6 +46,41 @@
       "is_test": false,
       "language": "Go",
       "lines": 43
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/client.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 263
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/runner.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 341
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/runner_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 235
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/state.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 162
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/state_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 84
     },
     {
       "directory": "internal/approval",
@@ -53,6 +109,62 @@
       "is_test": false,
       "language": "Go",
       "lines": 114
+    },
+    {
+      "directory": "internal/chat",
+      "file": "internal/chat/chat.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 152
+    },
+    {
+      "directory": "internal/chat",
+      "file": "internal/chat/chat_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 120
+    },
+    {
+      "directory": "internal/controller",
+      "file": "internal/controller/client.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 298
+    },
+    {
+      "directory": "internal/controller",
+      "file": "internal/controller/client_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 150
+    },
+    {
+      "directory": "internal/controller",
+      "file": "internal/controller/executor.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 108
+    },
+    {
+      "directory": "internal/controller",
+      "file": "internal/controller/executor_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 135
+    },
+    {
+      "directory": "internal/controller",
+      "file": "internal/controller/state.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 145
+    },
+    {
+      "directory": "internal/controller",
+      "file": "internal/controller/state_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 83
     },
     {
       "directory": "internal/executor",
@@ -87,14 +199,14 @@
       "file": "internal/executor/git.go",
       "is_test": false,
       "language": "Go",
-      "lines": 110
+      "lines": 144
     },
     {
       "directory": "internal/executor",
       "file": "internal/executor/git_test.go",
       "is_test": false,
       "language": "Go",
-      "lines": 107
+      "lines": 150
     },
     {
       "directory": "internal/executor",
@@ -181,6 +293,20 @@
       "lines": 103
     },
     {
+      "directory": "internal/providers/openaicompat",
+      "file": "internal/providers/openaicompat/provider.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 242
+    },
+    {
+      "directory": "internal/providers/openaicompat",
+      "file": "internal/providers/openaicompat/provider_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 157
+    },
+    {
       "directory": "internal/relay",
       "file": "internal/relay/command_auth.go",
       "is_test": false,
@@ -227,35 +353,35 @@
       "file": "internal/relay/http.go",
       "is_test": false,
       "language": "Go",
-      "lines": 389
+      "lines": 418
     },
     {
       "directory": "internal/relay",
       "file": "internal/relay/http_test.go",
       "is_test": false,
       "language": "Go",
-      "lines": 318
+      "lines": 354
     },
     {
       "directory": "internal/relay",
       "file": "internal/relay/pairing.go",
       "is_test": false,
       "language": "Go",
-      "lines": 165
+      "lines": 227
     },
     {
       "directory": "internal/relay",
       "file": "internal/relay/pairing_test.go",
       "is_test": false,
       "language": "Go",
-      "lines": 168
+      "lines": 212
     },
     {
       "directory": "internal/relay",
       "file": "internal/relay/store.go",
       "is_test": false,
       "language": "Go",
-      "lines": 384
+      "lines": 386
     },
     {
       "directory": "internal/relay",
@@ -269,13 +395,13 @@
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925",
+  "source_digest": "2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e",
   "source_summary": {
-    "files": 36,
+    "files": 54,
     "languages": {
-      "Go": 36
+      "Go": 54
     },
-    "lines": 4898,
+    "lines": 8477,
     "test_files": 0
   },
   "tests": []

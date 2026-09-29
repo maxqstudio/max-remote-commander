@@ -10,10 +10,10 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/phase-3-closure
+Active branch: work/phase-4-agent-chat
 Current authoritative SHA: external final acceptance evidence
 Last accepted SHA: 95d60a599d2ea6ab75831c54bad5c999ab7d6901
-Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
+Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
 
 ## Authorities
 Source authority: Canonical source history and releases
@@ -24,17 +24,18 @@ UI authority: see SOURCE_AUTHORITY_MAP.md
 Historical/reference authority: see SOURCE_AUTHORITY_MAP.md
 
 ## Technology
-Languages: Go, TypeScript
-Frameworks: Go standard library initially, React planned for chat client
-Persistence: local device identity and policy configuration planned, relay state is in-memory in Phase 2
-External systems: GitHub Actions, LLM provider APIs, MCP clients
+Languages: Go
+Frameworks: Go standard library
+Persistence: create-once local device and controller Ed25519 identity seeds, create-once local device/controller pairing state, bounded append-only local audit JSONL, relay operational state remains in-memory
+External systems: GitHub Actions, OpenAI-compatible LLM provider APIs, MCP clients (planned)
 
 ## Entry points
 
 | Entry | Path | Purpose |
 |---|---|---|
-| max-agent | cmd/max-agent/main.go | Cross-platform user-device agent executable |
-| max-relay | cmd/max-relay/main.go | Authenticated outbound relay server executable |
+| max-agent | cmd/max-agent/main.go | Outbound-only paired user-device agent executable |
+| max-relay | cmd/max-relay/main.go | Authenticated relay server executable |
+| max-chat | cmd/max-chat/main.go | Paired terminal chat/controller client using provider-neutral tool calls |
 
 ## Critical directories
 

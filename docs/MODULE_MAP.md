@@ -3,23 +3,39 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
+Source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
 |---|---|---:|---|---|
-| cmd/max-agent/main.go | Go | 20 | cmd/max-agent | NO |
+| cmd/max-agent/main.go | Go | 282 | cmd/max-agent | NO |
+| cmd/max-agent/main_test.go | Go | 76 | cmd/max-agent | NO |
+| cmd/max-chat/main.go | Go | 216 | cmd/max-chat | NO |
+| cmd/max-chat/main_test.go | Go | 100 | cmd/max-chat | NO |
 | cmd/max-relay/main.go | Go | 43 | cmd/max-relay | NO |
+| internal/agent/client.go | Go | 263 | internal/agent | NO |
+| internal/agent/runner.go | Go | 341 | internal/agent | NO |
+| internal/agent/runner_test.go | Go | 235 | internal/agent | NO |
+| internal/agent/state.go | Go | 162 | internal/agent | NO |
+| internal/agent/state_test.go | Go | 84 | internal/agent | NO |
 | internal/approval/store.go | Go | 100 | internal/approval | NO |
 | internal/approval/store_test.go | Go | 45 | internal/approval | NO |
 | internal/audit/log.go | Go | 154 | internal/audit | NO |
 | internal/audit/log_test.go | Go | 114 | internal/audit | NO |
+| internal/chat/chat.go | Go | 152 | internal/chat | NO |
+| internal/chat/chat_test.go | Go | 120 | internal/chat | NO |
+| internal/controller/client.go | Go | 298 | internal/controller | NO |
+| internal/controller/client_test.go | Go | 150 | internal/controller | NO |
+| internal/controller/executor.go | Go | 108 | internal/controller | NO |
+| internal/controller/executor_test.go | Go | 135 | internal/controller | NO |
+| internal/controller/state.go | Go | 145 | internal/controller | NO |
+| internal/controller/state_test.go | Go | 83 | internal/controller | NO |
 | internal/executor/dispatcher.go | Go | 231 | internal/executor | NO |
 | internal/executor/dispatcher_test.go | Go | 122 | internal/executor | NO |
 | internal/executor/filesystem.go | Go | 139 | internal/executor | NO |
 | internal/executor/filesystem_test.go | Go | 120 | internal/executor | NO |
-| internal/executor/git.go | Go | 110 | internal/executor | NO |
-| internal/executor/git_test.go | Go | 107 | internal/executor | NO |
+| internal/executor/git.go | Go | 144 | internal/executor | NO |
+| internal/executor/git_test.go | Go | 150 | internal/executor | NO |
 | internal/executor/process.go | Go | 167 | internal/executor | NO |
 | internal/executor/process_test.go | Go | 124 | internal/executor | NO |
 | internal/identity/device.go | Go | 159 | internal/identity | NO |
@@ -32,17 +48,19 @@ Generated/refreshed: current compiler run
 | internal/protocol/envelope_test.go | Go | 93 | internal/protocol | NO |
 | internal/protocol/verifier.go | Go | 65 | internal/protocol | NO |
 | internal/protocol/verifier_test.go | Go | 103 | internal/protocol | NO |
+| internal/providers/openaicompat/provider.go | Go | 242 | internal/providers/openaicompat | NO |
+| internal/providers/openaicompat/provider_test.go | Go | 157 | internal/providers/openaicompat | NO |
 | internal/relay/command_auth.go | Go | 91 | internal/relay | NO |
 | internal/relay/command_auth_test.go | Go | 85 | internal/relay | NO |
 | internal/relay/controller_auth.go | Go | 172 | internal/relay | NO |
 | internal/relay/controller_auth_test.go | Go | 166 | internal/relay | NO |
 | internal/relay/device_auth.go | Go | 133 | internal/relay | NO |
 | internal/relay/device_auth_test.go | Go | 130 | internal/relay | NO |
-| internal/relay/http.go | Go | 389 | internal/relay | NO |
-| internal/relay/http_test.go | Go | 318 | internal/relay | NO |
-| internal/relay/pairing.go | Go | 165 | internal/relay | NO |
-| internal/relay/pairing_test.go | Go | 168 | internal/relay | NO |
-| internal/relay/store.go | Go | 384 | internal/relay | NO |
+| internal/relay/http.go | Go | 418 | internal/relay | NO |
+| internal/relay/http_test.go | Go | 354 | internal/relay | NO |
+| internal/relay/pairing.go | Go | 227 | internal/relay | NO |
+| internal/relay/pairing_test.go | Go | 212 | internal/relay | NO |
+| internal/relay/store.go | Go | 386 | internal/relay | NO |
 | internal/relay/store_test.go | Go | 149 | internal/relay | NO |
 
 Machine-derived facts do not invent semantic ownership.

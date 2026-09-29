@@ -2,15 +2,17 @@
 
 # WORKFLOW STATE MACHINE
 
-## FLOW-COMMAND — Paired remote capability command
+## FLOW-COMMAND — Phase 4 paired chat-to-capability command
 
-Purpose: Carry a controller-signed capability request from paired controller through relay and local verification/policy without letting remote input grant privilege.
+Purpose: Carry a provider-neutral structured tool request through paired controller signing, relay validation, outbound agent verification, local policy/approval/audit, and bounded result return without letting remote input grant privilege.
 Critical: TRUE
-Entry condition: Device and controller are paired; device has an active Ed25519-authenticated relay session; controller has an active paired session bound to the same agent session.
+Entry condition: Device/controller pairing is persisted locally; device has an active paired session; max-chat has a paired controller identity; provider emits only a declared structured tool call.
 Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
 
 ### States
 
+- CHAT_TOOL_REQUESTED
+- CONTROLLER_SESSION_BOUND
 - CONTROLLER_SIGNED
 - RELAY_VERIFIED
 - QUEUED
@@ -22,32 +24,37 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 - EXECUTED
 - DENIED
 - RESULT_SUBMITTED
+- CHAT_TOOL_RESULT
 
 ### Legal transitions
 
 | From | To | Action | Authority | Side effects |
 |---|---|---|---|---|
-| CONTROLLER_SIGNED | RELAY_VERIFIED | authenticate paired controller session and verify signed CommandEnvelope for current device and agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record command nonce only after successful verification |
+| CHAT_TOOL_REQUESTED | CONTROLLER_SESSION_BOUND | provider-neutral chat core validates declared tool name and JSON arguments then obtains a controller session bound to the active agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
+| CONTROLLER_SESSION_BOUND | CONTROLLER_SIGNED | controller creates a fresh request ID and Ed25519-signed CommandEnvelope for the relay-provided agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record no persistent provider secret |
+| CONTROLLER_SIGNED | RELAY_VERIFIED | relay authenticates paired controller session and verifies signed envelope for current device and agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record command nonce only after verification |
 | RELAY_VERIFIED | QUEUED | enqueue bounded verified request for the owning device | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append request to bounded in-memory device queue |
 | QUEUED | DEVICE_POLLED | authenticate current paired device session on outbound long poll | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
 | DEVICE_POLLED | AGENT_VERIFIED | agent re-verifies controller signature freshness device/session binding and replay | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record local replay nonce after valid verification |
-| AGENT_VERIFIED | POLICY_CHECKED | evaluate local capability policy | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
-| POLICY_CHECKED | DENIED | deny shell unknown or policy-denied capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
-| POLICY_CHECKED | APPROVAL_REQUIRED | stop privileged capability at trusted local approval boundary | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
+| AGENT_VERIFIED | POLICY_CHECKED | evaluate local capability policy and write required audit decision before privileged side effects | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append bounded secret-safe audit metadata |
+| POLICY_CHECKED | DENIED | deny shell unknown or locally rejected capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
+| POLICY_CHECKED | APPROVAL_REQUIRED | stop privileged capability at trusted local terminal approval boundary | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
 | POLICY_CHECKED | EXECUTED | execute only automatically allowed read-only capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded local read-only effects |
-| APPROVAL_REQUIRED | APPROVED | consume one-use short-lived exact-request local approval | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | consume local approval token |
+| APPROVAL_REQUIRED | APPROVED | explicit local yes issues and consumes one-use short-lived exact-request approval | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | consume local approval token |
 | APPROVED | EXECUTED | execute approved privileged capability through bounded executor | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded locally approved side effect |
 | EXECUTED | RESULT_SUBMITTED | owning paired device session submits bounded result | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | complete queued request and retain bounded result |
+| RESULT_SUBMITTED | CHAT_TOOL_RESULT | paired controller receives SSE result and returns validated JSON tool result to the chat loop | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append tool result to in-process conversation history |
 
 ### Invariants
 
+- Provider output is not command authority; controller Ed25519 signing is required.
 - Shared bootstrap registration key cannot mint paired-device sessions.
-- Global symmetric controller command authority does not exist.
 - Relay and agent both require the signed command to target the current device and agent session.
 - Command nonce replay rejects.
 - Remote request cannot self-assert local approval.
 - Shell and unknown capabilities deny by default.
-- Privileged approval is one-use and exact-request bound.
+- Privileged approval is one-use exact-request bound and defaults to deny.
+- Provider API key is not persisted by max-chat.
 
 ### Failure behavior
 
@@ -56,7 +63,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 ### Restart behavior
 
-- Fresh agent session ID makes old signed commands stale; final running agent integration remains to be proven.
+- Fresh agent session ID invalidates old controller sessions and stale signed commands; RemoteExecutor refreshes and re-signs a new request.
 - Relay in-memory state is lost on relay restart and durability is not claimed.
 
 ### Rollback behavior

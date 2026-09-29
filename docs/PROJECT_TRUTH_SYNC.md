@@ -20,7 +20,7 @@ HEAD is recorded externally after the commit exists.
 | BEHAVIORAL_SYNC | PASS | |
 | CROSS_DOCUMENT_CONSISTENCY | PASS | |
 | HUMAN_COMPREHENSION | NOT_PROVEN | |
-| SEQUENCE_SYNC | PASS | |
+| SEQUENCE_SYNC | NOT_PROVEN | |
 | DOC_LAYOUT | PASS | |
 | PROJECT_DOCS_NORMALIZED | PASS | |
 | DOC_READABILITY | PASS | |
@@ -28,7 +28,7 @@ HEAD is recorded externally after the commit exists.
 | DOC_SOURCE_TRACEABILITY | PASS | |
 | DOC_TEST_TRACEABILITY | PASS | |
 | TEST_RUNTIME_TRACEABILITY | NOT_PROVEN | |
-| PROJECT_STATE_SYNC | PASS | |
+| PROJECT_STATE_SYNC | NOT_PROVEN | |
 
 ## Critical claim traceability
 
@@ -42,6 +42,11 @@ HEAD is recorded externally after the commit exists.
 | TRUTH-COMMAND-AUTH-001 | Relay queues only controller-signed command envelopes targeted to the current device and agent session and rejects command nonce replay. | API_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | internal/relay/command_auth.go::Store.QueuePairedCommand( | internal/relay/command_auth_test.go; internal/relay/http_test.go | NOT_APPLICABLE | PASS |
 | TRUTH-APPROVAL-001 | Privileged local approvals are one-use short-lived and bound to request ID capability and exact argument digest. | API_CONTRACTS.md; DATA_CONTRACTS.md | internal/approval/store.go::Store.Issue(; internal/approval/store.go::Store.Consume(; internal/executor/dispatcher.go::Dispatcher.DispatchApproved( | internal/approval/store_test.go; internal/executor/dispatcher_test.go | NOT_APPLICABLE | PASS |
 | TRUTH-AUDIT-001 | Audit primitive accepts only bounded structured secret-safe fields and never stores raw arguments tokens stdout stderr or free-form messages. | DATA_CONTRACTS.md | internal/audit/log.go::Open(; internal/audit/log.go::Logger.Append( | internal/audit/log_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P4-RUNNER-001 | The runnable outbound agent creates a fresh active session, re-verifies controller-signed commands, applies local policy/approval, audits before privileged side effects, and submits bounded results. | ARCHITECTURE.md; WORKFLOW_STATE_MACHINE.md; API_CONTRACTS.md | internal/agent/runner.go::NewRunner(; internal/agent/runner.go::Runner.Run(; internal/agent/runner.go::Runner.handleCommand( | internal/agent/runner_test.go; cmd/max-agent/main_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P4-CONTROLLER-001 | The controller signs each tool request for the relay-provided active agent session and refreshes controller authority when that session changes. | ARCHITECTURE.md; API_CONTRACTS.md | internal/controller/client.go::Client.OpenSession(; internal/controller/client.go::Client.QueueTool(; internal/controller/executor.go::RemoteExecutor.Execute( | internal/controller/client_test.go; internal/controller/executor_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P4-CHAT-001 | The chat core is provider-neutral, exposes only declared structured tools, validates tool-call/result JSON, and enforces a bounded round limit. | ARCHITECTURE.md; API_CONTRACTS.md | internal/chat/chat.go::Session.Run(; internal/chat/chat.go::RemoteTools( | internal/chat/chat_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P4-PROVIDER-001 | The OpenAI-compatible adapter requires HTTPS except loopback, refuses redirects by default, bounds responses, and rejects malformed tool calls. | API_CONTRACTS.md; RUNBOOK.md | internal/providers/openaicompat/provider.go::New(; internal/providers/openaicompat/provider.go::Provider.Complete( | internal/providers/openaicompat/provider_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P4-LOCAL-APPROVAL-001 | The implemented terminal approval path defaults to deny and can issue one-use local approval only after explicit local yes input; remote requests cannot carry trusted approval. | DATA_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | cmd/max-agent/main.go::consoleApprover.Approve(; internal/agent/runner.go::Runner.handleCommand( | cmd/max-agent/main_test.go; internal/agent/runner_test.go | NOT_APPLICABLE | PASS |
 
 ## Claim relations
 
