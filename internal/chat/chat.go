@@ -134,7 +134,7 @@ func RemoteTools() []ToolDefinition {
 	object := func(properties string, required string) json.RawMessage {
 		raw := `{"type":"object","properties":` + properties + `,"additionalProperties":false`
 		if required != "" {
-			raw += `,`"required":` + required
+			raw += `,"required":` + required
 		}
 		raw += "}"
 		return json.RawMessage(raw)
