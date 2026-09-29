@@ -327,6 +327,11 @@ func validateDurableState(state *durableState, now time.Time, maxQueue, maxResul
 		state.Results = make(map[string]Result)
 	}
 
+	for deviceID, generation := range state.PairingGeneration {
+		if !validID(deviceID, 64) || generation == 0 {
+			return ErrDurableStateCorrupt
+		}
+	}
 	pairings := make(map[string]durablePairing, len(state.Pairings))
 	for _, pairing := range state.Pairings {
 		if !validID(pairing.DeviceID, 64) || pairing.Generation == 0 {
@@ -394,8 +399,14 @@ func validateDurableState(state *durableState, now time.Time, maxQueue, maxResul
 		if !validID(requestID, 128) || !validID(deviceID, 64) {
 			return ErrDurableStateCorrupt
 		}
+		if _, paired := pairings[deviceID]; !paired {
+			return ErrDurableStateCorrupt
+		}
 		if queuedDevice, queued := queuedRequests[requestID]; queued {
 			if queuedDevice != deviceID {
+				return ErrDurableStateCorrupt
+			}
+			if _, completed := state.Results[requestID]; completed {
 				return ErrDurableStateCorrupt
 			}
 			continue
