@@ -4,7 +4,7 @@
 
 ## Evidence boundary
 
-Phase 0 through Phase 3 are accepted and revalidated on main. Phase 4 source candidate 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race source lanes on GitHub Actions run 36555366255, but STRICT governance is still pending. Physical remote runtime, live external provider E2E, graphical multi-device UI, relay durability, public TLS deployment, OS-native key protection, and MCP remain NOT_PROVEN.
+Phase 0 through Phase 4 source are accepted and revalidated on main. Phase 4 exact SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed all five blocking jobs on work branch run 36558524192 and identical-SHA main run 36558681560. Physical remote runtime, live external provider E2E, graphical multi-device UI, relay durability, public TLS deployment, OS-native key protection, and MCP remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
 Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
@@ -25,7 +25,7 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 | P4-CHAT-001 | Provider-neutral chat loop exposes only declared structured tools, validates tool JSON, and bounds tool rounds. | GitHub Actions run 36555366255; internal/chat/chat_test.go | PASS |
 | P4-PROVIDER-001 | OpenAI-compatible adapter is HTTPS-by-default except loopback, redirect-refusing by default, response-bounded, and rejects malformed tool calls. | GitHub Actions run 36555366255; internal/providers/openaicompat/provider_test.go | PASS |
 | P4-CLI-001 | max-chat uses local controller identity/state, stdin pairing code, environment-only provider key, and builds across Linux Windows and macOS. | GitHub Actions run 36555366255; cmd/max-chat/main_test.go | PASS |
-| P4-GOV-001 | Exact Phase 4 candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation. | Pending Phase 4 governance closure | NOT_PROVEN |
+| P4-GOV-001 | Exact Phase 4 candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation. | GitHub Actions work run 36558524192 and main run 36558681560 at exact SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 | PASS |
 
 ## Test commands
 
@@ -42,7 +42,7 @@ Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82
 
 Sequence mode for this phase/session: DURING
 Sequence session contract: docs/sequence/phase-4.session.json
-SEQUENCE_SYNC: NOT_PROVEN
+SEQUENCE_SYNC: PASS
 
 ## Project Truth Compiler evidence
 

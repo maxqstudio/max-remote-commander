@@ -3,18 +3,18 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: 95d60a599d2ea6ab75831c54bad5c999ab7d6901
+Authority verified at SHA: 8c205dd1b1ee01fe3c73d44264493610a2704666
 Governance profile: strict
 
 ## Current phase
 Phase: Phase 4 - runnable agent and terminal chat integration
-Status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
+Status: ACCEPTED_CLOSED
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/phase-4-agent-chat
+Branch: work/phase-4-closure
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: 95d60a599d2ea6ab75831c54bad5c999ab7d6901
+Last accepted SHA: 8c205dd1b1ee01fe3c73d44264493610a2704666
 Current candidate SHA: external final acceptance evidence
 Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e
 
@@ -34,11 +34,12 @@ PROJECT_DOCS_SYNC: PASS
 Sequence policy: REQUIRED
 Current sequence mode: DURING
 Current sequence session: docs/sequence/phase-4.session.json
-SEQUENCE_SYNC: NOT_PROVEN
+SEQUENCE_SYNC: PASS
 
 ## Proven
 - Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed all five GitHub Actions jobs on work branch run 36550259782 and main run 36550406590
-- Phase 4 source candidate SHA 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race source lanes on GitHub Actions run 36555366255; STRICT governance remained stale and is not yet accepted
+- Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192
+- The identical Phase 4 SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on main run 36558681560
 - max-agent is a runnable outbound-only client that loads persistent identity and pairing state, authenticates a fresh per-start agent session, long-polls commands, re-verifies signed envelopes, applies local policy and approval, audits decisions/outcomes, and submits results
 - Interactive local approval is opt-in and defaults to deny; privileged execution requires a one-use exact-request local approval issued on the remote PC
 - Git execution isolates user credential/config environment and disables credential helpers, askpass, and terminal prompts for remote clone operations
@@ -48,8 +49,6 @@ SEQUENCE_SYNC: NOT_PROVEN
 - max-chat terminal client keeps provider API keys in environment only, prompts pairing codes via stdin, and is built/tested on Linux Windows and macOS
 
 ## Not proven
-- Phase 4 STRICT governance and exact 5-job work-branch acceptance
-- identical-SHA main revalidation for Phase 4
 - physical remote-device runtime and live external LLM-provider end-to-end behavior
 - graphical multi-device chat UI and device selector
 - durable relay pairing queue session result and nonce state across relay restart
@@ -64,10 +63,8 @@ SEQUENCE_SYNC: NOT_PROVEN
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- synchronize deterministic Phase 4 Project Truth and sequence evidence
-- obtain exact Phase 4 work-branch Linux Windows macOS race and STRICT 5-job PASS
-- merge accepted Phase 4 candidate to main and revalidate the identical SHA
-- start Phase 5 durability TLS packaging graphical multi-device UI MCP and physical E2E work
+- revalidate this truth-only Phase 4 closure on the work branch and main
+- start Phase 5 graphical multi-device UI MCP durability TLS packaging protected-key-storage and physical E2E work
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination

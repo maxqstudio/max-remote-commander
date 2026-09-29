@@ -89,7 +89,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 Current phase: Phase 4 - runnable agent and terminal chat integration
 
-Current status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
+Current status: ACCEPTED_CLOSED
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -98,7 +98,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 | Concern | Authority | Meaning |
 |---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases |
-| working_candidate | work/phase-4-agent-chat | Current unaccepted Phase 4 governance candidate |
+| working_candidate | work/phase-4-closure | Truth-only Phase 4 closure candidate; product source already accepted on main |
 | governance | maxqstudio/Skill_Workflow@9e22feddb8f94e8c0f1af6a33e14b64de5068f8f | Pinned project workflow rules and deterministic documentation compiler |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution |
@@ -109,7 +109,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 ### Mutable current state
 
 - source: Canonical source history and releases
-- working_candidate: Current unaccepted Phase 4 governance candidate
+- working_candidate: Truth-only Phase 4 closure candidate; product source already accepted on main
 
 ### Immutable history / evidence
 
@@ -131,10 +131,8 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- synchronize deterministic Phase 4 Project Truth and sequence evidence
-- obtain exact Phase 4 work-branch Linux Windows macOS race and STRICT 5-job PASS
-- merge accepted Phase 4 candidate to main and revalidate the identical SHA
-- start Phase 5 durability TLS packaging graphical multi-device UI MCP and physical E2E work
+- revalidate this truth-only Phase 4 closure on the work branch and main
+- start Phase 5 graphical multi-device UI MCP durability TLS packaging protected-key-storage and physical E2E work
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -152,7 +150,8 @@ Known blockers:
 ### Proven
 
 - Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed all five GitHub Actions jobs on work branch run 36550259782 and main run 36550406590
-- Phase 4 source candidate SHA 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race source lanes on GitHub Actions run 36555366255; STRICT governance remained stale and is not yet accepted
+- Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192
+- The identical Phase 4 SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on main run 36558681560
 - max-agent is a runnable outbound-only client that loads persistent identity and pairing state, authenticates a fresh per-start agent session, long-polls commands, re-verifies signed envelopes, applies local policy and approval, audits decisions/outcomes, and submits results
 - Interactive local approval is opt-in and defaults to deny; privileged execution requires a one-use exact-request local approval issued on the remote PC
 - Git execution isolates user credential/config environment and disables credential helpers, askpass, and terminal prompts for remote clone operations
@@ -163,8 +162,6 @@ Known blockers:
 
 ### Not proven
 
-- Phase 4 STRICT governance and exact 5-job work-branch acceptance
-- identical-SHA main revalidation for Phase 4
 - physical remote-device runtime and live external LLM-provider end-to-end behavior
 - graphical multi-device chat UI and device selector
 - durable relay pairing queue session result and nonce state across relay restart
