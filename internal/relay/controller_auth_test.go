@@ -116,8 +116,12 @@ func TestRevocationInvalidatesControllerSessionAndGeneration(t *testing.T) {
 		t.Fatal("revoked controller token remained authorized")
 	}
 
+	bootstrapAgain, err := store.Register(pairing.DeviceID, testRegistrationKey, now)
+	if err != nil {
+		t.Fatal(err)
+	}
 	code, hash, _ := identity.GeneratePairingCode()
-	if err := store.PublishPairingOffer(pairing.DeviceID, deviceSession.Token, hash, device.PublicKey(), time.Minute, now); err != nil {
+	if err := store.PublishPairingOffer(pairing.DeviceID, bootstrapAgain.Token, hash, device.PublicKey(), time.Minute, now); err != nil {
 		t.Fatal(err)
 	}
 	pub2, priv2, _ := ed25519.GenerateKey(rand.Reader)
