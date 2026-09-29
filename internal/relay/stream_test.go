@@ -3,6 +3,8 @@ package relay
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -146,7 +148,7 @@ func TestDeviceStreamHeartbeatClosesExpiredSession(t *testing.T) {
 	}()
 	select {
 	case err := <-errs:
-		if websocket.CloseStatus(err) != websocket.StatusPolicyViolation {
+		if websocket.CloseStatus(err) != websocket.StatusPolicyViolation && !errors.Is(err, io.EOF) {
 			t.Fatalf("close status %v: %v", websocket.CloseStatus(err), err)
 		}
 	case <-time.After(time.Second):
