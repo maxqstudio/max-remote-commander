@@ -9,8 +9,8 @@
     },
     {
       "concern": "working_candidate",
-      "authority": "work/phase-4-agent-chat",
-      "meaning": "Current unaccepted Phase 4 governance candidate",
+      "authority": "work/phase-4-closure",
+      "meaning": "Truth-only Phase 4 closure candidate; product source already accepted on main",
       "mutable": true
     },
     {

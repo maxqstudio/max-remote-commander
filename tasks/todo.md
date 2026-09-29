@@ -4,17 +4,16 @@
 - [x] Phase 1 accepted/revalidated on main at 6132e215fb15862471ec5a40acd72ca8d0422f88
 - [x] Phase 2 accepted/revalidated on main at c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
 - [x] Phase 3 accepted/revalidated on main at 95d60a599d2ea6ab75831c54bad5c999ab7d6901
-- [x] Phase 4 runnable outbound max-agent source
-- [x] Phase 4 trusted local terminal approval and audit integration source
-- [x] Phase 4 Git credential-environment isolation
-- [x] Phase 4 paired controller bridge and agent-session refresh
-- [x] Phase 4 provider-neutral bounded chat tool loop
-- [x] Phase 4 OpenAI-compatible / loopback-local provider adapter
-- [x] Phase 4 cross-platform max-chat terminal client
-- [x] Phase 4 source candidate 8174d1775c01b1b09b0381611486718f462f59b8 source lanes PASS on run 36555366255
-- [ ] Synchronize Phase 4 Project Truth and sequence evidence
-- [ ] Phase 4 exact work-branch 5/5 PASS
-- [ ] Phase 4 merge to main and identical-SHA 5/5 revalidation
+- [x] Phase 4 source accepted at 8c205dd1b1ee01fe3c73d44264493610a2704666
+- [x] Phase 4 work run 36558524192 5/5 PASS
+- [x] Phase 4 identical-SHA main run 36558681560 5/5 PASS
+- [x] Runnable outbound max-agent with trusted local approval and audit integration
+- [x] Git credential-environment isolation
+- [x] Paired controller bridge with active-agent-session refresh
+- [x] Provider-neutral bounded chat tool loop
+- [x] OpenAI-compatible / loopback-local provider adapter
+- [x] Cross-platform max-chat terminal client
+- [ ] Revalidate truth-only Phase 4 closure on work branch and main
 - [ ] Phase 5 graphical multi-device UI/device selector
 - [ ] Phase 5 MCP adapter
 - [ ] Phase 5 durable relay state/replay strategy

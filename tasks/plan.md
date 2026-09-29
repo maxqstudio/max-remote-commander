@@ -44,7 +44,7 @@ Build a secure self-hosted cross-platform remote computer agent gateway for LLM 
 - [x] Paired controller bridge with active-agent-session refresh.
 - [x] OpenAI-compatible and loopback-local provider adapter.
 - [x] Cross-platform `max-chat` terminal client.
-- [ ] Exact Phase 4 STRICT governance acceptance and main revalidation.
+- [x] Exact Phase 4 STRICT governance acceptance and main revalidation at 8c205dd1b1ee01fe3c73d44264493610a2704666.
 
 Phase 4 scope decision: graphical multi-device chat UI/device selector moves to Phase 5; it is not claimed as implemented.
 

@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through Phase 3 are accepted and revalidated on main. Phase 4 source candidate 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race source lanes on GitHub Actions run 36555366255, but STRICT governance is still pending. Physical remote runtime, live external provider E2E, graphical multi-device UI, relay durability, public TLS deployment, OS-native key protection, and MCP remain NOT_PROVEN.",
+  "evidence_boundary": "Phase 0 through Phase 4 source are accepted and revalidated on main. Phase 4 exact SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed all five blocking jobs on work branch run 36558524192 and identical-SHA main run 36558681560. Physical remote runtime, live external provider E2E, graphical multi-device UI, relay durability, public TLS deployment, OS-native key protection, and MCP remain NOT_PROVEN.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -88,10 +88,10 @@
       "status": "PASS"
     },
     {
-      "evidence": "Pending Phase 4 governance closure",
+      "evidence": "GitHub Actions work run 36558524192 and main run 36558681560 at exact SHA 8c205dd1b1ee01fe3c73d44264493610a2704666",
       "id": "P4-GOV-001",
       "requirement": "Exact Phase 4 candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation.",
-      "status": "NOT_PROVEN"
+      "status": "PASS"
     }
   ],
   "runtime_checks": [],
@@ -99,7 +99,7 @@
   "schema_version": 1,
   "sequence_mode": "DURING",
   "sequence_session": "docs/sequence/phase-4.session.json",
-  "sequence_sync_status": "NOT_PROVEN",
+  "sequence_sync_status": "PASS",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
@@ -116,12 +116,12 @@
     "HUMAN_COMPREHENSION": "NOT_PROVEN",
     "PROJECT_DOCS_NORMALIZED": "PASS",
     "PROJECT_DOCS_SYNC": "PASS",
-    "PROJECT_STATE_SYNC": "NOT_PROVEN",
+    "PROJECT_STATE_SYNC": "PASS",
     "PROVENANCE_SYNC": "PASS",
     "REFERENCE_SYNC": "PASS",
     "RUNTIME_E2E": "NOT_PROVEN",
     "SEMANTIC_SYNC": "PASS",
-    "SEQUENCE_SYNC": "NOT_PROVEN",
+    "SEQUENCE_SYNC": "PASS",
     "SOURCE_TESTS": "PASS",
     "STRUCTURAL_SYNC": "PASS",
     "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"
