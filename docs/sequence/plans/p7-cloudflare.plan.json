@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "flow_id": "FLOW-P7-CLOUDFLARE-RELAY",
+  "title": "P7 Cloudflare paired command and result flow",
+  "status": "FROZEN",
+  "nodes": [
+    {
+      "id": "worker-entry",
+      "label": "Cloudflare Worker route",
+      "locator": "cloudflare/relay/src/index.ts::fetch",
+      "kind": "source"
+    },
+    {
+      "id": "device-do",
+      "label": "Per-device Durable Object",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.fetch",
+      "kind": "source"
+    },
+    {
+      "id": "protocol-verify",
+      "label": "Protocol-v1 authority checks",
+      "locator": "cloudflare/relay/src/protocol.ts::verifySignedCommand",
+      "kind": "source"
+    },
+    {
+      "id": "durable-queue",
+      "label": "Transactional device queue",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.queueCommand",
+      "kind": "source"
+    },
+    {
+      "id": "agent-ws",
+      "label": "Hibernation WebSocket agent",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.acceptAgentWebSocket",
+      "kind": "source"
+    },
+    {
+      "id": "local-agent",
+      "label": "MAX Agent verifier/policy/approval",
+      "locator": "internal/agent/runner.go::Runner.Run",
+      "kind": "source"
+    },
+    {
+      "id": "result-store",
+      "label": "Durable result acknowledgement",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.submitResult",
+      "kind": "source"
+    },
+    {
+      "id": "controller-result",
+      "label": "Controller result response",
+      "locator": "cloudflare/relay/src/index.ts::fetch",
+      "kind": "source"
+    }
+  ],
+  "edges": [
+    {
+      "from": "worker-entry",
+      "to": "device-do",
+      "action": "route by validated device id",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "device-do",
+      "to": "protocol-verify",
+      "action": "verify controller/device/session authority before mutation",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "protocol-verify",
+      "to": "durable-queue",
+      "action": "persist accepted command and replay guard transactionally",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "durable-queue",
+      "to": "agent-ws",
+      "action": "deliver only current FIFO head to authenticated outbound agent socket",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "agent-ws",
+      "to": "local-agent",
+      "action": "carry unchanged signed CommandEnvelope; agent re-verifies locally",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "local-agent",
+      "to": "result-store",
+      "action": "submit bounded result under active device session",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "result-store",
+      "to": "controller-result",
+      "action": "acknowledge result only after durable write succeeds",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "worker-entry",
+      "to": "local-agent",
+      "action": "direct remote execution bypass",
+      "requirement": "FORBID",
+      "verification": "SOURCE"
+    }
+  ]
+}

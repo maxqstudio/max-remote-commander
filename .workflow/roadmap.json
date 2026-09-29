@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_phase": "P6 - Transport V2",
+  "current_phase": "P7 - Cloudflare Relay",
   "phases": [
     {
       "id": "P0 - Governance Foundation",
@@ -59,7 +59,7 @@
     {
       "id": "P6 - Transport V2",
       "title": "Transport V2",
-      "status": "CURRENT",
+      "status": "CLOSED",
       "objective": "Add outbound WebSocket command delivery with reconnect, heartbeat, bounded backoff, session refresh, FIFO lease safety, and long-poll fallback while preserving protocol-v1 authority.",
       "exit_criteria": [
         "Linux, Windows, macOS, race, and latest Skill_Workflow governance pass on the exact final work SHA.",
@@ -70,11 +70,15 @@
     {
       "id": "P7 - Cloudflare Relay",
       "title": "Cloudflare Relay",
-      "status": "PLANNED",
-      "objective": "Add Worker + Durable Object relay path with WebSocket/Hibernation and Cloudflare-appropriate durable routing.",
+      "status": "CURRENT",
+      "objective": "Add a protocol-v1-conformant Cloudflare Worker + per-device SQLite Durable Object relay with Hibernation WebSocket agent connectivity, durable controller/result routing, and measured Free-plan resource behavior.",
       "exit_criteria": [
-        "Deployed Cloudflare test environment preserves shared protocol vectors and outbound-only device connectivity.",
-        "Free-tier/resource behavior is measured without weakening security."
+        "TypeScript Cloudflare adapter passes the accepted protocol-v1 signing and restart fixtures without weakening device, generation, expiry, replay, or agent-session binding.",
+        "SQLite Durable Object tests prove restart/hibernation-safe trust, queue, result, and replay semantics with bearer sessions remaining short-lived.",
+        "Hibernation WebSocket tests preserve outbound-only agent connectivity and stale-session rejection.",
+        "A deployed Cloudflare staging environment passes paired command/result E2E without opening an inbound PC port.",
+        "Free-plan request, CPU, storage, and connection budgets are measured and documented.",
+        "Exact final P7 work SHA and identical-SHA main revalidation pass all blocking lanes under current Skill_Workflow."
       ]
     },
     {

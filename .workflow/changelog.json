@@ -121,6 +121,17 @@
         "P6 closes with outbound WebSocket command push, bounded reconnect/backoff, heartbeat/session refresh, strict framing, FIFO head-of-line leases, HTTPS durable result acknowledgement, and explicit long-poll fallback.",
         "Cloudflare relay, MCP, physical E2E, packaging, and OS-native protected key storage remain later roadmap phases."
       ]
+    },
+    {
+      "date": "2026-09-30",
+      "title": "P7 Cloudflare Relay planning started",
+      "type": "planning",
+      "changes": [
+        "Started P7 from final accepted P6 closure SHA 2af086edfbe262b8de87e446bc35a5f5089d0676.",
+        "Selected a per-device SQLite Durable Object and Hibernation WebSocket architecture while preserving protocol-v1 as the security authority.",
+        "P7 is split into cross-language conformance, Durable Object persistence, Hibernation agent transport, controller/result routing, and deployed Free-plan acceptance.",
+        "No Cloudflare implementation or deployment is claimed proven at this planning checkpoint."
+      ]
     }
   ]
 }

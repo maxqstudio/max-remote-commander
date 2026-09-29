@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through P6 Transport V2 are accepted and revalidated on main. P6 exact SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed all five blocking jobs on work run 36611213711 and identical-SHA main run 36611401330 under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259. P6 proves authenticated outbound WebSocket command delivery, strict stream framing, bounded reconnect/backoff, heartbeat/session refresh, FIFO lease safety, HTTPS durable result acknowledgement, and long-poll fallback in GitHub-hosted cross-platform tests. Cloudflare deployment, MCP integration, physical network E2E, packaging, OS-native protected key storage, and physical crash/power-loss behavior remain NOT_PROVEN.",
+  "evidence_boundary": "Phase 0 through P6 Transport V2 are accepted and revalidated on main. P7 Cloudflare Relay is now IN_PROGRESS from accepted P6 closure SHA 2af086edfbe262b8de87e446bc35a5f5089d0676. P7 must treat Cloudflare Worker/Durable Object code as a thin protocol-v1 transport/state adapter and prove cross-language fixture conformance before deployment claims. No Cloudflare runtime, deployed staging, free-tier budget, or physical internet E2E evidence is proven yet.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -176,14 +176,50 @@
       "id": "P6-WORKFLOW-LATEST-001",
       "requirement": "P6 adopts Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 with synchronized roadmap authority, generated ROADMAP.md, ROADMAP_SYNC, and project-local vendored governance tools before final acceptance.",
       "status": "PASS"
+    },
+    {
+      "id": "P7-CONFORMANCE-001",
+      "requirement": "Cloudflare TypeScript protocol implementation conforms to accepted protocol-v1 signing/canonicalization/restart fixtures and does not weaken security bindings.",
+      "evidence": "Pending P7A implementation and CI.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-DURABILITY-001",
+      "requirement": "One SQLite Durable Object per device durably preserves pairing generation queue request result and replay state while bearer sessions remain short-lived and restart/hibernation safe.",
+      "evidence": "Pending P7B implementation and Workers-runtime tests.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-HIBERNATION-001",
+      "requirement": "Agent connects outbound through authenticated Hibernation WebSocket and stale/revoked sessions fail closed without an inbound PC listener.",
+      "evidence": "Pending P7C implementation and Workers-runtime tests.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-ROUTING-001",
+      "requirement": "Controller command and result routing through Cloudflare preserves current agent-session binding FIFO command authority and durable result acknowledgement semantics.",
+      "evidence": "Pending P7D implementation and integration tests.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-DEPLOY-001",
+      "requirement": "Cloudflare staging deployment passes paired command/result E2E and records Free-plan request CPU storage and connection budgets.",
+      "evidence": "Pending P7E deployment evidence.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-GOV-001",
+      "requirement": "Exact final P7 candidate passes all blocking source/runtime/governance lanes on work branch and identical SHA passes main revalidation.",
+      "evidence": "Pending P7 final acceptance.",
+      "status": "NOT_PROVEN"
     }
   ],
   "runtime_checks": [],
   "runtime_status": "NOT_PROVEN",
   "schema_version": 1,
-  "sequence_mode": "DURING",
-  "sequence_session": "docs/sequence/p6.session.json",
-  "sequence_sync_status": "PASS",
+  "sequence_mode": "BEFORE",
+  "sequence_session": "docs/sequence/p7.session.json",
+  "sequence_sync_status": "NOT_PROVEN",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
@@ -199,14 +235,14 @@
     "DOC_TEST_TRACEABILITY": "PASS",
     "HUMAN_COMPREHENSION": "NOT_PROVEN",
     "PROJECT_DOCS_NORMALIZED": "PASS",
-    "PROJECT_DOCS_SYNC": "PASS",
+    "PROJECT_DOCS_SYNC": "NOT_PROVEN",
     "PROJECT_STATE_SYNC": "NOT_PROVEN",
     "PROVENANCE_SYNC": "PASS",
     "REFERENCE_SYNC": "PASS",
-    "ROADMAP_SYNC": "PASS",
+    "ROADMAP_SYNC": "NOT_PROVEN",
     "RUNTIME_E2E": "NOT_PROVEN",
     "SEMANTIC_SYNC": "PASS",
-    "SEQUENCE_SYNC": "PASS",
+    "SEQUENCE_SYNC": "NOT_PROVEN",
     "SOURCE_TESTS": "PASS",
     "STRUCTURAL_SYNC": "PASS",
     "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"

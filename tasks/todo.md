@@ -36,9 +36,19 @@
 - [x] P6 exact SHA 8e13e0374cee8724dd5dbda766a373f800d44afd 5/5 work-branch PASS on run 36611213711 under latest Skill_Workflow
 - [x] P6 identical-SHA main revalidation 5/5 PASS on run 36611401330; P6 accepted
 
+## P7 — Cloudflare Relay
+
+- [x] Create work/p7-cloudflare-relay from final accepted P6 main
+- [ ] Freeze BEFORE sequence plan
+- [ ] P7A protocol-v1 TypeScript conformance
+- [ ] P7B SQLite Durable Object persistence
+- [ ] P7C Hibernation WebSocket agent path
+- [ ] P7D controller/result routing
+- [ ] P7E deployed staging + Free-plan budget evidence
+- [ ] Exact P7 work/main acceptance
+
 ## Forward roadmap
 
-- [ ] P7 Cloudflare Relay — Worker, Durable Objects, WebSocket/Hibernation
 - [ ] P8 MCP Gateway — structured capability adapter, no default unrestricted shell
 - [ ] P9 Multi-client Compatibility — ChatGPT-compatible, Codex/IDE, generic MCP conformance
 - [ ] P10 Device & Permission Model — multi-device, scopes, revoke, per-device policy

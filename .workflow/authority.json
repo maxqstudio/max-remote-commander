@@ -9,8 +9,8 @@
     },
     {
       "concern": "working_candidate",
-      "authority": "work/p6-transport-v2",
-      "meaning": "Current unaccepted P6 Transport V2 candidate under latest-governance migration",
+      "authority": "work/p7-cloudflare-relay",
+      "meaning": "Current unaccepted P7 Cloudflare Relay candidate",
       "mutable": true
     },
     {

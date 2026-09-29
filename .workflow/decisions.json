@@ -70,6 +70,13 @@
       "status": "ACCEPTED",
       "decision": "Pin Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259, make .workflow/roadmap.json the roadmap authority, generate docs/ROADMAP.md deterministically, and vendor the latest project-local governance tool pack while retaining the repo-specific Go-aware sequence extractor as a documented extension.",
       "rationale": "The latest workflow makes roadmap/state synchronization blocking and provides project-local deterministic tools. Replacing the Go-aware extractor with the generic upstream extractor would regress Go sequence coverage, so the project keeps that extension while adopting the latest contract and LF determinism."
+    },
+    {
+      "id": "DEC-011",
+      "title": "Cloudflare relay is a thin per-device Durable Object adapter",
+      "status": "ACCEPTED",
+      "decision": "Implement P7 as a TypeScript Cloudflare Worker that routes each device to one SQLite-backed Durable Object; use the Hibernation WebSocket API for the outbound agent connection and preserve protocol-v1 cryptographic/session authority rather than creating Cloudflare-specific command authority.",
+      "rationale": "Cloudflare recommends SQLite-backed Durable Objects for new namespaces and Hibernation for WebSocket servers. A per-device object gives serialized strongly-consistent state and keeps Cloudflare-specific transport/storage code behind the already accepted protocol-v1 compatibility boundary."
     }
   ]
 }

@@ -72,8 +72,16 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [x] Exact P6 SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed 5/5 on work run 36611213711 under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259.
 - [x] Identical-SHA main run 36611401330 passed 5/5; P6 Transport V2 accepted and closed.
 
-### P7-P19 production roadmap
-- [ ] P7 Cloudflare Relay — Worker, Durable Objects, and WebSocket/Hibernation.
+### P7: Cloudflare Relay
+- [ ] Freeze P7 BEFORE sequence contract before implementation.
+- [ ] P7A — TypeScript protocol-v1 signing/restart conformance against accepted fixtures.
+- [ ] P7B — Per-device SQLite Durable Object trust/queue/result/replay persistence.
+- [ ] P7C — Hibernation WebSocket agent connectivity and stale-session handling.
+- [ ] P7D — Controller command + durable result routing.
+- [ ] P7E — Staging deployment, security checks, and Free-plan request/CPU/storage/connection budget evidence.
+- [ ] Exact P7 work-branch acceptance and identical-SHA main revalidation.
+
+### P8-P19 production roadmap
 - [ ] P8 MCP Gateway — structured capability adapter with no default unrestricted shell.
 - [ ] P9 Multi-client Compatibility.
 - [ ] P10 Device & Permission Model.
