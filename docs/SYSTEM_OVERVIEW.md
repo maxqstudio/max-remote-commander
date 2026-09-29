@@ -82,7 +82,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 Current phase: Phase 3 - pairing identity and trusted approval
 
-Current status: ACTIVE_CANDIDATE
+Current status: ACCEPTED_CLOSED
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -124,11 +124,9 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- synchronize deterministic Project Truth for Phase 3
-- run exact-SHA Phase 3 acceptance
-- fast-forward accepted Phase 3 SHA to main
-- revalidate the same SHA on main
-- start Phase 4 chat-agent integration only after main revalidation
+- synchronize this post-acceptance Phase 3 truth closure
+- revalidate truth-only closure on work branch and main
+- start Phase 4 runnable agent and chat integration from accepted Phase 3 main
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -136,17 +134,18 @@ Blocked actions:
 - allow controller bootstrap secrets as command authority
 - mint paired-device sessions from the shared registration bootstrap key
 - auto-execute privileged local capabilities without trusted local approval
-- claim physical runtime or approval UI proven from GitHub-hosted CI
+- claim physical runtime approval UI chat or MCP as proven
 
 Known blockers:
-- Phase 3 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
+- None declared.
 
 ## Proven vs not proven
 
 ### Proven
 
 - Phase 2 exact SHA c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 passed all five GitHub Actions jobs on work branch run 36329243639 and main run 36329323271
-- Phase 3 source jobs passed Linux Windows macOS and race at run 36549467606 on source SHA f8f8f1d89c4af8619f53915b45aa7fbd41f8e0c2
+- Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed Linux Windows macOS race and STRICT governance on work branch run 36550259782
+- The identical Phase 3 source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed Linux Windows macOS race and STRICT governance on main run 36550406590
 - Device identity uses persistent Ed25519 keys with deterministic device IDs, symlink rejection, restricted POSIX permissions, and concurrent first-start convergence
 - Pairing binds one device public key to one controller public key with one-use high-entropy pairing codes, generation counters, attempt limits, expiry, and revocation
 - Paired relay device sessions require short-lived Ed25519 device assertions bound to pairing generation and per-start agent session ID; shared registration bootstrap cannot mint a paired-device session
@@ -157,14 +156,13 @@ Known blockers:
 
 ### Not proven
 
-- STRICT governance and cross-platform CI on the exact final Phase 3 closure SHA
-- main-branch revalidation of accepted Phase 3
 - user-facing trusted local approval prompt and issuance workflow
 - integration of audit events across the final running agent and relay lifecycle
 - durable relay pairing queue session result and nonce state across relay restart
 - public TLS deployment and reverse-proxy configuration
 - OS-native protected key storage or explicit Windows ACL hardening for the device identity seed
 - physical remote-device runtime
+- runnable outbound agent loop
 - chat client and LLM provider runtime
 - MCP adapter
 

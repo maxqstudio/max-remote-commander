@@ -22,10 +22,10 @@ Type: feature
 - Accepted exact SHA c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 after work-branch run 36329243639 and main run 36329323271 5-job PASS.
 - Added outbound long-poll command relay bounded queues/results and loopback-by-default max-relay.
 
-## 2026-09-29 — Phase 3 pairing identity and trusted approval candidate
+## 2026-09-29 — Phase 3 accepted pairing identity and trusted approval core
 
 Type: security
 
-- Added persistent Ed25519 device identity one-use pairing generations paired device/controller assertions and session binding.
-- Removed global controller bootstrap secret as command authority and require signed CommandEnvelope payloads bound to active agent session.
+- Accepted exact source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 after work-branch run 36550259782 and main run 36550406590 both passed Linux Windows macOS race and STRICT governance.
+- Added persistent Ed25519 device identity, one-use pairing generations, paired device/controller assertions, active agent-session binding, and signed command replay defense.
 - Added one-use exact-request local approval grants and bounded secret-safe audit primitive.

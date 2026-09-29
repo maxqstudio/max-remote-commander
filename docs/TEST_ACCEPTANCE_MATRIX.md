@@ -4,7 +4,7 @@
 
 ## Evidence boundary
 
-Phase 0 through Phase 2 are accepted on main. Phase 3 security primitives have GitHub-hosted cross-platform source evidence at run 36549467606, but exact final Phase 3 STRICT governance/main revalidation, user-facing approval runtime, audit runtime integration, durable relay state, public TLS deployment, physical remote runtime, chat providers, and MCP remain NOT_PROVEN.
+Phase 0 through Phase 3 source are accepted and revalidated on main. Phase 3 exact source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed all five blocking jobs on work branch run 36550259782 and main run 36550406590. User-facing approval runtime, audit runtime integration, durable relay state, public TLS deployment, physical remote runtime, chat providers, and MCP remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
 Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
@@ -19,7 +19,7 @@ Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162
 | P3-COMMAND-001 | Relay accepts only controller-signed CommandEnvelope payloads bound to current device and agent session and rejects nonce replay. | GitHub Actions run 36549467606; internal/relay/command_auth_test.go; internal/relay/http_test.go | PASS |
 | P3-APPROVAL-001 | Privileged approvals are one-use short-lived and exact-request bound and cannot be self-asserted by remote request payload. | GitHub Actions run 36549467606; internal/approval/store_test.go; internal/executor/dispatcher_test.go | PASS |
 | P3-AUDIT-001 | Audit primitive is structured secret-safe bounded and rejects symlink/free-form misuse. | GitHub Actions run 36549467606; internal/audit/log_test.go | PASS |
-| P3-FINAL-001 | Exact final Phase 3 SHA passes Linux Windows macOS race and STRICT governance then identical SHA passes main revalidation. | Pending exact final Phase 3 CI | NOT_PROVEN |
+| P3-FINAL-001 | Exact final Phase 3 SHA passes Linux Windows macOS race and STRICT governance then identical SHA passes main revalidation. | GitHub Actions work run 36550259782 and main run 36550406590 at exact SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 | PASS |
 
 ## Test commands
 
@@ -36,7 +36,7 @@ Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162
 
 Sequence mode for this phase/session: DURING
 Sequence session contract: docs/sequence/phase-3.session.json
-SEQUENCE_SYNC: NOT_PROVEN
+SEQUENCE_SYNC: PASS
 
 ## Project Truth Compiler evidence
 

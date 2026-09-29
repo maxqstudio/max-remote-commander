@@ -3,18 +3,18 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
+Authority verified at SHA: 95d60a599d2ea6ab75831c54bad5c999ab7d6901
 Governance profile: strict
 
 ## Current phase
 Phase: Phase 3 - pairing identity and trusted approval
-Status: ACTIVE_CANDIDATE
+Status: ACCEPTED_CLOSED
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/phase-3-identity-approval
+Branch: work/phase-3-closure
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
+Last accepted SHA: 95d60a599d2ea6ab75831c54bad5c999ab7d6901
 Current candidate SHA: external final acceptance evidence
 Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
 
@@ -34,11 +34,12 @@ PROJECT_DOCS_SYNC: PASS
 Sequence policy: REQUIRED
 Current sequence mode: DURING
 Current sequence session: docs/sequence/phase-3.session.json
-SEQUENCE_SYNC: NOT_PROVEN
+SEQUENCE_SYNC: PASS
 
 ## Proven
 - Phase 2 exact SHA c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 passed all five GitHub Actions jobs on work branch run 36329243639 and main run 36329323271
-- Phase 3 source jobs passed Linux Windows macOS and race at run 36549467606 on source SHA f8f8f1d89c4af8619f53915b45aa7fbd41f8e0c2
+- Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed Linux Windows macOS race and STRICT governance on work branch run 36550259782
+- The identical Phase 3 source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed Linux Windows macOS race and STRICT governance on main run 36550406590
 - Device identity uses persistent Ed25519 keys with deterministic device IDs, symlink rejection, restricted POSIX permissions, and concurrent first-start convergence
 - Pairing binds one device public key to one controller public key with one-use high-entropy pairing codes, generation counters, attempt limits, expiry, and revocation
 - Paired relay device sessions require short-lived Ed25519 device assertions bound to pairing generation and per-start agent session ID; shared registration bootstrap cannot mint a paired-device session
@@ -48,29 +49,26 @@ SEQUENCE_SYNC: NOT_PROVEN
 - Secret-safe audit primitive writes bounded structured JSONL without raw arguments tokens stdout stderr or free-form messages
 
 ## Not proven
-- STRICT governance and cross-platform CI on the exact final Phase 3 closure SHA
-- main-branch revalidation of accepted Phase 3
 - user-facing trusted local approval prompt and issuance workflow
 - integration of audit events across the final running agent and relay lifecycle
 - durable relay pairing queue session result and nonce state across relay restart
 - public TLS deployment and reverse-proxy configuration
 - OS-native protected key storage or explicit Windows ACL hardening for the device identity seed
 - physical remote-device runtime
+- runnable outbound agent loop
 - chat client and LLM provider runtime
 - MCP adapter
 
 ## Known blockers
-- Phase 3 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
+- None declared.
 
 ## Known defects
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- synchronize deterministic Project Truth for Phase 3
-- run exact-SHA Phase 3 acceptance
-- fast-forward accepted Phase 3 SHA to main
-- revalidate the same SHA on main
-- start Phase 4 chat-agent integration only after main revalidation
+- synchronize this post-acceptance Phase 3 truth closure
+- revalidate truth-only closure on work branch and main
+- start Phase 4 runnable agent and chat integration from accepted Phase 3 main
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination
@@ -78,4 +76,4 @@ See KNOWN_DEFECTS.md.
 - allow controller bootstrap secrets as command authority
 - mint paired-device sessions from the shared registration bootstrap key
 - auto-execute privileged local capabilities without trusted local approval
-- claim physical runtime or approval UI proven from GitHub-hosted CI
+- claim physical runtime approval UI chat or MCP as proven
