@@ -2,7 +2,7 @@
 
 # ARCHITECTURE
 
-Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582
+Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
 ## Components
 
@@ -12,10 +12,10 @@ Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e682
 | controller_client | Paired Controller Client | Persists local controller trust state, authenticates controller sessions, signs remote commands, refreshes stale sessions, and consumes results | controller Ed25519 identity, controller pairing state, controller session refresh, signed command submission | relay_server, protocol |
 | llm_provider_adapter | OpenAI-compatible Provider Adapter | Maps provider-neutral chat messages/tools to an OpenAI-compatible chat-completions boundary | HTTPS/loopback provider transport, API-key header injection from runtime environment, provider response bounds and tool-call parsing | chat_core |
 | llm_client | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
-| relay_server | Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results, and optionally persists durable trust/command state as an encrypted atomic snapshot | pre-pairing registration bootstrap, pairing generations, ephemeral device and controller sessions, signed command validation, bounded command leases, bounded result retention, encrypted durable pairings generations queues results and replay nonces when configured, SSE result stream | identity, protocol, agent, durable_state |
-| agent | PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
+| relay_server | Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results over authenticated WebSocket or long-poll fallback, and optionally persists durable trust/command state as an encrypted atomic snapshot | pre-pairing registration bootstrap, pairing generations, ephemeral device and controller sessions, signed command validation, bounded command leases, bounded result retention, encrypted durable pairings generations queues results and replay nonces when configured, SSE result stream, authenticated paired-device WebSocket command stream, heartbeat-based stale-session detection, FIFO head-of-line command leases | identity, protocol, agent, durable_state |
+| agent | PC Agent | Maintains device identity and per-start session, receives signed commands over outbound WebSocket by default with long-poll fallback, re-verifies requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary, outbound WebSocket reconnect with bounded backoff, idle device-session refresh, explicit long-poll fallback | identity, protocol, policy, approval, executor, audit, relay_server |
 | identity | Identity | Persists device Ed25519 identity and derives deterministic device IDs and pairing codes | device private seed, device public key, device ID, pairing code generation |  |
-| protocol | Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID |  |
+| protocol | Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID, strict versioned WebSocket transport framing that carries the unchanged signed CommandEnvelope |  |
 | policy | Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
 | approval | Local Approval Store | Issues one-use short-lived local approval grants bound to exact privileged requests | approval token hashes, request capability and argument bindings | policy |
 | executor | Local Capability Executor | Executes bounded filesystem process and Git operations after policy and approval authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, dispatcher | policy, approval |
@@ -27,14 +27,14 @@ Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e682
 - llm_provider_adapter -> chat_core: assistant text or validated structured tool calls
 - chat_core -> controller_client: declared structured tool request only
 - controller_client -> relay_server: paired controller assertion and controller-signed CommandEnvelope bound to current agent session
-- relay_server -> agent: outbound long-poll delivery of relay-validated signed command envelope
+- relay_server -> agent: authenticated outbound WebSocket push of relay-validated signed command envelopes by default, with long-poll fallback
 - agent -> protocol: agent re-verifies controller signature device/session freshness and replay before local policy
 - protocol -> policy: verified structured capability intent
 - policy -> approval: privileged capability requires trusted local approval
 - approval -> executor: one-use exact-request approval enables privileged execution
 - executor -> audit: decision and outcome metadata without raw secret-bearing payloads
 - executor -> agent: bounded local capability result
-- agent -> relay_server: paired-device-session-authenticated result submission
+- agent -> relay_server: paired-device-session-authenticated HTTPS result submission after local execution
 - relay_server -> controller_client: paired-controller-session-authenticated SSE result event
 - controller_client -> chat_core: validated JSON tool result returned to conversation
 - relay_server -> durable_state: transactionally commit restart-critical state before acknowledging durable mutations
@@ -42,7 +42,7 @@ Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e682
 
 ## External boundaries
 
-- Public network: Device traffic is outbound from the agent. Relay binds loopback by default; public deployment requires external TLS termination and remains unproven.
+- Public network: Device traffic remains outbound from the agent. Non-loopback clients require HTTPS/WSS; relay binds loopback by default and public TLS termination remains deployment-unproven.
 - Initial bootstrap: The shared registration bootstrap key is only for an unpaired device to create a temporary pre-pairing session; it is rejected for paired devices and is not controller command authority.
 - Paired identity: Paired device and controller sessions require Ed25519 proof-of-possession, pairing generation, freshness, nonce replay checks, and current agent session binding.
 - Local privileged execution: Remote payloads cannot self-approve. Privileged capability grants are local one-use short-lived exact-request bindings.
@@ -53,9 +53,9 @@ Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e682
 
 ## Observed implementation inventory
 
-Source files: 61
-Source lines: 10109
-Languages: Go=61
+Source files: 69
+Source lines: 11147
+Languages: Go=69
 
 Structural facts come from the code extractor. Component meaning comes from
 .workflow/architecture.json.

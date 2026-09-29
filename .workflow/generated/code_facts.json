@@ -17,7 +17,7 @@
       "file": "cmd/max-agent/main.go",
       "is_test": false,
       "language": "Go",
-      "lines": 282
+      "lines": 297
     },
     {
       "directory": "cmd/max-agent",
@@ -59,14 +59,21 @@
       "file": "internal/agent/client.go",
       "is_test": false,
       "language": "Go",
-      "lines": 263
+      "lines": 278
     },
     {
       "directory": "internal/agent",
       "file": "internal/agent/runner.go",
       "is_test": false,
       "language": "Go",
-      "lines": 341
+      "lines": 357
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/runner_refresh_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 89
     },
     {
       "directory": "internal/agent",
@@ -88,6 +95,20 @@
       "is_test": false,
       "language": "Go",
       "lines": 84
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/ws_transport.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 248
+    },
+    {
+      "directory": "internal/agent",
+      "file": "internal/agent/ws_transport_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 124
     },
     {
       "directory": "internal/approval",
@@ -294,6 +315,20 @@
     },
     {
       "directory": "internal/protocol",
+      "file": "internal/protocol/stream.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 68
+    },
+    {
+      "directory": "internal/protocol",
+      "file": "internal/protocol/stream_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 43
+    },
+    {
+      "directory": "internal/protocol",
       "file": "internal/protocol/verifier.go",
       "is_test": false,
       "language": "Go",
@@ -388,7 +423,7 @@
       "file": "internal/relay/http.go",
       "is_test": false,
       "language": "Go",
-      "lines": 418
+      "lines": 421
     },
     {
       "directory": "internal/relay",
@@ -430,7 +465,14 @@
       "file": "internal/relay/store.go",
       "is_test": false,
       "language": "Go",
-      "lines": 433
+      "lines": 475
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/store_fifo_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 47
     },
     {
       "directory": "internal/relay",
@@ -438,19 +480,33 @@
       "is_test": false,
       "language": "Go",
       "lines": 149
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/stream.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 124
+    },
+    {
+      "directory": "internal/relay",
+      "file": "internal/relay/stream_test.go",
+      "is_test": false,
+      "language": "Go",
+      "lines": 204
     }
   ],
   "python_calls": [],
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582",
+  "source_digest": "9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951",
   "source_summary": {
-    "files": 61,
+    "files": 69,
     "languages": {
-      "Go": 61
+      "Go": 69
     },
-    "lines": 10109,
+    "lines": 11147,
     "test_files": 0
   },
   "tests": []

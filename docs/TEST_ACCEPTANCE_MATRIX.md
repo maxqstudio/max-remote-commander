@@ -4,10 +4,10 @@
 
 ## Evidence boundary
 
-Phase 0 through P5 Protocol & Durability are accepted and revalidated on main. Phase 5B exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed all five blocking jobs on work branch run 36591264102 and identical-SHA main run 36591432809. P5 proves encrypted relay restart state, fail-closed replay/session semantics, and language-neutral protocol-v1 conformance vectors in the Go reference implementation. Independent Cloudflare/MCP consumers, WebSocket transport, physical crash/power-loss recovery, packaging, graphical multi-device UI, and physical end-to-end runtime remain NOT_PROVEN.
+Phase 0 through P5 Protocol & Durability are accepted and revalidated on main. P6 source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418, while STRICT governance is pending. P6 source evidence proves authenticated outbound WebSocket command delivery with HTTPS session/result boundaries, bounded reconnect, heartbeat/session refresh, strict stream framing, and FIFO head-of-line lease behavior in GitHub-hosted tests. Exact P6 work/main acceptance, Cloudflare deployment, physical network E2E, packaging, and physical crash/power-loss behavior remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
-Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582
+Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
@@ -35,6 +35,10 @@ Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e682
 | P5B-SIGN-001 | Protocol-v1 language-neutral fixtures lock deterministic Ed25519 identities, canonical JSON, SHA-256 digests, and signatures for device assertion, controller assertion, and command envelope compatibility. | GitHub Actions run 36589988772; testdata/protocol/v1/signing-vectors.json; internal/protocol/conformance_test.go; internal/relay/conformance_test.go | PASS |
 | P5B-RESTART-001 | Protocol-v1 restart fixtures require same-session unexpired queued commands to remain deliverable while rotated-session or expired queued commands are durably pruned. | GitHub Actions run 36589988772; testdata/protocol/v1/restart-semantics.json; internal/relay/conformance_test.go | PASS |
 | P5B-GOV-001 | Exact Phase 5B candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation. | GitHub Actions work run 36591264102 and main run 36591432809 at exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 | PASS |
+| P6-STREAM-001 | Authenticated paired-device WebSocket command delivery preserves the signed CommandEnvelope payload and strict versioned stream framing while long-poll remains an explicit fallback. | GitHub Actions run 36595825418; internal/relay/stream_test.go; internal/agent/ws_transport_test.go; internal/protocol/stream_test.go | PASS |
+| P6-RECONNECT-001 | WebSocket transport uses bounded reconnect backoff, does not retry hard unauthorized handshakes indefinitely, detects stale sessions, and refreshes the paired device session while idle. | GitHub Actions run 36595825418; internal/agent/ws_transport_test.go; internal/agent/runner_refresh_test.go; internal/relay/stream_test.go | PASS |
+| P6-FIFO-001 | Relay delivery is FIFO head-of-line across command leases so reconnect cannot bypass an in-flight command; successful result submission wakes waiting delivery after durable commit. | GitHub Actions run 36595825418; internal/relay/store_fifo_test.go; internal/relay/stream_test.go | PASS |
+| P6-GOV-001 | Exact P6 candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation. | Pending P6 governance closure | NOT_PROVEN |
 
 ## Test commands
 
@@ -50,8 +54,8 @@ Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e682
 ## Sequence contract evidence
 
 Sequence mode for this phase/session: DURING
-Sequence session contract: docs/sequence/phase-5b.session.json
-SEQUENCE_SYNC: PASS
+Sequence session contract: docs/sequence/p6.session.json
+SEQUENCE_SYNC: NOT_PROVEN
 
 ## Project Truth Compiler evidence
 

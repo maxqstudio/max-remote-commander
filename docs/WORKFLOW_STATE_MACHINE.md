@@ -2,9 +2,9 @@
 
 # WORKFLOW STATE MACHINE
 
-## FLOW-COMMAND — Phase 5A durable paired chat-to-capability command
+## FLOW-COMMAND — P6 outbound WebSocket paired chat-to-capability command
 
-Purpose: Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, outbound agent verification, local policy/approval/audit, durable result retention, and bounded result return without letting remote input grant privilege.
+Purpose: Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, authenticated outbound WebSocket delivery by default with long-poll fallback, agent verification, local policy/approval/audit, durable HTTPS result acknowledgement, and bounded result return without letting transport or remote input grant privilege.
 Critical: TRUE
 Entry condition: Device/controller pairing is persisted locally; device has an active paired session; max-chat has a paired controller identity; provider emits only a declared structured tool call.
 Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
@@ -16,7 +16,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 - CONTROLLER_SIGNED
 - RELAY_VERIFIED
 - QUEUED
-- DEVICE_POLLED
+- DEVICE_TRANSPORT_BOUND
 - AGENT_VERIFIED
 - POLICY_CHECKED
 - APPROVAL_REQUIRED
@@ -34,15 +34,15 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 | CONTROLLER_SESSION_BOUND | CONTROLLER_SIGNED | controller creates a fresh request ID and Ed25519-signed CommandEnvelope for the relay-provided agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record no persistent provider secret |
 | CONTROLLER_SIGNED | RELAY_VERIFIED | relay authenticates paired controller session and verifies signed envelope for current device and agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record command nonce in durable state only after successful verification when durability is configured |
 | RELAY_VERIFIED | QUEUED | enqueue bounded verified request for the owning device and atomically persist queue request ownership and command replay guard when durability is configured | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append request to bounded relay queue, commit encrypted durable snapshot before acknowledgement when configured |
-| QUEUED | DEVICE_POLLED | authenticate current paired device session on outbound long poll | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
-| DEVICE_POLLED | AGENT_VERIFIED | agent re-verifies controller signature freshness device/session binding and replay | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record local replay nonce after valid verification |
+| QUEUED | DEVICE_TRANSPORT_BOUND | authenticate the current paired device session and deliver the FIFO head command over outbound WebSocket by default or long-poll fallback | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | lease only the FIFO head request for bounded time |
+| DEVICE_TRANSPORT_BOUND | AGENT_VERIFIED | agent decodes strict transport framing then re-verifies controller signature freshness device/session binding and replay | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record local replay nonce after valid verification |
 | AGENT_VERIFIED | POLICY_CHECKED | evaluate local capability policy and write required audit decision before privileged side effects | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append bounded secret-safe audit metadata |
 | POLICY_CHECKED | DENIED | deny shell unknown or locally rejected capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
 | POLICY_CHECKED | APPROVAL_REQUIRED | stop privileged capability at trusted local terminal approval boundary | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
 | POLICY_CHECKED | EXECUTED | execute only automatically allowed read-only capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded local read-only effects |
 | APPROVAL_REQUIRED | APPROVED | explicit local yes issues and consumes one-use short-lived exact-request approval | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | consume local approval token |
 | APPROVED | EXECUTED | execute approved privileged capability through bounded executor | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded locally approved side effect |
-| EXECUTED | RESULT_SUBMITTED | owning paired device session submits bounded result; relay atomically persists completed result and queue removal before acknowledgement when durability is configured | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | complete queued request, retain bounded result, commit encrypted durable snapshot before acknowledgement when configured |
+| EXECUTED | RESULT_SUBMITTED | owning paired device session submits bounded result over HTTPS; relay atomically persists completed result and queue removal before acknowledgement when durability is configured | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | complete queued request, retain bounded result, commit encrypted durable snapshot before acknowledgement when configured |
 | RESULT_SUBMITTED | CHAT_TOOL_RESULT | paired controller receives SSE result and returns validated JSON tool result to the chat loop | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append tool result to in-process conversation history |
 
 ### Invariants
@@ -57,11 +57,17 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 - Provider API key is not persisted by max-chat.
 - Configured durable state never persists device/controller bearer sessions, leases, pairing offers, pairing receipts, or the state encryption key.
 - A durable mutation is acknowledged only after the encrypted snapshot commit succeeds; failed commits restore the prior in-memory durable maps.
+- WebSocket framing is transport only; the unchanged controller-signed CommandEnvelope remains command authority.
+- Only the FIFO head command may be leased so reconnect cannot bypass an in-flight command.
+- Result completion wakes waiting command delivery only after the durable mutation commits.
+- Heartbeat or hard unauthorized stream failure cannot extend an expired paired-device session.
 
 ### Failure behavior
 
 - Fail closed before side effects on auth signature session replay policy or approval failure.
 - No fabricated result is emitted.
+- Retryable WebSocket transport failures use bounded reconnect backoff; hard authorization failures return to paired device-session refresh.
+- Long-poll remains an explicit fallback and uses the same queue/session authority.
 
 ### Restart behavior
 

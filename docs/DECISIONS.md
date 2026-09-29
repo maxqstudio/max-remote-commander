@@ -65,3 +65,11 @@ Status: ACCEPTED
 Future Cloudflare relay, MCP gateway, and other language/client adapters must conform to the published protocol-v1 canonical signing and restart vectors; they must not weaken device, generation, expiry, replay, or agent-session binding to gain compatibility.
 
 Rationale: A single executable language-neutral compatibility boundary prevents transport or adapter implementations from duplicating or drifting away from the security semantics already proven in the Go core.
+
+## DEC-009 — Hybrid outbound WebSocket command transport with durable HTTPS result acknowledgement
+
+Status: ACCEPTED
+
+Use authenticated outbound WebSocket as the default agent command-delivery transport, retain long-poll as an explicit fallback, and keep device-session creation plus result submission on HTTPS so existing durable result acknowledgement semantics remain unchanged.
+
+Rationale: This removes constant polling and prepares the agent for Cloudflare WebSocket/Hibernation without changing protocol-v1 command authority, local policy, or the already-proven persistence boundary. Keeping results on HTTPS avoids introducing a second durability acknowledgement protocol in P6.

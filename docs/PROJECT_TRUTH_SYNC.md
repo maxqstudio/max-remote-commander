@@ -20,7 +20,7 @@ HEAD is recorded externally after the commit exists.
 | BEHAVIORAL_SYNC | PASS | |
 | CROSS_DOCUMENT_CONSISTENCY | PASS | |
 | HUMAN_COMPREHENSION | NOT_PROVEN | |
-| SEQUENCE_SYNC | PASS | |
+| SEQUENCE_SYNC | NOT_PROVEN | |
 | DOC_LAYOUT | PASS | |
 | PROJECT_DOCS_NORMALIZED | PASS | |
 | DOC_READABILITY | PASS | |
@@ -28,7 +28,7 @@ HEAD is recorded externally after the commit exists.
 | DOC_SOURCE_TRACEABILITY | PASS | |
 | DOC_TEST_TRACEABILITY | PASS | |
 | TEST_RUNTIME_TRACEABILITY | NOT_PROVEN | |
-| PROJECT_STATE_SYNC | PASS | |
+| PROJECT_STATE_SYNC | NOT_PROVEN | |
 
 ## Critical claim traceability
 
@@ -51,6 +51,7 @@ HEAD is recorded externally after the commit exists.
 | TRUTH-P5A-RESTART-001 | Relay Store recreation restores durable trust queue result and replay state, invalidates old bearer sessions, rejects replayed assertions/commands, and requires fresh device/controller authentication. | DATA_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | internal/relay/store.go::NewStore(; internal/relay/device_auth.go::Store.AuthenticateDevice(; internal/relay/controller_auth.go::Store.AuthenticateController( | internal/relay/durability_test.go | NOT_APPLICABLE | PASS |
 | TRUTH-P5A-REVOKE-001 | Pairing revocation durably advances generation and removes the revoked device pairing queue results and replay guards before ephemeral sessions are invalidated. | DATA_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | internal/relay/pairing.go::Store.RevokePairing(; internal/relay/durable_mutation.go::Store.removeDurableDeviceLocked( | internal/relay/durability_test.go | NOT_APPLICABLE | PASS |
 | TRUTH-P5B-CONFORMANCE-001 | Protocol-v1 language-neutral fixtures lock canonical Ed25519 signing semantics and fail-closed restart queue behavior for future cross-language transports and adapters. | TEST_ACCEPTANCE_MATRIX.md; WORKFLOW_STATE_MACHINE.md | internal/protocol/envelope.go::Sign(; internal/protocol/envelope.go::Verify(; internal/relay/device_auth.go::SignDeviceAssertion(; internal/relay/controller_auth.go::SignControllerAssertion(; internal/relay/durable_mutation.go::Store.pruneQueuedCommandsForSessionLocked( | internal/protocol/conformance_test.go; internal/relay/conformance_test.go | NOT_APPLICABLE | PASS |
+| TRUTH-P6-TRANSPORT-001 | The outbound agent defaults to an authenticated WebSocket command stream with strict framing, heartbeat, bounded reconnect and session refresh while signed command verification, local policy/approval, HTTPS result acknowledgement, and protocol-v1 authority remain unchanged. | ARCHITECTURE.md; API_CONTRACTS.md; WORKFLOW_STATE_MACHINE.md | internal/protocol/stream.go::DecodeStreamMessage(; internal/relay/stream.go::HTTPServer.deviceStream(; internal/relay/stream.go::HTTPServer.writeDeviceCommands(; internal/agent/ws_transport.go::WebSocketTransport.NextCommand(; internal/agent/runner.go::Runner.Run(; internal/relay/store.go::Store.NextCommand(; internal/relay/store.go::Store.SubmitResult( | internal/protocol/stream_test.go; internal/relay/stream_test.go; internal/agent/ws_transport_test.go; internal/agent/runner_refresh_test.go; internal/relay/store_fifo_test.go | NOT_APPLICABLE | PASS |
 
 ## Claim relations
 

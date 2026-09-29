@@ -18,6 +18,7 @@ Expected outcomes:
 - local policy enforcement
 - auditable remote tool calls
 - provider-neutral LLM integration
+- outbound WebSocket command delivery with bounded reconnect and long-poll fallback
 
 ## System at a glance
 
@@ -27,7 +28,7 @@ Users / External Systems
     -> State / Evidence Authorities
     -> External Runtime / Outputs
 
-Observed source inventory: 61 files, 1 language categories.
+Observed source inventory: 69 files, 1 language categories.
 
 ## Major components
 
@@ -37,10 +38,10 @@ Observed source inventory: 61 files, 1 language categories.
 | Paired Controller Client | Persists local controller trust state, authenticates controller sessions, signs remote commands, refreshes stale sessions, and consumes results | controller Ed25519 identity, controller pairing state, controller session refresh, signed command submission | relay_server, protocol |
 | OpenAI-compatible Provider Adapter | Maps provider-neutral chat messages/tools to an OpenAI-compatible chat-completions boundary | HTTPS/loopback provider transport, API-key header injection from runtime environment, provider response bounds and tool-call parsing | chat_core |
 | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
-| Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results, and optionally persists durable trust/command state as an encrypted atomic snapshot | pre-pairing registration bootstrap, pairing generations, ephemeral device and controller sessions, signed command validation, bounded command leases, bounded result retention, encrypted durable pairings generations queues results and replay nonces when configured, SSE result stream | identity, protocol, agent, durable_state |
-| PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
+| Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results over authenticated WebSocket or long-poll fallback, and optionally persists durable trust/command state as an encrypted atomic snapshot | pre-pairing registration bootstrap, pairing generations, ephemeral device and controller sessions, signed command validation, bounded command leases, bounded result retention, encrypted durable pairings generations queues results and replay nonces when configured, SSE result stream, authenticated paired-device WebSocket command stream, heartbeat-based stale-session detection, FIFO head-of-line command leases | identity, protocol, agent, durable_state |
+| PC Agent | Maintains device identity and per-start session, receives signed commands over outbound WebSocket by default with long-poll fallback, re-verifies requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary, outbound WebSocket reconnect with bounded backoff, idle device-session refresh, explicit long-poll fallback | identity, protocol, policy, approval, executor, audit, relay_server |
 | Identity | Persists device Ed25519 identity and derives deterministic device IDs and pairing codes | device private seed, device public key, device ID, pairing code generation |  |
-| Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID |  |
+| Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID, strict versioned WebSocket transport framing that carries the unchanged signed CommandEnvelope |  |
 | Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
 | Local Approval Store | Issues one-use short-lived local approval grants bound to exact privileged requests | approval token hashes, request capability and argument bindings | policy |
 | Local Capability Executor | Executes bounded filesystem process and Git operations after policy and approval authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, dispatcher | policy, approval |
@@ -52,14 +53,14 @@ Observed source inventory: 61 files, 1 language categories.
 - llm_provider_adapter -> chat_core: assistant text or validated structured tool calls
 - chat_core -> controller_client: declared structured tool request only
 - controller_client -> relay_server: paired controller assertion and controller-signed CommandEnvelope bound to current agent session
-- relay_server -> agent: outbound long-poll delivery of relay-validated signed command envelope
+- relay_server -> agent: authenticated outbound WebSocket push of relay-validated signed command envelopes by default, with long-poll fallback
 - agent -> protocol: agent re-verifies controller signature device/session freshness and replay before local policy
 - protocol -> policy: verified structured capability intent
 - policy -> approval: privileged capability requires trusted local approval
 - approval -> executor: one-use exact-request approval enables privileged execution
 - executor -> audit: decision and outcome metadata without raw secret-bearing payloads
 - executor -> agent: bounded local capability result
-- agent -> relay_server: paired-device-session-authenticated result submission
+- agent -> relay_server: paired-device-session-authenticated HTTPS result submission after local execution
 - relay_server -> controller_client: paired-controller-session-authenticated SSE result event
 - controller_client -> chat_core: validated JSON tool result returned to conversation
 - relay_server -> durable_state: transactionally commit restart-critical state before acknowledging durable mutations
@@ -67,9 +68,9 @@ Observed source inventory: 61 files, 1 language categories.
 
 ## Main user workflows
 
-### FLOW-COMMAND — Phase 5A durable paired chat-to-capability command
+### FLOW-COMMAND — P6 outbound WebSocket paired chat-to-capability command
 
-Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, outbound agent verification, local policy/approval/audit, durable result retention, and bounded result return without letting remote input grant privilege.
+Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, authenticated outbound WebSocket delivery by default with long-poll fallback, agent verification, local policy/approval/audit, durable HTTPS result acknowledgement, and bounded result return without letting transport or remote input grant privilege.
 
 Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
 
@@ -77,22 +78,22 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 - CONTROLLER_SESSION_BOUND -> CONTROLLER_SIGNED : controller creates a fresh request ID and Ed25519-signed CommandEnvelope for the relay-provided agent session
 - CONTROLLER_SIGNED -> RELAY_VERIFIED : relay authenticates paired controller session and verifies signed envelope for current device and agent session
 - RELAY_VERIFIED -> QUEUED : enqueue bounded verified request for the owning device and atomically persist queue request ownership and command replay guard when durability is configured
-- QUEUED -> DEVICE_POLLED : authenticate current paired device session on outbound long poll
-- DEVICE_POLLED -> AGENT_VERIFIED : agent re-verifies controller signature freshness device/session binding and replay
+- QUEUED -> DEVICE_TRANSPORT_BOUND : authenticate the current paired device session and deliver the FIFO head command over outbound WebSocket by default or long-poll fallback
+- DEVICE_TRANSPORT_BOUND -> AGENT_VERIFIED : agent decodes strict transport framing then re-verifies controller signature freshness device/session binding and replay
 - AGENT_VERIFIED -> POLICY_CHECKED : evaluate local capability policy and write required audit decision before privileged side effects
 - POLICY_CHECKED -> DENIED : deny shell unknown or locally rejected capability
 - POLICY_CHECKED -> APPROVAL_REQUIRED : stop privileged capability at trusted local terminal approval boundary
 - POLICY_CHECKED -> EXECUTED : execute only automatically allowed read-only capability
 - APPROVAL_REQUIRED -> APPROVED : explicit local yes issues and consumes one-use short-lived exact-request approval
 - APPROVED -> EXECUTED : execute approved privileged capability through bounded executor
-- EXECUTED -> RESULT_SUBMITTED : owning paired device session submits bounded result; relay atomically persists completed result and queue removal before acknowledgement when durability is configured
+- EXECUTED -> RESULT_SUBMITTED : owning paired device session submits bounded result over HTTPS; relay atomically persists completed result and queue removal before acknowledgement when durability is configured
 - RESULT_SUBMITTED -> CHAT_TOOL_RESULT : paired controller receives SSE result and returns validated JSON tool result to the chat loop
 
 ## Lifecycle and state
 
-Current phase: Phase 5B - canonical protocol and restart vectors
+Current phase: P6 - Transport V2
 
-Current status: ACCEPTED_CLOSED
+Current status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -130,13 +131,16 @@ compiler does not infer them from implementation names.
 
 - FLOW-COMMAND: Fail closed before side effects on auth signature session replay policy or approval failure.
 - FLOW-COMMAND: No fabricated result is emitted.
+- FLOW-COMMAND: Retryable WebSocket transport failures use bounded reconnect backoff; hard authorization failures return to paired device-session refresh.
+- FLOW-COMMAND: Long-poll remains an explicit fallback and uses the same queue/session authority.
 
 ## Current project state
 
 Next authorized actions:
-- start P6 Transport V2 on a fresh work branch from accepted main
-- add WebSocket transport without changing protocol-v1 signing or local execution authority
-- prove reconnect heartbeat bounded backoff stale-session rejection and outbound-only agent behavior across Linux Windows macOS race and STRICT governance
+- synchronize deterministic P6 Project Truth and sequence evidence
+- obtain exact P6 Linux Windows macOS race and STRICT 5-job PASS on the final work-branch candidate
+- fast-forward the accepted exact P6 SHA to main and revalidate it
+- close P6 Transport V2 then start P7 Cloudflare Relay
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -167,9 +171,16 @@ Known blockers:
 - Protocol-v1 restart fixtures prove an unexpired queued command is deliverable only when the reauthenticated agent session ID is unchanged; rotated-session or expired queued commands are pruned and remain absent after another restart
 - Phase 5B exact accepted SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed Linux Windows macOS race and STRICT governance on work branch run 36591264102 and identical-SHA main run 36591432809
 - P5 Protocol & Durability is closed: encrypted restart-critical state, replay/session fail-closed semantics, and protocol-v1 language-neutral conformance vectors are accepted
+- P5 read-only closure SHA 5b79d0eab9c9bbcffe7aedb931389399c26d0c99 passed all five blocking jobs on work run 36592773777 and main run 36593066059
+- P6 source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418; STRICT governance remained stale and is not yet accepted
+- Agent command delivery defaults to an authenticated outbound WebSocket stream while paired device session creation and durable result acknowledgement remain HTTPS; long-poll remains an explicit fallback
+- WebSocket reconnect uses bounded exponential backoff, hard authorization failures do not retry indefinitely, heartbeat detects stale sessions, and the runner refreshes device sessions while an idle push stream is blocked
+- Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds
 
 ### Not proven
 
+- P6 exact 5-job work-branch governance acceptance
+- P6 identical-SHA main revalidation
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
@@ -178,7 +189,6 @@ Known blockers:
 - graphical multi-device chat UI and device selector
 - MCP adapter
 - OS-native protected key storage or explicit Windows ACL hardening for device/controller identity seeds
-- WebSocket transport and reconnect/session-rebinding behavior
 - Cloudflare Worker Durable Object relay deployment
 
 ## Important limitations

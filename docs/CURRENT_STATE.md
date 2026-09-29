@@ -7,16 +7,16 @@ Authority verified at SHA: 5c6db407f0ec3061387c5c4a59039ae5431bffb4
 Governance profile: strict
 
 ## Current phase
-Phase: Phase 5B - canonical protocol and restart vectors
-Status: ACCEPTED_CLOSED
+Phase: P6 - Transport V2
+Status: SOURCE_COMPLETE_AWAITING_GOVERNANCE
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/phase-5b-protocol-vectors
+Branch: work/p6-transport-v2
 Authoritative SHA: external final acceptance evidence
 Last accepted SHA: 5c6db407f0ec3061387c5c4a59039ae5431bffb4
 Current candidate SHA: external final acceptance evidence
-Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582
+Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
 ## Runtime
 Environment: see SOURCE_AUTHORITY_MAP.md and RUNBOOK.md
@@ -33,8 +33,8 @@ PROJECT_DOCS_SYNC: PASS
 ## Sequence governance
 Sequence policy: REQUIRED
 Current sequence mode: DURING
-Current sequence session: docs/sequence/phase-5b.session.json
-SEQUENCE_SYNC: PASS
+Current sequence session: docs/sequence/p6.session.json
+SEQUENCE_SYNC: NOT_PROVEN
 
 ## Proven
 - Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192 and identical-SHA main run 36558681560
@@ -51,8 +51,15 @@ SEQUENCE_SYNC: PASS
 - Protocol-v1 restart fixtures prove an unexpired queued command is deliverable only when the reauthenticated agent session ID is unchanged; rotated-session or expired queued commands are pruned and remain absent after another restart
 - Phase 5B exact accepted SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed Linux Windows macOS race and STRICT governance on work branch run 36591264102 and identical-SHA main run 36591432809
 - P5 Protocol & Durability is closed: encrypted restart-critical state, replay/session fail-closed semantics, and protocol-v1 language-neutral conformance vectors are accepted
+- P5 read-only closure SHA 5b79d0eab9c9bbcffe7aedb931389399c26d0c99 passed all five blocking jobs on work run 36592773777 and main run 36593066059
+- P6 source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418; STRICT governance remained stale and is not yet accepted
+- Agent command delivery defaults to an authenticated outbound WebSocket stream while paired device session creation and durable result acknowledgement remain HTTPS; long-poll remains an explicit fallback
+- WebSocket reconnect uses bounded exponential backoff, hard authorization failures do not retry indefinitely, heartbeat detects stale sessions, and the runner refreshes device sessions while an idle push stream is blocked
+- Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds
 
 ## Not proven
+- P6 exact 5-job work-branch governance acceptance
+- P6 identical-SHA main revalidation
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
@@ -61,7 +68,6 @@ SEQUENCE_SYNC: PASS
 - graphical multi-device chat UI and device selector
 - MCP adapter
 - OS-native protected key storage or explicit Windows ACL hardening for device/controller identity seeds
-- WebSocket transport and reconnect/session-rebinding behavior
 - Cloudflare Worker Durable Object relay deployment
 
 ## Known blockers
@@ -71,9 +77,10 @@ SEQUENCE_SYNC: PASS
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- start P6 Transport V2 on a fresh work branch from accepted main
-- add WebSocket transport without changing protocol-v1 signing or local execution authority
-- prove reconnect heartbeat bounded backoff stale-session rejection and outbound-only agent behavior across Linux Windows macOS race and STRICT governance
+- synchronize deterministic P6 Project Truth and sequence evidence
+- obtain exact P6 Linux Windows macOS race and STRICT 5-job PASS on the final work-branch candidate
+- fast-forward the accepted exact P6 SHA to main and revalidate it
+- close P6 Transport V2 then start P7 Cloudflare Relay
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination

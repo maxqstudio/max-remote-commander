@@ -10,10 +10,10 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/phase-5b-protocol-vectors
+Active branch: work/p6-transport-v2
 Current authoritative SHA: external final acceptance evidence
 Last accepted SHA: 5c6db407f0ec3061387c5c4a59039ae5431bffb4
-Current source digest: 90298aa06d3130940a60beee0a65b9a0eded2fa568b144bc7f326e6827a31582
+Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
 ## Authorities
 Source authority: Canonical source history and releases
@@ -25,7 +25,7 @@ Historical/reference authority: see SOURCE_AUTHORITY_MAP.md
 
 ## Technology
 Languages: Go
-Frameworks: Go standard library
+Frameworks: Go standard library, github.com/coder/websocket v1.8.15
 Persistence: create-once local device and controller Ed25519 identity seeds, create-once local device/controller pairing state, bounded append-only local audit JSONL, optional bounded AES-256-GCM relay durable state snapshot keyed by external MAXRC_STATE_KEY; bearer sessions remain ephemeral
 External systems: GitHub Actions, OpenAI-compatible LLM provider APIs, MCP clients (planned)
 
@@ -69,3 +69,5 @@ Generated from PROJECT_PROFILE.yaml.
 - no PASS claim without executed evidence
 - cross-platform behavior must be tested on Linux Windows and macOS
 - configured relay durable state must never persist bearer sessions or the state encryption key
+- WebSocket command delivery is transport only and must not alter protocol-v1 signature device generation replay or agent-session authority
+- P6 result submission remains HTTPS so durable result acknowledgement semantics stay unchanged

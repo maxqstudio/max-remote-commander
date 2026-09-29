@@ -71,3 +71,12 @@ Type: security
 - Phase 5B exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed all five blocking jobs on work branch run 36591264102 and identical-SHA main run 36591432809.
 - P5 now has accepted encrypted relay durability, fail-closed stale-session/expiry/replay semantics, and language-neutral protocol-v1 conformance vectors for future transports and adapters.
 - Cloudflare, MCP, WebSocket transport, physical crash/power-loss recovery, and physical end-to-end behavior remain explicitly unproven and belong to later roadmap phases.
+
+## 2026-09-29 — P6 Transport V2 source candidate
+
+Type: feature
+
+- Source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418; STRICT governance remained stale and is pending synchronization.
+- Added authenticated outbound WebSocket command delivery with strict versioned framing, heartbeat, bounded reconnect backoff, and long-poll fallback.
+- Kept paired-device session creation and durable result acknowledgement on HTTPS so protocol-v1 authority and persistence semantics are unchanged.
+- Changed relay delivery to FIFO head-of-line lease semantics so reconnect cannot bypass an in-flight command; successful result submission wakes the waiting stream after durable commit.
