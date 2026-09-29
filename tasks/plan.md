@@ -34,8 +34,8 @@ Build a secure self-hosted cross-platform remote computer agent gateway for LLM 
 - [x] Relay-side signed CommandEnvelope validation and nonce replay rejection.
 - [x] One-use exact-request local approval grants.
 - [x] Bounded secret-safe audit primitive.
-- [ ] Synchronize deterministic Phase 3 Project Truth.
-- [ ] Exact final Phase 3 5-job PASS and identical-SHA main revalidation.
+- [x] Synchronize deterministic Phase 3 Project Truth.
+- [x] Exact source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 5-job PASS on work branch and identical-SHA main revalidation.
 
 ### Phase 4: Chat agent and runnable client
 - [ ] Outbound agent loop integrating identity/session/verifier/policy/approval/executor/audit.

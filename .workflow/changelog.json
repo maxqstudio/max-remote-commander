@@ -29,11 +29,11 @@
     },
     {
       "date": "2026-09-29",
-      "title": "Phase 3 pairing identity and trusted approval candidate",
+      "title": "Phase 3 accepted pairing identity and trusted approval core",
       "type": "security",
       "changes": [
-        "Added persistent Ed25519 device identity one-use pairing generations paired device/controller assertions and session binding.",
-        "Removed global controller bootstrap secret as command authority and require signed CommandEnvelope payloads bound to active agent session.",
+        "Accepted exact source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 after work-branch run 36550259782 and main run 36550406590 both passed Linux Windows macOS race and STRICT governance.",
+        "Added persistent Ed25519 device identity, one-use pairing generations, paired device/controller assertions, active agent-session binding, and signed command replay defense.",
         "Added one-use exact-request local approval grants and bounded secret-safe audit primitive."
       ]
     }

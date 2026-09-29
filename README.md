@@ -2,9 +2,11 @@
 
 Secure, self-hosted, cross-platform remote computer agent gateway for LLM clients.
 
-Current accepted main includes Phase 0-2. Phase 3 candidate adds persistent Ed25519 device identity, one-use device/controller pairing, Ed25519-authenticated device and controller sessions, active agent-session binding, controller-signed command envelopes, one-use local approval primitives, and bounded secret-safe audit logging.
+**Accepted source through Phase 3:** `95d60a599d2ea6ab75831c54bad5c999ab7d6901`.
 
-The project is **not yet production-ready**: the runnable outbound agent/chat client, public TLS deployment, durable relay state, MCP adapter, OS-native key protection hardening, and physical-device end-to-end acceptance remain future phases.
+The accepted core includes persistent Ed25519 device identity, one-use device/controller pairing, Ed25519-authenticated device and controller sessions, active agent-session binding, controller-signed command envelopes, bounded remote relay queues/results, one-use local approval primitives, bounded capability executors, and secret-safe audit logging primitives.
+
+The project is **not yet production-ready**: the runnable outbound agent/chat client, user-facing local approval flow, audit runtime integration, public TLS deployment, durable relay state, MCP adapter, OS-native protected key storage hardening, and physical-device end-to-end acceptance remain future work.
 
 ## Project documentation
 
