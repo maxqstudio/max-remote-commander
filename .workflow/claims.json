@@ -232,6 +232,62 @@
       ],
       "runtime_evidence": [],
       "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P5A-DURABILITY-001",
+      "claim": "When configured with a durable state path and external 32-byte key, the relay atomically persists encrypted pairings generations queued commands completed results and unexpired replay guards while bearer sessions remain ephemeral.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "DATA_CONTRACTS.md",
+        "RUNBOOK.md"
+      ],
+      "source_owners": [
+        "internal/relay/persistence.go::stateFile.Load(",
+        "internal/relay/persistence.go::stateFile.Save(",
+        "internal/relay/durable_mutation.go::Store.commitDurableLocked("
+      ],
+      "tests": [
+        "internal/relay/persistence_test.go",
+        "internal/relay/durability_test.go",
+        "cmd/max-relay/main_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P5A-RESTART-001",
+      "claim": "Relay Store recreation restores durable trust queue result and replay state, invalidates old bearer sessions, rejects replayed assertions/commands, and requires fresh device/controller authentication.",
+      "documents": [
+        "DATA_CONTRACTS.md",
+        "WORKFLOW_STATE_MACHINE.md"
+      ],
+      "source_owners": [
+        "internal/relay/store.go::NewStore(",
+        "internal/relay/device_auth.go::Store.AuthenticateDevice(",
+        "internal/relay/controller_auth.go::Store.AuthenticateController("
+      ],
+      "tests": [
+        "internal/relay/durability_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P5A-REVOKE-001",
+      "claim": "Pairing revocation durably advances generation and removes the revoked device pairing queue results and replay guards before ephemeral sessions are invalidated.",
+      "documents": [
+        "DATA_CONTRACTS.md",
+        "WORKFLOW_STATE_MACHINE.md"
+      ],
+      "source_owners": [
+        "internal/relay/pairing.go::Store.RevokePairing(",
+        "internal/relay/durable_mutation.go::Store.removeDurableDeviceLocked("
+      ],
+      "tests": [
+        "internal/relay/durability_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
     }
   ],
   "relations": []

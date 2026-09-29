@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through Phase 4 source are accepted and revalidated on main. Phase 4 exact SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed all five blocking jobs on work branch run 36558524192 and identical-SHA main run 36558681560. Physical remote runtime, live external provider E2E, graphical multi-device UI, relay durability, public TLS deployment, OS-native key protection, and MCP remain NOT_PROVEN.",
+  "evidence_boundary": "Phase 0 through Phase 4 are accepted and revalidated on main. Phase 5A source candidate a0fc977588a12acd69b82cca1acff6c8884745a2 passed Linux Windows macOS and race source lanes on GitHub Actions run 36565884484, while STRICT governance is pending. The CI evidence proves encrypted relay-state restart semantics in GitHub-hosted processes; physical deployed crash/power-loss recovery, state-key rotation, public TLS, packaging, graphical multi-device UI, MCP, and physical end-to-end runtime remain NOT_PROVEN.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -92,14 +92,50 @@
       "id": "P4-GOV-001",
       "requirement": "Exact Phase 4 candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation.",
       "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36565884484; internal/relay/persistence_test.go; cmd/max-relay/main_test.go",
+      "id": "P5A-STATE-001",
+      "requirement": "Configured relay durability stores only bounded versioned encrypted durable state, rejects wrong keys corruption symlinks unsafe permissions and oversized snapshots, and excludes session tokens.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36565884484; internal/relay/durability_test.go",
+      "id": "P5A-RESTART-001",
+      "requirement": "Pairing trust generations queued commands completed results and unexpired replay guards survive relay Store recreation while device/controller sessions must reauthenticate.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableMutationRollsBackWhenStateWriteFails",
+      "id": "P5A-ROLLBACK-001",
+      "requirement": "A durable state write failure rejects the mutation and restores the in-memory durable maps so the same authorized request can be retried safely.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableRelayRestartPreservesTrustQueueReplayAndResults",
+      "id": "P5A-REVOKE-001",
+      "requirement": "Pairing revocation persists generation advancement and removes the revoked device pairing queue completed results and replay state before restart.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36565884484; internal/relay/durability_test.go::TestDurableAgentSessionChangeDropsStaleQueuedCommands",
+      "id": "P5A-SESSION-001",
+      "requirement": "A fresh agent session after relay restart removes queued commands targeted to a stale agent session and the removal itself survives another restart.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Pending Phase 5A governance closure",
+      "id": "P5A-GOV-001",
+      "requirement": "Exact Phase 5A candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation.",
+      "status": "NOT_PROVEN"
     }
   ],
   "runtime_checks": [],
   "runtime_status": "NOT_PROVEN",
   "schema_version": 1,
   "sequence_mode": "DURING",
-  "sequence_session": "docs/sequence/phase-4.session.json",
-  "sequence_sync_status": "PASS",
+  "sequence_session": "docs/sequence/phase-5a.session.json",
+  "sequence_sync_status": "NOT_PROVEN",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
@@ -116,12 +152,12 @@
     "HUMAN_COMPREHENSION": "NOT_PROVEN",
     "PROJECT_DOCS_NORMALIZED": "PASS",
     "PROJECT_DOCS_SYNC": "PASS",
-    "PROJECT_STATE_SYNC": "PASS",
+    "PROJECT_STATE_SYNC": "NOT_PROVEN",
     "PROVENANCE_SYNC": "PASS",
     "REFERENCE_SYNC": "PASS",
     "RUNTIME_E2E": "NOT_PROVEN",
     "SEMANTIC_SYNC": "PASS",
-    "SEQUENCE_SYNC": "PASS",
+    "SEQUENCE_SYNC": "NOT_PROVEN",
     "SOURCE_TESTS": "PASS",
     "STRUCTURAL_SYNC": "PASS",
     "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"

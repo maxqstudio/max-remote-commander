@@ -57,20 +57,22 @@
     {
       "id": "relay_server",
       "name": "Relay Server",
-      "purpose": "Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results",
+      "purpose": "Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results, and optionally persists durable trust/command state as an encrypted atomic snapshot",
       "owns": [
         "pre-pairing registration bootstrap",
         "pairing generations",
-        "device and controller sessions",
+        "ephemeral device and controller sessions",
         "signed command validation",
         "bounded command leases",
         "bounded result retention",
+        "encrypted durable pairings generations queues results and replay nonces when configured",
         "SSE result stream"
       ],
       "depends_on": [
         "identity",
         "protocol",
-        "agent"
+        "agent",
+        "durable_state"
       ]
     },
     {
@@ -166,6 +168,19 @@
         "secret-safe fields"
       ],
       "depends_on": []
+    },
+    {
+      "id": "durable_state",
+      "name": "Encrypted Relay Durable State",
+      "purpose": "Atomically persists restart-critical relay trust command result and replay state without persisting bearer sessions",
+      "owns": [
+        "AES-256-GCM state envelope",
+        "pairings and generation counters",
+        "queued commands and request ownership",
+        "completed retained results",
+        "unexpired device controller and command replay nonces"
+      ],
+      "depends_on": []
     }
   ],
   "data_flows": [
@@ -233,6 +248,16 @@
       "from": "controller_client",
       "to": "chat_core",
       "meaning": "validated JSON tool result returned to conversation"
+    },
+    {
+      "from": "relay_server",
+      "to": "durable_state",
+      "meaning": "transactionally commit restart-critical state before acknowledging durable mutations"
+    },
+    {
+      "from": "durable_state",
+      "to": "relay_server",
+      "meaning": "restore pairings queues results and unexpired replay guards at relay startup; bearer sessions are never restored"
     }
   ],
   "external_boundaries": [
@@ -263,6 +288,10 @@
     {
       "name": "LLM provider",
       "contract": "Provider API key is supplied at runtime and not persisted by max-chat. Non-loopback provider endpoints require HTTPS and default HTTP redirects are refused."
+    },
+    {
+      "name": "Relay durable state",
+      "contract": "When MAXRC_STATE_FILE and MAXRC_STATE_KEY are configured together, restart-critical relay state is stored as an AES-256-GCM encrypted bounded versioned snapshot. MAXRC_STATE_KEY is an external 32-byte runtime secret and is not written into the snapshot. Device/controller sessions, command leases, pairing offers, and pairing receipts remain ephemeral."
     }
   ]
 }

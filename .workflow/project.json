@@ -26,7 +26,7 @@
       "create-once local device and controller Ed25519 identity seeds",
       "create-once local device/controller pairing state",
       "bounded append-only local audit JSONL",
-      "relay operational state remains in-memory"
+      "optional bounded AES-256-GCM relay durable state snapshot keyed by external MAXRC_STATE_KEY; bearer sessions remain ephemeral"
     ],
     "external_systems": [
       "GitHub Actions",
@@ -58,6 +58,7 @@
     "relay bootstrap registration and controller authorities must remain distinct",
     "relay public exposure requires TLS termination and is not yet proven",
     "no PASS claim without executed evidence",
-    "cross-platform behavior must be tested on Linux Windows and macOS"
+    "cross-platform behavior must be tested on Linux Windows and macOS",
+    "configured relay durable state must never persist bearer sessions or the state encryption key"
   ]
 }

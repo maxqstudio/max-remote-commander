@@ -10,9 +10,9 @@ Build a secure self-hosted cross-platform remote computer agent gateway for LLM 
 - Paired device and controller sessions require Ed25519 proof-of-possession.
 - Controller sessions and signed commands are bound to the active per-start agent session ID.
 - Remote payloads cannot self-assert trusted local approval.
-- Relay state remains in-memory until a later durability phase.
+- Configured relay restart-critical state is stored in a bounded AES-256-GCM snapshot; bearer sessions and transient pairing/lease state remain ephemeral.
 - Public relay deployment remains blocked until TLS configuration is implemented/proven.
-- Skill_Workflow STRICT is pinned to 9e22feddb8f94e8c0f1af6a33e14b64de5068f8f.
+- Skill_Workflow STRICT is pinned to 2148313678f476c4990e447b4d657724f071adff.
 
 ## Task List
 
@@ -48,12 +48,26 @@ Build a secure self-hosted cross-platform remote computer agent gateway for LLM 
 
 Phase 4 scope decision: graphical multi-device chat UI/device selector moves to Phase 5; it is not claimed as implemented.
 
-### Phase 5: Graphical UI, MCP, durability, TLS, packaging, E2E
-- [ ] Graphical multi-device chat UI/device selector.
-- [ ] MCP adapter.
-- [ ] Durable relay state/replay strategy.
-- [ ] TLS/reverse-proxy deployment contract.
+### Phase 5A: Encrypted relay durability
+- [x] AES-256-GCM bounded versioned state snapshot with externally supplied 32-byte key.
+- [x] Persist pairing trust/generations, queue/request/result state, and unexpired replay guards.
+- [x] Keep bearer sessions, leases, pairing offers, and pairing receipts ephemeral across restart.
+- [x] Roll back durable in-memory mutations when persistence fails.
+- [x] Revoke old-generation durable queue/result/replay state.
+- [x] Prove Store recreation, replay rejection, stale-session pruning, result restoration, and rollback across Linux/Windows/macOS/race.
+- [ ] Exact Phase 5A STRICT governance acceptance and identical-SHA main revalidation.
+
+### Phase 5B: TLS deployment and packaging
+- [ ] TLS/reverse-proxy deployment contract and public-exposure acceptance.
 - [ ] Cross-platform installers/service integration and protected key storage hardening.
+
+### Phase 5C: MCP
+- [ ] MCP adapter and protocol acceptance.
+
+### Phase 5D: Graphical multi-device UI
+- [ ] Graphical multi-device chat UI/device selector.
+
+### Phase 5E: Physical end-to-end acceptance
 - [ ] Physical multi-OS end-to-end acceptance and release artifacts.
 
 ## Residual Risks
@@ -63,6 +77,6 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 | Shared bootstrap key compromises paired devices | Bootstrap session issuance rejects already paired devices; paired sessions require device private key |
 | Stale controller after agent restart | Controller session is bound to active agent session ID |
 | Command replay | Relay command nonce guard plus agent verifier replay guard and per-start session binding |
-| Relay restart data loss | Explicitly NOT_PROVEN/durable state deferred |
+| Relay restart data loss | Configured encrypted snapshot is source/CI-proven across Store recreation; physical deployed crash/power-loss recovery remains NOT_PROVEN |
 | Public plaintext exposure | Default loopback; public deployment blocked pending TLS |
 | Windows seed protection | File-based identity is source-proven but OS-native protected storage/ACL hardening remains deferred |

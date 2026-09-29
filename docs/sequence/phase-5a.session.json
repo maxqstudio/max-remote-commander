@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "session_id": "phase-5a-encrypted-relay-durability",
+  "phase": "Phase 5A - encrypted relay durability",
+  "mode": "DURING",
+  "scope": "CURRENT",
+  "critical": true,
+  "status": "ACTIVE",
+  "implementation_base_sha": "b64c7cb7cc47e4aed5c29a53e2ae9a228df47910",
+  "plan": {
+    "required": false,
+    "contract": "",
+    "frozen": false,
+    "frozen_commit": "",
+    "sha256": "",
+    "diagram": ""
+  },
+  "actual": {
+    "graph": "docs/sequence/generated/phase-5a.actual.json",
+    "diagram": "docs/sequence/generated/phase-5a.actual.mmd",
+    "source_digest": "",
+    "entries": [
+      "cmd/max-relay/main.go::durableStateConfig",
+      "internal/relay/persistence.go::stateFile.Load",
+      "internal/relay/persistence.go::stateFile.Save",
+      "internal/relay/pairing.go::Store.RedeemPairing",
+      "internal/relay/command_auth.go::Store.QueuePairedCommand",
+      "internal/relay/store.go::Store.SubmitResult",
+      "internal/relay/pairing.go::Store.RevokePairing"
+    ]
+  },
+  "test_traceability_required": true,
+  "tests": [
+    "internal/relay/persistence_test.go",
+    "internal/relay/durability_test.go",
+    "cmd/max-relay/main_test.go",
+    "internal/relay/pairing_test.go",
+    "internal/relay/command_auth_test.go",
+    "internal/relay/store_test.go"
+  ],
+  "runtime_trace": {
+    "required": false,
+    "graph": ""
+  },
+  "acceptance_report": "artifacts/sequence/phase-5a.acceptance.json"
+}

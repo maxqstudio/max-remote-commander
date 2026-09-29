@@ -4,19 +4,15 @@
 - [x] Phase 1 accepted/revalidated on main at 6132e215fb15862471ec5a40acd72ca8d0422f88
 - [x] Phase 2 accepted/revalidated on main at c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
 - [x] Phase 3 accepted/revalidated on main at 95d60a599d2ea6ab75831c54bad5c999ab7d6901
-- [x] Phase 4 source accepted at 8c205dd1b1ee01fe3c73d44264493610a2704666
-- [x] Phase 4 work run 36558524192 5/5 PASS
-- [x] Phase 4 identical-SHA main run 36558681560 5/5 PASS
-- [x] Runnable outbound max-agent with trusted local approval and audit integration
-- [x] Git credential-environment isolation
-- [x] Paired controller bridge with active-agent-session refresh
-- [x] Provider-neutral bounded chat tool loop
-- [x] OpenAI-compatible / loopback-local provider adapter
-- [x] Cross-platform max-chat terminal client
-- [x] Revalidate truth-only Phase 4 closure on work run 36559020716 and main run 36559186242
-- [ ] Phase 5 graphical multi-device UI/device selector
-- [ ] Phase 5 MCP adapter
-- [ ] Phase 5 durable relay state/replay strategy
-- [ ] Phase 5 public TLS/reverse-proxy deployment proof
-- [ ] Phase 5 packaging/protected-key-storage hardening
-- [ ] Physical multi-OS end-to-end acceptance and release artifacts
+- [x] Phase 4 accepted/revalidated on main at 8c205dd1b1ee01fe3c73d44264493610a2704666
+- [x] Phase 5A encrypted durable relay-state source
+- [x] Phase 5A restart/replay/result/revoke/rollback regression tests
+- [x] Phase 5A source candidate a0fc977588a12acd69b82cca1acff6c8884745a2 Linux/Windows/macOS/race PASS on run 36565884484
+- [ ] Synchronize Phase 5A Project Truth with Skill_Workflow 2148313678f476c4990e447b4d657724f071adff
+- [ ] Phase 5A exact work-branch 5/5 PASS
+- [ ] Phase 5A merge to main and identical-SHA 5/5 revalidation
+- [ ] Phase 5B TLS/reverse-proxy deployment proof
+- [ ] Phase 5B cross-platform packaging/service integration and protected key storage
+- [ ] Phase 5C MCP adapter
+- [ ] Phase 5D graphical multi-device UI/device selector
+- [ ] Phase 5E physical multi-OS end-to-end acceptance and release artifacts

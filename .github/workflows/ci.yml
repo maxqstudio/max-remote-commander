@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           git clone https://github.com/maxqstudio/Skill_Workflow.git "$RUNNER_TEMP/Skill_Workflow"
-          git -C "$RUNNER_TEMP/Skill_Workflow" checkout 9e22feddb8f94e8c0f1af6a33e14b64de5068f8f
+          git -C "$RUNNER_TEMP/Skill_Workflow" checkout 2148313678f476c4990e447b4d657724f071adff
       - name: Generate deterministic Project Truth docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/sync_project_truth.py" --root "$GITHUB_WORKSPACE"
@@ -64,18 +64,18 @@ jobs:
         run: |
           python .workflow/tools/generate_sequence_actual.py \
             --root "$GITHUB_WORKSPACE" \
-            --output-json docs/sequence/generated/phase-4.actual.json \
-            --output-mermaid docs/sequence/generated/phase-4.actual.mmd \
-            --entry "cmd/max-chat/main.go::runREPL" \
-            --entry "internal/chat/chat.go::Session.Run" \
-            --entry "internal/controller/executor.go::RemoteExecutor.Execute" \
-            --entry "internal/controller/client.go::Client.QueueTool" \
-            --entry "internal/agent/runner.go::Runner.Run" \
-            --entry "internal/agent/runner.go::Runner.handleCommand" \
-            --entry "internal/providers/openaicompat/provider.go::Provider.Complete"
+            --output-json docs/sequence/generated/phase-5a.actual.json \
+            --output-mermaid docs/sequence/generated/phase-5a.actual.mmd \
+            --entry "cmd/max-relay/main.go::durableStateConfig" \
+            --entry "internal/relay/persistence.go::stateFile.Load" \
+            --entry "internal/relay/persistence.go::stateFile.Save" \
+            --entry "internal/relay/pairing.go::Store.RedeemPairing" \
+            --entry "internal/relay/command_auth.go::Store.QueuePairedCommand" \
+            --entry "internal/relay/store.go::Store.SubmitResult" \
+            --entry "internal/relay/pairing.go::Store.RevokePairing"
       - name: Validate sequence contract
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-4.session.json
+        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-5a.session.json
       - name: Validate generated docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"

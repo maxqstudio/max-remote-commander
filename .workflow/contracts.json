@@ -237,19 +237,6 @@
       ]
     },
     {
-      "name": "Relay ephemeral state",
-      "source_of_truth": "internal/relay/store.go",
-      "mutability": "Ephemeral server memory",
-      "legal_writes": [
-        "Authenticated session pairing command result operations"
-      ],
-      "retention": "Lost on relay restart",
-      "invariants": [
-        "Command queue and result retention are bounded.",
-        "Durability is not claimed."
-      ]
-    },
-    {
       "name": "Local agent pairing state",
       "source_of_truth": "internal/agent/state.go",
       "mutability": "Created once after successful pairing",
@@ -291,6 +278,30 @@
         "max-chat does not persist the API key.",
         "Non-loopback provider transport requires HTTPS.",
         "Default provider client refuses redirects."
+      ]
+    },
+    {
+      "name": "Encrypted relay durable state",
+      "source_of_truth": "internal/relay/persistence.go and internal/relay/durable_mutation.go",
+      "mutability": "Transactional encrypted snapshot when MAXRC_STATE_FILE and MAXRC_STATE_KEY are configured; explicit ephemeral mode remains available when both are unset",
+      "legal_writes": [
+        "successful pairing redeem",
+        "accepted paired device/controller assertion replay guard",
+        "accepted signed command queue mutation",
+        "completed result mutation and bounded eviction",
+        "paired device session rotation stale-command pruning",
+        "authorized pairing revocation"
+      ],
+      "retention": "Until explicit revoke/eviction or operator removes the encrypted state file; expired replay nonce records are discarded on load",
+      "invariants": [
+        "The state encryption key is exactly 32 externally supplied bytes and is never serialized into durable state.",
+        "AES-256-GCM authenticates a versioned state envelope with fixed associated data.",
+        "Pairings generation counters queued commands request ownership completed retained results and unexpired replay nonces survive Store recreation.",
+        "Bearer device/controller sessions command leases pairing offers and pairing receipts are never persisted and must be re-established after relay restart.",
+        "The state path rejects symlinks non-regular files broad POSIX file permissions and group/other-writable POSIX parent directories.",
+        "Snapshot size is bounded and defaults to 64 MiB.",
+        "Snapshot schema is strict and validates device-key identity queue/result/request ownership and replay invariants before load and before save.",
+        "Durable mutation failure restores prior in-memory durable maps and does not acknowledge the mutation."
       ]
     }
   ],
@@ -371,6 +382,11 @@
       "name": "Build binaries",
       "command": "go build ./cmd/max-agent ./cmd/max-relay ./cmd/max-chat",
       "expected": "agent relay and chat client build on current runner OS"
+    },
+    {
+      "name": "Configure durable relay state",
+      "command": "Set MAXRC_STATE_FILE to a protected local path and MAXRC_STATE_KEY to unpadded base64url of exactly 32 random bytes before launching max-relay",
+      "expected": "Both variables are configured together; relay loads or atomically updates encrypted durable state. If both are unset the relay starts in explicit ephemeral mode with a warning."
     }
   ]
 }
