@@ -12,10 +12,8 @@ import (
 
 func main() {
 	registrationKey := os.Getenv("MAXRC_REGISTRATION_KEY")
-	controllerKey := os.Getenv("MAXRC_CONTROLLER_KEY")
 	store, err := relay.NewStore(relay.Config{
 		RegistrationKey: registrationKey,
-		ControllerKey: controllerKey,
 		SessionTTL: 15 * time.Minute,
 		LeaseTTL: 30 * time.Second,
 		MaxQueue: 128,
