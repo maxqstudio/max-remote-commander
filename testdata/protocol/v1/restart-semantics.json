@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "original_agent_session_id": "agent-session-durable",
+  "cases": [
+    {
+      "id": "same-session-unexpired",
+      "next_agent_session_id": "agent-session-durable",
+      "advance_seconds": 0,
+      "expected_request_state": "deliverable"
+    },
+    {
+      "id": "rotated-session-unexpired",
+      "next_agent_session_id": "agent-session-rotated",
+      "advance_seconds": 0,
+      "expected_request_state": "pruned"
+    },
+    {
+      "id": "same-session-expired",
+      "next_agent_session_id": "agent-session-durable",
+      "advance_seconds": 61,
+      "expected_request_state": "pruned"
+    }
+  ]
+}

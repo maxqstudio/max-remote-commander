@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "encoding": "base64url-no-padding",
+  "warning": "TEST VECTORS ONLY. Private seeds in this file are public deterministic fixtures and must never be used as production identities.",
+  "identities": {
+    "device": {
+      "seed_b64url": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
+      "public_key_b64url": "A6EHv_POEL4dcN0Y50vAmWfk1jCbpQ1fHdyGZBJVMbg"
+    },
+    "controller": {
+      "seed_b64url": "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
+      "public_key_b64url": "Kay64UG8yvCyLhqU000LxzYeUm0L_hLIl5S8kyKWbdc"
+    }
+  },
+  "device_assertion": {
+    "value": {
+      "device_id": "dev-vector-001",
+      "generation": 7,
+      "agent_session_id": "agent-session-vector-001",
+      "issued_at": 1800000000,
+      "expires_at": 1800000030,
+      "nonce": "device-nonce-vector-001",
+      "signature": "z4eZuXNk0Iae-I2T8vbIYTMzybhwJB8IMB8gpZTOtI4bkDyRoq7_1HJwIjPuZAYlF-GlcMXxXsawB8Ec4qXUDA"
+    },
+    "canonical_json": "{\"device_id\":\"dev-vector-001\",\"generation\":7,\"agent_session_id\":\"agent-session-vector-001\",\"issued_at\":1800000000,\"expires_at\":1800000030,\"nonce\":\"device-nonce-vector-001\"}",
+    "canonical_sha256": "fbf92b490b82a1a07ccfac9142b2b33f5397fd7bbfdcbe83ec1ecb6e4f248ca5"
+  },
+  "controller_assertion": {
+    "value": {
+      "device_id": "dev-vector-001",
+      "generation": 7,
+      "issued_at": 1800000000,
+      "expires_at": 1800000030,
+      "nonce": "controller-nonce-vector-001",
+      "signature": "mydQ5R--JckGp_e4a4j6SR0jDmxlih6YPGv4xIOu2SNkVd6Z66Z40n_7r4f4360xMbtVjoz_X2h2_Fv6i2flBg"
+    },
+    "canonical_json": "{\"device_id\":\"dev-vector-001\",\"generation\":7,\"issued_at\":1800000000,\"expires_at\":1800000030,\"nonce\":\"controller-nonce-vector-001\"}",
+    "canonical_sha256": "89bdc03ded1960d84fdac2730460d98cb155b721ed0b7c319f2fbe955101ea4a"
+  },
+  "command_envelope": {
+    "value": {
+      "version": 1,
+      "request_id": "req-vector-001",
+      "device_id": "dev-vector-001",
+      "session_id": "agent-session-vector-001",
+      "issued_at": 1800000000,
+      "expires_at": 1800000060,
+      "nonce": "command-nonce-vector-001",
+      "tool": "filesystem.read",
+      "arguments": {
+        "path": "workspace/file.txt",
+        "limit": 16
+      },
+      "signature": "sbNcbTGOEiSk7rHQJnaavoyRXwk8g2-_C0bz5VbizfBxL6NrloLR2iDlN_EEu7a34Dca6ZUWYUu84bO1ltqjDQ"
+    },
+    "canonical_json": "{\"version\":1,\"request_id\":\"req-vector-001\",\"device_id\":\"dev-vector-001\",\"session_id\":\"agent-session-vector-001\",\"issued_at\":1800000000,\"expires_at\":1800000060,\"nonce\":\"command-nonce-vector-001\",\"tool\":\"filesystem.read\",\"arguments\":{\"path\":\"workspace/file.txt\",\"limit\":16}}",
+    "canonical_sha256": "68a45cd18b0441412d2faba541a6c4d94f89654834ebaef600390943051abab2"
+  }
+}
