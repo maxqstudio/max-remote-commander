@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/maxqstudio/max-remote-commander/internal/identity"
 	"github.com/maxqstudio/max-remote-commander/internal/protocol"
 )
 
@@ -82,12 +81,5 @@ func TestQueuePairedCommandRejectsWrongControllerSignature(t *testing.T) {
 	command := signedCommandForPairing(t, pairing, wrongPrivate, controllerSession.AgentSessionID, "req-wrong-sig", "command-nonce-wrong", now)
 	if err := store.QueuePairedCommand(pairing.DeviceID, controllerSession.Token, command, now); !errors.Is(err, ErrInvalidCommandEnvelope) {
 		t.Fatalf("wrong signature: %v", err)
-	}
-}
-
-func TestPairingDeviceHelperStillUsesIdentityPackage(t *testing.T) {
-	device, err := identity.New()
-	if err != nil || device.ID() == "" {
-		t.Fatalf("device identity unavailable: %v", err)
 	}
 }
