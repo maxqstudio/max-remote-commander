@@ -58,6 +58,26 @@
         "Pairings generations queues request ownership completed results and unexpired replay guards survive Store recreation while bearer sessions leases pairing offers and pairing receipts remain ephemeral.",
         "Durable mutations roll back on persistence failure; pairing revocation durably removes old-generation queue/results/replay state; stale-session queued commands are pruned after agent-session rotation."
       ]
+    },
+    {
+      "date": "2026-09-29",
+      "title": "Phase 5A accepted encrypted relay durability",
+      "type": "security",
+      "changes": [
+        "Accepted source SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da after work run 36588006526 and identical-SHA main run 36588253106 both passed all five blocking jobs.",
+        "Truth-only closure SHA b85a8af38e26046b22c5dc33c686de97dbf558cb passed work run 36588860214 and main run 36589194145."
+      ]
+    },
+    {
+      "date": "2026-09-29",
+      "title": "Phase 5B canonical protocol vectors source candidate",
+      "type": "security",
+      "changes": [
+        "Source candidate 501cd78a2bfa06825471ae1a45ce64a5647d0807 passed Linux Windows macOS and race source lanes on GitHub Actions run 36589988772; STRICT governance remained stale and is pending synchronization.",
+        "Added language-neutral protocol-v1 fixtures for deterministic Ed25519 identities canonical signing bytes signatures and SHA-256 digests.",
+        "Added executable restart vectors for same-session delivery and fail-closed rotated-session or expired queue pruning.",
+        "Fixture private seeds are intentionally public deterministic test material and are explicitly forbidden for production identity use."
+      ]
     }
   ]
 }

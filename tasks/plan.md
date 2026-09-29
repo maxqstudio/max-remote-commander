@@ -58,8 +58,8 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [x] Exact Phase 5A SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da passed work run 36588006526 and identical-SHA main run 36588253106.
 
 ### Phase 5B: Canonical protocol and restart vectors
-- [ ] Freeze deterministic protocol/restart test vectors shared by future transports and adapters.
-- [ ] Prove stale-session, expiry, replay, signature, generation, and capability-envelope conformance without weakening session binding.
+- [x] Freeze deterministic protocol/restart test vectors shared by future transports and adapters.
+- [x] Prove signing/canonicalization/replay/expiry and same-session/rotated-session/expired restart conformance in Linux/Windows/macOS/race source lanes on run 36589988772; independent cross-language consumers remain future-phase evidence.
 - [ ] Close P5 Protocol & Durability only after exact work/main acceptance.
 
 ### P6-P19 production roadmap

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "session_id": "phase-5b-protocol-conformance-vectors",
+  "phase": "Phase 5B - canonical protocol and restart vectors",
+  "mode": "DURING",
+  "scope": "CURRENT",
+  "critical": true,
+  "status": "ACTIVE",
+  "implementation_base_sha": "b85a8af38e26046b22c5dc33c686de97dbf558cb",
+  "plan": {
+    "required": false,
+    "contract": "",
+    "frozen": false,
+    "frozen_commit": "",
+    "sha256": "",
+    "diagram": ""
+  },
+  "actual": {
+    "graph": "docs/sequence/generated/phase-5b.actual.json",
+    "diagram": "docs/sequence/generated/phase-5b.actual.mmd",
+    "source_digest": "",
+    "entries": [
+      "internal/protocol/envelope.go::CommandEnvelope.Sign",
+      "internal/protocol/envelope.go::CommandEnvelope.Verify",
+      "internal/protocol/verifier.go::Verifier.Verify",
+      "internal/relay/device_auth.go::Store.AuthenticateDevice",
+      "internal/relay/controller_auth.go::Store.AuthenticateController",
+      "internal/relay/command_auth.go::Store.QueuePairedCommand",
+      "internal/relay/durable_mutation.go::Store.pruneQueuedCommandsForSessionLocked"
+    ]
+  },
+  "test_traceability_required": true,
+  "tests": [
+    "internal/protocol/conformance_test.go",
+    "internal/protocol/envelope_test.go",
+    "internal/protocol/verifier_test.go",
+    "internal/relay/conformance_test.go",
+    "internal/relay/durability_test.go",
+    "internal/relay/device_auth_test.go",
+    "internal/relay/controller_auth_test.go",
+    "internal/relay/command_auth_test.go"
+  ],
+  "runtime_trace": {
+    "required": false,
+    "graph": ""
+  },
+  "acceptance_report": "artifacts/sequence/phase-5b.acceptance.json"
+}

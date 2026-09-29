@@ -82,11 +82,13 @@ Cloudflare relay       Self-hosted Go relay
 
 ## Current execution checkpoint
 
-**Phase 5A encrypted relay durability is accepted** at exact SHA `f3a2ce567e50a2c0e8b96071a3253644b92d02da`: work run `36588006526` and identical-SHA main run `36588253106` both passed all five blocking lanes.
+**Phase 5A encrypted relay durability is accepted.** Source SHA `f3a2ce567e50a2c0e8b96071a3253644b92d02da` passed work run `36588006526` and identical-SHA main run `36588253106`; truth-only closure SHA `b85a8af38e26046b22c5dc33c686de97dbf558cb` passed work run `36588860214` and main run `36589194145`.
 
-The next authorized subphase is **Phase 5B canonical protocol and restart vectors**, which completes P5 Protocol & Durability before P6 begins. GitHub-hosted restart tests do not by themselves prove physical crash or power-loss recovery.
+**Phase 5B canonical protocol and restart vectors is source-complete but not yet accepted.** Candidate `501cd78a2bfa06825471ae1a45ce64a5647d0807` passed Linux, Windows, macOS, and race lanes on run `36589988772`; STRICT governance is pending synchronization.
 
-Queued commands remain bound to an agent session. If a relay/agent restart produces a new agent session, stale-session queued commands must be rejected or pruned rather than replayed under a different session.
+The protocol-v1 fixtures are the compatibility boundary for future Cloudflare/MCP implementations. They lock canonical Ed25519 signing bytes/signatures and the restart rule that an unexpired queued command may remain deliverable only when the reauthenticated agent session ID is unchanged. Rotated-session or expired queued commands are pruned rather than rebound.
+
+P5 is not closed until the final Phase 5B exact SHA passes all five work-branch lanes and identical-SHA main revalidation. GitHub-hosted restart tests do not prove physical crash or power-loss recovery.
 
 ## MCP V1 capability boundary
 

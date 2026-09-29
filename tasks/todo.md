@@ -18,7 +18,10 @@
 - [x] Exact P5A branch-head f3a2ce567e50a2c0e8b96071a3253644b92d02da 5/5 PASS on run 36588006526
 - [x] Fast-forward accepted P5A SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da to main
 - [x] Identical-SHA main revalidation 5/5 PASS on run 36588253106
-- [ ] Phase 5B freeze/document canonical protocol + restart semantics and shared conformance test vectors for P5 closure
+- [x] Phase 5B canonical protocol + restart vectors source candidate 501cd78a2bfa06825471ae1a45ce64a5647d0807
+- [x] Phase 5B Linux/Windows/macOS/race source lanes PASS on run 36589988772
+- [ ] Phase 5B exact 5/5 work-branch governance acceptance
+- [ ] Phase 5B identical-SHA main revalidation and P5 closure
 
 ## Forward roadmap
 

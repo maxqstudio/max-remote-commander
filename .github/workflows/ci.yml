@@ -66,31 +66,31 @@ jobs:
         run: |
           python .workflow/tools/generate_sequence_actual.py \
             --root "$GITHUB_WORKSPACE" \
-            --output-json docs/sequence/generated/phase-5a.actual.json \
-            --output-mermaid docs/sequence/generated/phase-5a.actual.mmd \
-            --entry "cmd/max-relay/main.go::durableStateConfig" \
-            --entry "internal/relay/persistence.go::stateFile.Load" \
-            --entry "internal/relay/persistence.go::stateFile.Save" \
-            --entry "internal/relay/pairing.go::Store.RedeemPairing" \
+            --output-json docs/sequence/generated/phase-5b.actual.json \
+            --output-mermaid docs/sequence/generated/phase-5b.actual.mmd \
+            --entry "internal/protocol/envelope.go::CommandEnvelope.Sign" \
+            --entry "internal/protocol/envelope.go::CommandEnvelope.Verify" \
+            --entry "internal/protocol/verifier.go::Verifier.Verify" \
+            --entry "internal/relay/device_auth.go::Store.AuthenticateDevice" \
+            --entry "internal/relay/controller_auth.go::Store.AuthenticateController" \
             --entry "internal/relay/command_auth.go::Store.QueuePairedCommand" \
-            --entry "internal/relay/store.go::Store.SubmitResult" \
-            --entry "internal/relay/pairing.go::Store.RevokePairing"
+            --entry "internal/relay/durable_mutation.go::Store.pruneQueuedCommandsForSessionLocked"
       - name: Validate sequence contract
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-5a.session.json
+        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-5b.session.json
       - name: Validate generated docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"
-      - name: Sync deterministic generated truth on Phase 5A work branch
-        if: github.event_name == 'push' && github.ref == 'refs/heads/work/phase-5a-durability'
+      - name: Sync deterministic generated truth on Phase 5B work branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/work/phase-5b-protocol-vectors'
         shell: bash
         run: |
           git add .workflow/generated/code_facts.json docs/*.md
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "chore: regenerate Phase 5A project truth"
-            git push origin HEAD:work/phase-5a-durability
+            git commit -m "chore: regenerate Phase 5B project truth"
+            git push origin HEAD:work/phase-5b-protocol-vectors
           fi
       - name: Verify tracked governance state is deterministic
         shell: bash

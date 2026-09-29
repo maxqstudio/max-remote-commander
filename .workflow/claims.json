@@ -288,6 +288,27 @@
       ],
       "runtime_evidence": [],
       "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P5B-CONFORMANCE-001",
+      "claim": "Protocol-v1 language-neutral fixtures lock canonical Ed25519 signing semantics and fail-closed restart queue behavior for future cross-language transports and adapters.",
+      "documents": [
+        "TEST_ACCEPTANCE_MATRIX.md",
+        "WORKFLOW_STATE_MACHINE.md"
+      ],
+      "source_owners": [
+        "internal/protocol/envelope.go::Sign(",
+        "internal/protocol/envelope.go::Verify(",
+        "internal/relay/device_auth.go::SignDeviceAssertion(",
+        "internal/relay/controller_auth.go::SignControllerAssertion(",
+        "internal/relay/durable_mutation.go::Store.pruneQueuedCommandsForSessionLocked("
+      ],
+      "tests": [
+        "internal/protocol/conformance_test.go",
+        "internal/relay/conformance_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
     }
   ],
   "relations": []
