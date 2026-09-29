@@ -52,6 +52,7 @@ func (s *HTTPServer) Handler() http.Handler {
 	mux.HandleFunc("POST /v1/devices/{device}/bootstrap-session", s.bootstrapSession)
 	mux.HandleFunc("POST /v1/devices/{device}/session", s.deviceSession)
 	mux.HandleFunc("POST /v1/devices/{device}/pairing-offer", s.publishPairingOffer)
+	mux.HandleFunc("GET /v1/devices/{device}/pairing/status", s.pairingStatus)
 	mux.HandleFunc("POST /v1/devices/{device}/pairing/redeem", s.redeemPairing)
 	mux.HandleFunc("POST /v1/devices/{device}/controller-session", s.controllerSession)
 	mux.HandleFunc("DELETE /v1/devices/{device}/pairing", s.revokePairing)
@@ -135,7 +136,7 @@ func relayStatus(err error) int {
 	switch {
 	case errors.Is(err, ErrUnauthorized), errors.Is(err, ErrDeviceAssertion), errors.Is(err, ErrDeviceIdentityRequired):
 		return http.StatusUnauthorized
-	case errors.Is(err, ErrPairingCodeInvalid), errors.Is(err, ErrControllerAssertion):
+	case errors.Is(err, ErrPairingCodeInvalid), errors.Is(err, ErrControllerAssertion), errors.Is(err, ErrPairingReceipt):
 		return http.StatusUnauthorized
 	case errors.Is(err, ErrInvalidIdentifier), errors.Is(err, ErrInvalidPublicKey), errors.Is(err, ErrPairingMismatch), errors.Is(err, ErrInvalidCommandEnvelope):
 		return http.StatusBadRequest
@@ -209,18 +210,46 @@ func (s *HTTPServer) publishPairingOffer(w http.ResponseWriter, r *http.Request)
 	}
 	var codeHash [32]byte
 	copy(codeHash[:], codeHashRaw)
-	if err := s.Store.PublishPairingOffer(
+	receipt, err := s.Store.PublishPairingOfferWithReceipt(
 		r.PathValue("device"),
 		token,
 		codeHash,
 		ed25519.PublicKey(publicRaw),
 		time.Duration(body.TTLSeconds)*time.Second,
 		s.now(),
-	); err != nil {
+	)
+	if err != nil {
 		writeError(w, relayStatus(err), err.Error())
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{"status":"pairing-offer-created"})
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"status": "pairing-offer-created",
+		"receipt_token": receipt.Token,
+		"receipt_expires_at": receipt.ExpiresAt,
+	})
+}
+
+func (s *HTTPServer) pairingStatus(w http.ResponseWriter, r *http.Request) {
+	receiptToken, ok := bearer(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+	pairing, paired, err := s.Store.PairingStatus(r.PathValue("device"), receiptToken, s.now())
+	if err != nil {
+		writeError(w, relayStatus(err), err.Error())
+		return
+	}
+	if !paired {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"device_id": pairing.DeviceID,
+		"generation": pairing.Generation,
+		"controller_public_key": base64.RawURLEncoding.EncodeToString(pairing.ControllerPublicKey),
+		"paired_at": pairing.PairedAt,
+	})
 }
 
 func (s *HTTPServer) redeemPairing(w http.ResponseWriter, r *http.Request) {
