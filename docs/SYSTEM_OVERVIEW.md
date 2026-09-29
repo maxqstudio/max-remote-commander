@@ -93,7 +93,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 Current phase: P6 - Transport V2
 
-Current status: GOVERNANCE_MIGRATION_AWAITING_REVALIDATION
+Current status: ACCEPTED_CLOSED
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -139,10 +139,10 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- adopt Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 including mandatory roadmap authority and ROADMAP_SYNC
-- regenerate deterministic P6 Project Truth and sequence evidence with the migrated governance toolchain
-- obtain exact 5-job PASS on the final P6 work-branch SHA under the latest workflow
-- fast-forward that exact P6 SHA to main and revalidate before closing P6
+- start P7 Cloudflare Relay on a new work branch from accepted P6 main
+- update .workflow/state.json and .workflow/roadmap.json together when P7 becomes CURRENT
+- implement Cloudflare Worker plus Durable Object relay as a thin protocol-v1-conformant transport and state adapter
+- preserve outbound-only agent connectivity, device generation, replay, agent-session binding, local policy, approval, and audit semantics
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -180,12 +180,11 @@ Known blockers:
 - Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds
 - P6 pre-migration governance SHA da89c5625d7f78dd9a2941f912cacbf326e29f0a passed all five jobs on GitHub Actions run 36596829111 under prior Skill_Workflow pin 2148313678f476c4990e447b4d657724f071adff; it is not final P6 authority because the Owner requested migration to the latest workflow before merge
 - Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151
+- P6 exact accepted SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed Linux Windows macOS race and latest STRICT governance on work run 36611213711 and identical-SHA main run 36611401330
+- P6 Transport V2 is closed under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259: outbound WebSocket command delivery, bounded reconnect/backoff, heartbeat/session refresh, FIFO head-of-line lease safety, strict framing, HTTPS durable result acknowledgement, and explicit long-poll fallback are accepted
 
 ### Not proven
 
-- P6 latest Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 exact 5-job work-branch revalidation
-- P6 exact 5-job work-branch governance acceptance
-- P6 identical-SHA main revalidation
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY

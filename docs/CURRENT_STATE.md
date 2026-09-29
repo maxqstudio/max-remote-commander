@@ -3,12 +3,12 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: 5b79d0eab9c9bbcffe7aedb931389399c26d0c99
+Authority verified at SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
 Governance profile: strict
 
 ## Current phase
 Phase: P6 - Transport V2
-Status: GOVERNANCE_MIGRATION_AWAITING_REVALIDATION
+Status: ACCEPTED_CLOSED
 Roadmap phase: P6 - Transport V2
 ROADMAP_SYNC: PASS
 
@@ -16,7 +16,7 @@ ROADMAP_SYNC: PASS
 Repository: maxqstudio/max-remote-commander
 Branch: work/p6-transport-v2
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: 5b79d0eab9c9bbcffe7aedb931389399c26d0c99
+Last accepted SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
 Current candidate SHA: external final acceptance evidence
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
@@ -36,7 +36,7 @@ PROJECT_DOCS_SYNC: PASS
 Sequence policy: REQUIRED
 Current sequence mode: DURING
 Current sequence session: docs/sequence/p6.session.json
-SEQUENCE_SYNC: NOT_PROVEN
+SEQUENCE_SYNC: PASS
 
 ## Proven
 - Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192 and identical-SHA main run 36558681560
@@ -60,11 +60,10 @@ SEQUENCE_SYNC: NOT_PROVEN
 - Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds
 - P6 pre-migration governance SHA da89c5625d7f78dd9a2941f912cacbf326e29f0a passed all five jobs on GitHub Actions run 36596829111 under prior Skill_Workflow pin 2148313678f476c4990e447b4d657724f071adff; it is not final P6 authority because the Owner requested migration to the latest workflow before merge
 - Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151
+- P6 exact accepted SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed Linux Windows macOS race and latest STRICT governance on work run 36611213711 and identical-SHA main run 36611401330
+- P6 Transport V2 is closed under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259: outbound WebSocket command delivery, bounded reconnect/backoff, heartbeat/session refresh, FIFO head-of-line lease safety, strict framing, HTTPS durable result acknowledgement, and explicit long-poll fallback are accepted
 
 ## Not proven
-- P6 latest Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 exact 5-job work-branch revalidation
-- P6 exact 5-job work-branch governance acceptance
-- P6 identical-SHA main revalidation
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
@@ -82,10 +81,10 @@ SEQUENCE_SYNC: NOT_PROVEN
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- adopt Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 including mandatory roadmap authority and ROADMAP_SYNC
-- regenerate deterministic P6 Project Truth and sequence evidence with the migrated governance toolchain
-- obtain exact 5-job PASS on the final P6 work-branch SHA under the latest workflow
-- fast-forward that exact P6 SHA to main and revalidate before closing P6
+- start P7 Cloudflare Relay on a new work branch from accepted P6 main
+- update .workflow/state.json and .workflow/roadmap.json together when P7 becomes CURRENT
+- implement Cloudflare Worker plus Durable Object relay as a thin protocol-v1-conformant transport and state adapter
+- preserve outbound-only agent connectivity, device generation, replay, agent-session binding, local policy, approval, and audit semantics
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination

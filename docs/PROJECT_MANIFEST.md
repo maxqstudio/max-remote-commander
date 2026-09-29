@@ -12,7 +12,7 @@ Governance profile: strict
 Repository: maxqstudio/max-remote-commander
 Active branch: work/p6-transport-v2
 Current authoritative SHA: external final acceptance evidence
-Last accepted SHA: 5b79d0eab9c9bbcffe7aedb931389399c26d0c99
+Last accepted SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
 ## Authorities
