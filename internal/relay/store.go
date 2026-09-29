@@ -31,6 +31,9 @@ type Config struct {
 	ControllerSessionTTL time.Duration
 	ControllerClockSkew  time.Duration
 	DeviceClockSkew      time.Duration
+	StatePath            string
+	StateKey             []byte
+	MaxStateBytes        int64
 }
 
 type Command struct {
@@ -92,6 +95,7 @@ type Store struct {
 	controllerNonces   map[controllerNonceKey]int64
 	deviceNonces       map[deviceNonceKey]int64
 	commandNonces      map[commandNonceKey]int64
+	stateFile          *stateFile
 }
 
 func NewStore(cfg Config) (*Store, error) {
@@ -122,7 +126,18 @@ func NewStore(cfg Config) (*Store, error) {
 	if cfg.DeviceClockSkew <= 0 {
 		cfg.DeviceClockSkew = 30 * time.Second
 	}
-	return &Store{
+	if (cfg.StatePath == "") != (len(cfg.StateKey) == 0) {
+		return nil, ErrDurableStateConfig
+	}
+	var persistence *stateFile
+	if cfg.StatePath != "" {
+		var err error
+		persistence, err = newStateFile(cfg.StatePath, cfg.StateKey, cfg.MaxStateBytes)
+		if err != nil {
+			return nil, err
+		}
+	}
+	store := &Store{
 		registrationHash: sha256.Sum256([]byte(cfg.RegistrationKey)),
 		sessionTTL: cfg.SessionTTL,
 		leaseTTL: cfg.LeaseTTL,
@@ -147,7 +162,20 @@ func NewStore(cfg Config) (*Store, error) {
 		controllerNonces: make(map[controllerNonceKey]int64),
 		deviceNonces: make(map[deviceNonceKey]int64),
 		commandNonces: make(map[commandNonceKey]int64),
-	}, nil
+		stateFile: persistence,
+	}
+	if persistence != nil {
+		state, ok, err := persistence.Load(time.Now(), store.maxQueue, store.maxResults)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
+			if err := store.restoreDurableStateLocked(state); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return store, nil
 }
 
 func secureEqual(expected [32]byte, supplied string) bool {
