@@ -9,7 +9,10 @@ import (
 	"github.com/maxqstudio/max-remote-commander/internal/identity"
 )
 
-const maxPairingTTL = 5 * time.Minute
+const (
+	maxPairingTTL = 5 * time.Minute
+	maxPairingReceiptTTL = 10 * time.Minute
+)
 
 var (
 	ErrPairingOfferMissing = errors.New("pairing offer not found")
@@ -20,6 +23,7 @@ var (
 	ErrPairingMismatch     = errors.New("device public key does not match device id")
 	ErrInvalidPublicKey    = errors.New("invalid Ed25519 public key")
 	ErrNotPaired           = errors.New("device is not paired")
+	ErrPairingReceipt       = errors.New("invalid pairing receipt")
 )
 
 type pairingOffer struct {
@@ -27,6 +31,16 @@ type pairingOffer struct {
 	devicePublicKey ed25519.PublicKey
 	expiresAt       time.Time
 	attempts        int
+}
+
+type pairingReceiptState struct {
+	tokenHash [32]byte
+	expiresAt time.Time
+}
+
+type PairingReceipt struct {
+	Token     string    `json:"token"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 type Pairing struct {
@@ -46,31 +60,56 @@ func validPublicKey(key ed25519.PublicKey) bool {
 }
 
 func (s *Store) PublishPairingOffer(deviceID, sessionToken string, codeHash [32]byte, devicePublicKey ed25519.PublicKey, ttl time.Duration, now time.Time) error {
+	_, err := s.publishPairingOffer(deviceID, sessionToken, codeHash, devicePublicKey, ttl, now, false)
+	return err
+}
+
+func (s *Store) PublishPairingOfferWithReceipt(deviceID, sessionToken string, codeHash [32]byte, devicePublicKey ed25519.PublicKey, ttl time.Duration, now time.Time) (PairingReceipt, error) {
+	return s.publishPairingOffer(deviceID, sessionToken, codeHash, devicePublicKey, ttl, now, true)
+}
+
+func (s *Store) publishPairingOffer(deviceID, sessionToken string, codeHash [32]byte, devicePublicKey ed25519.PublicKey, ttl time.Duration, now time.Time, issueReceipt bool) (PairingReceipt, error) {
 	if !validID(deviceID, 64) || !validPublicKey(devicePublicKey) || ttl <= 0 || ttl > maxPairingTTL {
-		return ErrInvalidIdentifier
+		return PairingReceipt{}, ErrInvalidIdentifier
 	}
 	expectedID, err := identity.DeviceID(devicePublicKey)
 	if err != nil || expectedID != deviceID {
-		return ErrPairingMismatch
+		return PairingReceipt{}, ErrPairingMismatch
 	}
 	if codeHash == sha256.Sum256(nil) {
-		return ErrInvalidIdentifier
+		return PairingReceipt{}, ErrInvalidIdentifier
+	}
+
+	var receipt PairingReceipt
+	var receiptHash [32]byte
+	if issueReceipt {
+		token, hash, err := randomToken()
+		if err != nil {
+			return PairingReceipt{}, err
+		}
+		receipt = PairingReceipt{Token: token, ExpiresAt: now.Add(maxPairingReceiptTTL)}
+		receiptHash = hash
 	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if !s.sessionAuthorizedLocked(deviceID, sessionToken, now) {
-		return ErrUnauthorized
+		return PairingReceipt{}, ErrUnauthorized
 	}
 	if _, exists := s.pairings[deviceID]; exists {
-		return ErrAlreadyPaired
+		return PairingReceipt{}, ErrAlreadyPaired
 	}
 	s.pairingOffers[deviceID] = pairingOffer{
 		codeHash: codeHash,
 		devicePublicKey: clonePublicKey(devicePublicKey),
 		expiresAt: now.Add(ttl),
 	}
-	return nil
+	if issueReceipt {
+		s.pairingReceipts[deviceID] = pairingReceiptState{tokenHash: receiptHash, expiresAt: receipt.ExpiresAt}
+	} else {
+		delete(s.pairingReceipts, deviceID)
+	}
+	return receipt, nil
 }
 
 func (s *Store) RedeemPairing(deviceID, code string, controllerPublicKey ed25519.PublicKey, now time.Time) (Pairing, error) {
@@ -89,12 +128,14 @@ func (s *Store) RedeemPairing(deviceID, code string, controllerPublicKey ed25519
 	}
 	if !now.Before(offer.expiresAt) {
 		delete(s.pairingOffers, deviceID)
+		delete(s.pairingReceipts, deviceID)
 		return Pairing{}, ErrPairingOfferExpired
 	}
 	if !identity.PairingCodeMatches(offer.codeHash, code) {
 		offer.attempts++
 		if offer.attempts >= s.maxPairingAttempts {
 			delete(s.pairingOffers, deviceID)
+			delete(s.pairingReceipts, deviceID)
 			return Pairing{}, ErrPairingAttempts
 		}
 		s.pairingOffers[deviceID] = offer
@@ -119,6 +160,26 @@ func (s *Store) RedeemPairing(deviceID, code string, controllerPublicKey ed25519
 		}
 	}
 	return clonePairing(pairing), nil
+}
+
+func (s *Store) PairingStatus(deviceID, receiptToken string, now time.Time) (Pairing, bool, error) {
+	if !validID(deviceID, 64) || receiptToken == "" {
+		return Pairing{}, false, ErrPairingReceipt
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	receipt, ok := s.pairingReceipts[deviceID]
+	if !ok || !now.Before(receipt.expiresAt) || !secureEqual(receipt.tokenHash, receiptToken) {
+		if ok && !now.Before(receipt.expiresAt) {
+			delete(s.pairingReceipts, deviceID)
+		}
+		return Pairing{}, false, ErrPairingReceipt
+	}
+	pairing, paired := s.pairings[deviceID]
+	if !paired {
+		return Pairing{}, false, nil
+	}
+	return clonePairing(pairing), true, nil
 }
 
 func clonePairing(pairing Pairing) Pairing {
@@ -148,6 +209,7 @@ func (s *Store) RevokePairing(deviceID, sessionToken string, now time.Time) erro
 	}
 	delete(s.pairings, deviceID)
 	delete(s.pairingOffers, deviceID)
+	delete(s.pairingReceipts, deviceID)
 	delete(s.sessions, deviceID)
 	delete(s.controllerSessions, deviceID)
 	for key := range s.controllerNonces {
