@@ -82,9 +82,9 @@ Cloudflare relay       Self-hosted Go relay
 
 ## Current execution checkpoint
 
-Current implementation work is **P5 / Phase 5A encrypted relay durability** on `work/phase-5a-durability`.
+**Phase 5A encrypted relay durability is accepted** at exact SHA `f3a2ce567e50a2c0e8b96071a3253644b92d02da`: work run `36588006526` and identical-SHA main run `36588253106` both passed all five blocking lanes.
 
-P5 is not complete until the exact accepted source has passed all blocking CI lanes on the work branch, is merged to `main`, and the accepted main state is revalidated. GitHub-hosted restart tests do not by themselves prove physical crash or power-loss recovery.
+The next authorized subphase is **Phase 5B canonical protocol and restart vectors**, which completes P5 Protocol & Durability before P6 begins. GitHub-hosted restart tests do not by themselves prove physical crash or power-loss recovery.
 
 Queued commands remain bound to an agent session. If a relay/agent restart produces a new agent session, stale-session queued commands must be rejected or pruned rather than replayed under a different session.
 

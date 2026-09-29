@@ -15,10 +15,10 @@
 - [x] Phase 5A source candidate a0fc977588a12acd69b82cca1acff6c8884745a2 Linux/Windows/macOS/race PASS on run 36565884484
 - [x] Skill_Workflow pin updated to 2148313678f476c4990e447b4d657724f071adff
 - [x] Project Truth synchronization run 36566942745 reached 5/5 PASS at trigger SHA 752fc25d8d96e3f8d1f22ebe62ddb7bfdc11a271
-- [ ] Obtain exact 5/5 PASS on the final P5A branch-head candidate
-- [ ] Merge accepted P5A candidate to main
-- [ ] Revalidate accepted P5A state on main
-- [ ] Freeze/document canonical restart semantics and protocol test vectors for P5 closure
+- [x] Exact P5A branch-head f3a2ce567e50a2c0e8b96071a3253644b92d02da 5/5 PASS on run 36588006526
+- [x] Fast-forward accepted P5A SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da to main
+- [x] Identical-SHA main revalidation 5/5 PASS on run 36588253106
+- [ ] Phase 5B freeze/document canonical protocol + restart semantics and shared conformance test vectors for P5 closure
 
 ## Forward roadmap
 

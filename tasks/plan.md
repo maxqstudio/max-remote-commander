@@ -55,20 +55,30 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [x] Roll back durable in-memory mutations when persistence fails.
 - [x] Revoke old-generation durable queue/result/replay state.
 - [x] Prove Store recreation, replay rejection, stale-session pruning, result restoration, and rollback across Linux/Windows/macOS/race.
-- [ ] Exact Phase 5A STRICT governance acceptance and identical-SHA main revalidation.
+- [x] Exact Phase 5A SHA f3a2ce567e50a2c0e8b96071a3253644b92d02da passed work run 36588006526 and identical-SHA main run 36588253106.
 
-### Phase 5B: TLS deployment and packaging
-- [ ] TLS/reverse-proxy deployment contract and public-exposure acceptance.
-- [ ] Cross-platform installers/service integration and protected key storage hardening.
+### Phase 5B: Canonical protocol and restart vectors
+- [ ] Freeze deterministic protocol/restart test vectors shared by future transports and adapters.
+- [ ] Prove stale-session, expiry, replay, signature, generation, and capability-envelope conformance without weakening session binding.
+- [ ] Close P5 Protocol & Durability only after exact work/main acceptance.
 
-### Phase 5C: MCP
-- [ ] MCP adapter and protocol acceptance.
+### P6-P19 production roadmap
+- [ ] P6 Transport V2 — WebSocket reconnect, heartbeat, bounded backoff, and session rebinding.
+- [ ] P7 Cloudflare Relay — Worker, Durable Objects, and WebSocket/Hibernation.
+- [ ] P8 MCP Gateway — structured capability adapter with no default unrestricted shell.
+- [ ] P9 Multi-client Compatibility.
+- [ ] P10 Device & Permission Model.
+- [ ] P11 Desktop Agent UX.
+- [ ] P12 Web Dashboard.
+- [ ] P13 ChatGPT Integration.
+- [ ] P14 Extended Capabilities.
+- [ ] P15 Security Hardening.
+- [ ] P16 Packaging.
+- [ ] P17 Scale & Reliability.
+- [ ] P18 Physical E2E.
+- [ ] P19 Public Release.
 
-### Phase 5D: Graphical multi-device UI
-- [ ] Graphical multi-device chat UI/device selector.
-
-### Phase 5E: Physical end-to-end acceptance
-- [ ] Physical multi-OS end-to-end acceptance and release artifacts.
+See `docs/ROADMAP.md` for phase boundaries and exit gates.
 
 ## Residual Risks
 | Risk | Current control |
