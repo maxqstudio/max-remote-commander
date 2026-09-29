@@ -29,7 +29,8 @@ func pairedControllerFixture(t *testing.T, store *Store, now time.Time) (*identi
 	if err != nil {
 		t.Fatal(err)
 	}
-	return device, session, pub, priv, pairing
+	pairedSession := authenticatePairingDevice(t, store, device, pairing, now, "fixture-device-nonce")
+	return device, pairedSession, pub, priv, pairing
 }
 
 func signedControllerAssertion(t *testing.T, pairing Pairing, privateKey ed25519.PrivateKey, now time.Time, nonce string) ControllerAssertion {
