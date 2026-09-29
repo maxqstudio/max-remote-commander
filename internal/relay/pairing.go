@@ -142,6 +142,7 @@ func (s *Store) RedeemPairing(deviceID, code string, controllerPublicKey ed25519
 		return Pairing{}, ErrPairingCodeInvalid
 	}
 
+	before := s.durableStateLocked()
 	generation := s.pairingGeneration[deviceID] + 1
 	s.pairingGeneration[deviceID] = generation
 	pairing := Pairing{
@@ -152,13 +153,17 @@ func (s *Store) RedeemPairing(deviceID, code string, controllerPublicKey ed25519
 		PairedAt: now,
 	}
 	s.pairings[deviceID] = pairing
-	delete(s.pairingOffers, deviceID)
-	delete(s.sessions, deviceID)
 	for key := range s.deviceNonces {
 		if key.deviceID == deviceID {
 			delete(s.deviceNonces, key)
 		}
 	}
+	if err := s.commitDurableLocked(before); err != nil {
+		return Pairing{}, err
+	}
+
+	delete(s.pairingOffers, deviceID)
+	delete(s.sessions, deviceID)
 	return clonePairing(pairing), nil
 }
 
@@ -207,21 +212,20 @@ func (s *Store) RevokePairing(deviceID, sessionToken string, now time.Time) erro
 	if _, ok := s.pairings[deviceID]; !ok {
 		return ErrNotPaired
 	}
-	delete(s.pairings, deviceID)
+
+	before := s.durableStateLocked()
+	removedRequests := s.removeDurableDeviceLocked(deviceID)
+	if err := s.commitDurableLocked(before); err != nil {
+		return err
+	}
+
 	delete(s.pairingOffers, deviceID)
 	delete(s.pairingReceipts, deviceID)
 	delete(s.sessions, deviceID)
 	delete(s.controllerSessions, deviceID)
-	for key := range s.controllerNonces {
-		if key.deviceID == deviceID {
-			delete(s.controllerNonces, key)
-		}
+	s.signalQueueLocked(deviceID)
+	for _, requestID := range removedRequests {
+		s.signalResultLocked(requestID)
 	}
-	for key := range s.deviceNonces {
-		if key.deviceID == deviceID {
-			delete(s.deviceNonces, key)
-		}
-	}
-	s.pairingGeneration[deviceID]++
 	return nil
 }

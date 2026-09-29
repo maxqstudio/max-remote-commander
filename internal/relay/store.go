@@ -318,14 +318,22 @@ func (s *Store) SubmitResult(deviceID, token string, result Result, now time.Tim
 	if owner != deviceID {
 		return ErrWrongDevice
 	}
+
+	var before durableState
+	durable := s.stateFile != nil
+	if durable {
+		before = s.durableStateLocked()
+	}
+
 	result.Payload = append([]byte(nil), result.Payload...)
+	var evicted []string
 	if _, exists := s.results[result.RequestID]; !exists {
 		for len(s.results) >= s.maxResults && len(s.resultOrder) > 0 {
 			evict := s.resultOrder[0]
 			s.resultOrder = s.resultOrder[1:]
 			delete(s.results, evict)
 			delete(s.requests, evict)
-			delete(s.resultNotify, evict)
+			evicted = append(evicted, evict)
 		}
 		s.resultOrder = append(s.resultOrder, result.RequestID)
 	}
@@ -335,8 +343,19 @@ func (s *Store) SubmitResult(deviceID, token string, result Result, now time.Tim
 	for i, item := range queue {
 		if item.command.RequestID == result.RequestID {
 			s.queues[deviceID] = append(queue[:i], queue[i+1:]...)
+			if len(s.queues[deviceID]) == 0 {
+				delete(s.queues, deviceID)
+			}
 			break
 		}
+	}
+	if durable {
+		if err := s.commitDurableLocked(before); err != nil {
+			return err
+		}
+	}
+	for _, requestID := range evicted {
+		s.signalResultLocked(requestID)
 	}
 	s.signalResultLocked(result.RequestID)
 	return nil

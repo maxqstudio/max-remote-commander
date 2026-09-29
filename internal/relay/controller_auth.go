@@ -126,13 +126,17 @@ func (s *Store) AuthenticateController(assertion ControllerAssertion, now time.T
 	if _, exists := s.controllerNonces[nonceKey]; exists {
 		return ControllerSession{}, ErrControllerReplay
 	}
-	s.controllerNonces[nonceKey] = assertion.ExpiresAt
-
 	token, hash, err := randomToken()
 	if err != nil {
-		delete(s.controllerNonces, nonceKey)
 		return ControllerSession{}, fmt.Errorf("issue controller session: %w", err)
 	}
+
+	before := s.durableStateLocked()
+	s.controllerNonces[nonceKey] = assertion.ExpiresAt
+	if err := s.commitDurableLocked(before); err != nil {
+		return ControllerSession{}, err
+	}
+
 	expiresAt := now.Add(s.controllerSessionTTL)
 	s.controllerSessions[assertion.DeviceID] = controllerSessionState{
 		tokenHash: hash,

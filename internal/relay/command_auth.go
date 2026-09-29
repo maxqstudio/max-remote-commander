@@ -80,12 +80,16 @@ func (s *Store) QueuePairedCommand(deviceID, controllerToken string, command Com
 		return ErrQueueFull
 	}
 
+	before := s.durableStateLocked()
 	copyPayload := append([]byte(nil), command.Payload...)
 	s.queues[deviceID] = append(s.queues[deviceID], &queuedCommand{
 		command: Command{RequestID: command.RequestID, Payload: copyPayload},
 	})
 	s.requests[command.RequestID] = deviceID
 	s.commandNonces[nonceKey] = envelope.ExpiresAt
+	if err := s.commitDurableLocked(before); err != nil {
+		return err
+	}
 	s.signalQueueLocked(deviceID)
 	return nil
 }

@@ -109,13 +109,18 @@ func (s *Store) AuthenticateDevice(assertion DeviceAssertion, now time.Time) (Se
 	if _, exists := s.deviceNonces[nonceKey]; exists {
 		return Session{}, ErrDeviceReplay
 	}
-	s.deviceNonces[nonceKey] = assertion.ExpiresAt
-
 	token, hash, err := randomToken()
 	if err != nil {
-		delete(s.deviceNonces, nonceKey)
 		return Session{}, fmt.Errorf("issue device session: %w", err)
 	}
+
+	before := s.durableStateLocked()
+	s.deviceNonces[nonceKey] = assertion.ExpiresAt
+	removedRequests := s.pruneQueuedCommandsForSessionLocked(assertion.DeviceID, assertion.AgentSessionID, now)
+	if err := s.commitDurableLocked(before); err != nil {
+		return Session{}, err
+	}
+
 	expiresAt := now.Add(s.sessionTTL)
 	s.sessions[assertion.DeviceID] = sessionState{
 		tokenHash: hash,
@@ -124,6 +129,11 @@ func (s *Store) AuthenticateDevice(assertion DeviceAssertion, now time.Time) (Se
 		paired: true,
 		agentSessionID: assertion.AgentSessionID,
 	}
+	delete(s.controllerSessions, assertion.DeviceID)
+	for _, requestID := range removedRequests {
+		s.signalResultLocked(requestID)
+	}
+	s.signalQueueLocked(assertion.DeviceID)
 	return Session{
 		Token: token,
 		ExpiresAt: expiresAt,
