@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "phase": "Phase 5B - canonical protocol and restart vectors",
-  "status": "ACCEPTED_CLOSED",
-  "working_branch": "work/phase-5b-protocol-vectors",
+  "phase": "P6 - Transport V2",
+  "status": "SOURCE_COMPLETE_AWAITING_GOVERNANCE",
+  "working_branch": "work/p6-transport-v2",
   "last_accepted_sha": "5c6db407f0ec3061387c5c4a59039ae5431bffb4",
   "last_accepted_branch": "main",
   "proven": [
@@ -19,9 +19,16 @@
     "Protocol-v1 language-neutral fixtures lock deterministic Ed25519 public keys canonical JSON SHA-256 digests and signatures for device assertions controller assertions and command envelopes",
     "Protocol-v1 restart fixtures prove an unexpired queued command is deliverable only when the reauthenticated agent session ID is unchanged; rotated-session or expired queued commands are pruned and remain absent after another restart",
     "Phase 5B exact accepted SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed Linux Windows macOS race and STRICT governance on work branch run 36591264102 and identical-SHA main run 36591432809",
-    "P5 Protocol & Durability is closed: encrypted restart-critical state, replay/session fail-closed semantics, and protocol-v1 language-neutral conformance vectors are accepted"
+    "P5 Protocol & Durability is closed: encrypted restart-critical state, replay/session fail-closed semantics, and protocol-v1 language-neutral conformance vectors are accepted",
+    "P5 read-only closure SHA 5b79d0eab9c9bbcffe7aedb931389399c26d0c99 passed all five blocking jobs on work run 36592773777 and main run 36593066059",
+    "P6 source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418; STRICT governance remained stale and is not yet accepted",
+    "Agent command delivery defaults to an authenticated outbound WebSocket stream while paired device session creation and durable result acknowledgement remain HTTPS; long-poll remains an explicit fallback",
+    "WebSocket reconnect uses bounded exponential backoff, hard authorization failures do not retry indefinitely, heartbeat detects stale sessions, and the runner refreshes device sessions while an idle push stream is blocked",
+    "Relay command delivery is FIFO head-of-line across leases so reconnect cannot bypass an in-flight command; result completion wakes waiting streams only after durable mutation commit succeeds"
   ],
   "not_proven": [
+    "P6 exact 5-job work-branch governance acceptance",
+    "P6 identical-SHA main revalidation",
     "cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures",
     "physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests",
     "state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY",
@@ -30,14 +37,14 @@
     "graphical multi-device chat UI and device selector",
     "MCP adapter",
     "OS-native protected key storage or explicit Windows ACL hardening for device/controller identity seeds",
-    "WebSocket transport and reconnect/session-rebinding behavior",
     "Cloudflare Worker Durable Object relay deployment"
   ],
   "blockers": [],
   "next_authorized_actions": [
-    "start P6 Transport V2 on a fresh work branch from accepted main",
-    "add WebSocket transport without changing protocol-v1 signing or local execution authority",
-    "prove reconnect heartbeat bounded backoff stale-session rejection and outbound-only agent behavior across Linux Windows macOS race and STRICT governance"
+    "synchronize deterministic P6 Project Truth and sequence evidence",
+    "obtain exact P6 Linux Windows macOS race and STRICT 5-job PASS on the final work-branch candidate",
+    "fast-forward the accepted exact P6 SHA to main and revalidate it",
+    "close P6 Transport V2 then start P7 Cloudflare Relay"
   ],
   "blocked_actions": [
     "expose relay publicly without TLS termination",

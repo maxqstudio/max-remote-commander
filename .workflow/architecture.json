@@ -57,7 +57,7 @@
     {
       "id": "relay_server",
       "name": "Relay Server",
-      "purpose": "Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results, and optionally persists durable trust/command state as an encrypted atomic snapshot",
+      "purpose": "Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, routes bounded queues/results over authenticated WebSocket or long-poll fallback, and optionally persists durable trust/command state as an encrypted atomic snapshot",
       "owns": [
         "pre-pairing registration bootstrap",
         "pairing generations",
@@ -66,7 +66,10 @@
         "bounded command leases",
         "bounded result retention",
         "encrypted durable pairings generations queues results and replay nonces when configured",
-        "SSE result stream"
+        "SSE result stream",
+        "authenticated paired-device WebSocket command stream",
+        "heartbeat-based stale-session detection",
+        "FIFO head-of-line command leases"
       ],
       "depends_on": [
         "identity",
@@ -78,14 +81,17 @@
     {
       "id": "agent",
       "name": "PC Agent",
-      "purpose": "Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities",
+      "purpose": "Maintains device identity and per-start session, receives signed commands over outbound WebSocket by default with long-poll fallback, re-verifies requests, obtains trusted local approvals, and delegates bounded capabilities",
       "owns": [
         "device identity",
         "agent session identity",
         "policy enforcement",
         "approval store",
         "executor",
-        "audit integration boundary"
+        "audit integration boundary",
+        "outbound WebSocket reconnect with bounded backoff",
+        "idle device-session refresh",
+        "explicit long-poll fallback"
       ],
       "depends_on": [
         "identity",
@@ -117,7 +123,8 @@
         "envelope format",
         "signature verification",
         "nonce replay state",
-        "agent session ID"
+        "agent session ID",
+        "strict versioned WebSocket transport framing that carries the unchanged signed CommandEnvelope"
       ],
       "depends_on": []
     },
@@ -202,7 +209,7 @@
     {
       "from": "relay_server",
       "to": "agent",
-      "meaning": "outbound long-poll delivery of relay-validated signed command envelope"
+      "meaning": "authenticated outbound WebSocket push of relay-validated signed command envelopes by default, with long-poll fallback"
     },
     {
       "from": "agent",
@@ -237,7 +244,7 @@
     {
       "from": "agent",
       "to": "relay_server",
-      "meaning": "paired-device-session-authenticated result submission"
+      "meaning": "paired-device-session-authenticated HTTPS result submission after local execution"
     },
     {
       "from": "relay_server",
@@ -263,7 +270,7 @@
   "external_boundaries": [
     {
       "name": "Public network",
-      "contract": "Device traffic is outbound from the agent. Relay binds loopback by default; public deployment requires external TLS termination and remains unproven."
+      "contract": "Device traffic remains outbound from the agent. Non-loopback clients require HTTPS/WSS; relay binds loopback by default and public TLS termination remains deployment-unproven."
     },
     {
       "name": "Initial bootstrap",

@@ -83,13 +83,15 @@ Cloudflare relay       Self-hosted Go relay
 
 ## Current execution checkpoint
 
-**P5 Protocol & Durability is accepted and closed.** Phase 5B exact SHA `5c6db407f0ec3061387c5c4a59039ae5431bffb4` passed all five blocking jobs on work run `36591264102` and identical-SHA main run `36591432809`.
+**P5 Protocol & Durability remains accepted and closed.** The current accepted main closure is `5b79d0eab9c9bbcffe7aedb931389399c26d0c99`, which passed all five blocking jobs on work run `36592773777` and main run `36593066059`.
 
-The accepted P5 boundary includes encrypted restart-critical relay state, persisted replay protection, fail-closed stale-session/expiry pruning, and executable language-neutral protocol-v1 signing/restart fixtures. Future Cloudflare, MCP, and other adapters must conform to these vectors rather than fork the protocol or weaken security binding.
+**P6 Transport V2 is source-complete but not yet accepted.** Candidate `5412f3111723834176adad1e35c46bbbe2f06c7b` passed Linux, Windows, macOS, and race source lanes on run `36595825418`; STRICT governance is pending synchronization.
 
-The next roadmap phase is **P6 Transport V2**: WebSocket transport, reconnect, heartbeat, bounded backoff, and session rebinding while keeping the agent outbound-only and protocol-v1 unchanged.
+P6 uses a hybrid outbound transport: signed commands are pushed over an authenticated WebSocket stream by default, while device-session creation and durable result acknowledgement remain HTTPS. Long-poll remains an explicit fallback. The WebSocket frame is transport only; the existing controller-signed `CommandEnvelope`, device/generation/session binding, replay rules, local policy, local approval, executor, and audit boundaries remain unchanged.
 
-Physical crash/power-loss recovery, Cloudflare deployment, MCP integration, packaging, and physical end-to-end runtime remain unproven until their later acceptance phases.
+Reconnect is bounded, heartbeat detects stale sessions, the runner refreshes a device session even while the push stream is idle, and the relay enforces FIFO head-of-line leasing so reconnect cannot bypass an in-flight command.
+
+P6 is not closed until the final exact SHA passes all five work-branch jobs and identical-SHA main revalidation. Cloudflare Worker/Durable Object deployment remains P7.
 
 ## MCP V1 capability boundary
 

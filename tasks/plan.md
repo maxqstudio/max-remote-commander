@@ -11,6 +11,7 @@ Build a secure self-hosted cross-platform remote computer agent gateway for LLM 
 - Controller sessions and signed commands are bound to the active per-start agent session ID.
 - Remote payloads cannot self-assert trusted local approval.
 - Configured relay restart-critical state is stored in a bounded AES-256-GCM snapshot; bearer sessions and transient pairing/lease state remain ephemeral.
+- Agent command delivery defaults to outbound WebSocket; signed command authority and local execution policy are transport-independent, and durable results remain HTTPS-acknowledged in P6.
 - Public relay deployment remains blocked until TLS configuration is implemented/proven.
 - Skill_Workflow STRICT is pinned to 2148313678f476c4990e447b4d657724f071adff.
 
@@ -62,8 +63,16 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [x] Prove signing/canonicalization/replay/expiry and same-session/rotated-session/expired restart conformance in Linux/Windows/macOS/race source lanes on run 36589988772; independent cross-language consumers remain future-phase evidence.
 - [x] Close P5 Protocol & Durability at exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 after work run 36591264102 and identical-SHA main run 36591432809.
 
-### P6-P19 production roadmap
-- [ ] P6 Transport V2 — WebSocket reconnect, heartbeat, bounded backoff, and session rebinding.
+### P6: Transport V2
+- [x] Add authenticated outbound WebSocket command delivery with strict versioned framing.
+- [x] Keep HTTPS device-session creation and durable result acknowledgement; retain long-poll fallback.
+- [x] Add bounded reconnect backoff, heartbeat/stale-session handling, and idle session refresh.
+- [x] Enforce FIFO head-of-line lease semantics across reconnect.
+- [x] Linux/Windows/macOS/race source lanes PASS for candidate 5412f3111723834176adad1e35c46bbbe2f06c7b on run 36595825418.
+- [ ] Exact P6 5-job STRICT work-branch acceptance.
+- [ ] Identical-SHA main revalidation and P6 closure.
+
+### P7-P19 production roadmap
 - [ ] P7 Cloudflare Relay — Worker, Durable Objects, and WebSocket/Hibernation.
 - [ ] P8 MCP Gateway — structured capability adapter with no default unrestricted shell.
 - [ ] P9 Multi-client Compatibility.

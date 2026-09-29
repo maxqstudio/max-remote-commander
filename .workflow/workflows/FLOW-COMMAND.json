@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "flow_id": "FLOW-COMMAND",
-  "title": "Phase 5A durable paired chat-to-capability command",
-  "purpose": "Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, outbound agent verification, local policy/approval/audit, durable result retention, and bounded result return without letting remote input grant privilege.",
+  "title": "P6 outbound WebSocket paired chat-to-capability command",
+  "purpose": "Carry a provider-neutral structured tool request through paired controller signing, encrypted durable relay queue/replay state, authenticated outbound WebSocket delivery by default with long-poll fallback, agent verification, local policy/approval/audit, durable HTTPS result acknowledgement, and bounded result return without letting transport or remote input grant privilege.",
   "critical": true,
   "entry_condition": "Device/controller pairing is persisted locally; device has an active paired session; max-chat has a paired controller identity; provider emits only a declared structured tool call.",
   "authority": "Paired Ed25519 identities plus local PC-agent policy and trusted local approval",
@@ -12,7 +12,7 @@
     "CONTROLLER_SIGNED",
     "RELAY_VERIFIED",
     "QUEUED",
-    "DEVICE_POLLED",
+    "DEVICE_TRANSPORT_BOUND",
     "AGENT_VERIFIED",
     "POLICY_CHECKED",
     "APPROVAL_REQUIRED",
@@ -56,14 +56,16 @@
     },
     {
       "from": "QUEUED",
-      "to": "DEVICE_POLLED",
-      "action": "authenticate current paired device session on outbound long poll",
-      "side_effects": []
+      "to": "DEVICE_TRANSPORT_BOUND",
+      "action": "authenticate the current paired device session and deliver the FIFO head command over outbound WebSocket by default or long-poll fallback",
+      "side_effects": [
+        "lease only the FIFO head request for bounded time"
+      ]
     },
     {
-      "from": "DEVICE_POLLED",
+      "from": "DEVICE_TRANSPORT_BOUND",
       "to": "AGENT_VERIFIED",
-      "action": "agent re-verifies controller signature freshness device/session binding and replay",
+      "action": "agent decodes strict transport framing then re-verifies controller signature freshness device/session binding and replay",
       "side_effects": [
         "record local replay nonce after valid verification"
       ]
@@ -115,7 +117,7 @@
     {
       "from": "EXECUTED",
       "to": "RESULT_SUBMITTED",
-      "action": "owning paired device session submits bounded result; relay atomically persists completed result and queue removal before acknowledgement when durability is configured",
+      "action": "owning paired device session submits bounded result over HTTPS; relay atomically persists completed result and queue removal before acknowledgement when durability is configured",
       "side_effects": [
         "complete queued request",
         "retain bounded result",
@@ -141,11 +143,17 @@
     "Privileged approval is one-use exact-request bound and defaults to deny.",
     "Provider API key is not persisted by max-chat.",
     "Configured durable state never persists device/controller bearer sessions, leases, pairing offers, pairing receipts, or the state encryption key.",
-    "A durable mutation is acknowledged only after the encrypted snapshot commit succeeds; failed commits restore the prior in-memory durable maps."
+    "A durable mutation is acknowledged only after the encrypted snapshot commit succeeds; failed commits restore the prior in-memory durable maps.",
+    "WebSocket framing is transport only; the unchanged controller-signed CommandEnvelope remains command authority.",
+    "Only the FIFO head command may be leased so reconnect cannot bypass an in-flight command.",
+    "Result completion wakes waiting command delivery only after the durable mutation commits.",
+    "Heartbeat or hard unauthorized stream failure cannot extend an expired paired-device session."
   ],
   "failure_behavior": [
     "Fail closed before side effects on auth signature session replay policy or approval failure.",
-    "No fabricated result is emitted."
+    "No fabricated result is emitted.",
+    "Retryable WebSocket transport failures use bounded reconnect backoff; hard authorization failures return to paired device-session refresh.",
+    "Long-poll remains an explicit fallback and uses the same queue/session authority."
   ],
   "restart_behavior": [
     "Configured durable pairings generation counters queued commands request ownership completed results and unexpired replay nonces survive relay Store recreation.",
@@ -172,7 +180,10 @@
     "internal/relay/persistence.go",
     "internal/relay/durable_mutation.go",
     "internal/relay/store.go",
-    "internal/relay/pairing.go"
+    "internal/relay/pairing.go",
+    "internal/relay/stream.go",
+    "internal/agent/ws_transport.go",
+    "internal/protocol/stream.go"
   ],
   "tests": [
     "internal/chat/chat_test.go",
@@ -185,7 +196,12 @@
     "cmd/max-chat/main_test.go",
     "internal/relay/persistence_test.go",
     "internal/relay/durability_test.go",
-    "cmd/max-relay/main_test.go"
+    "cmd/max-relay/main_test.go",
+    "internal/relay/stream_test.go",
+    "internal/agent/ws_transport_test.go",
+    "internal/agent/runner_refresh_test.go",
+    "internal/protocol/stream_test.go",
+    "internal/relay/store_fifo_test.go"
   ],
-  "sequence_session": "docs/sequence/phase-5a.session.json"
+  "sequence_session": "docs/sequence/p6.session.json"
 }

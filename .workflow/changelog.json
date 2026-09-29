@@ -88,6 +88,17 @@
         "P5 now has accepted encrypted relay durability, fail-closed stale-session/expiry/replay semantics, and language-neutral protocol-v1 conformance vectors for future transports and adapters.",
         "Cloudflare, MCP, WebSocket transport, physical crash/power-loss recovery, and physical end-to-end behavior remain explicitly unproven and belong to later roadmap phases."
       ]
+    },
+    {
+      "date": "2026-09-29",
+      "title": "P6 Transport V2 source candidate",
+      "type": "feature",
+      "changes": [
+        "Source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418; STRICT governance remained stale and is pending synchronization.",
+        "Added authenticated outbound WebSocket command delivery with strict versioned framing, heartbeat, bounded reconnect backoff, and long-poll fallback.",
+        "Kept paired-device session creation and durable result acknowledgement on HTTPS so protocol-v1 authority and persistence semantics are unchanged.",
+        "Changed relay delivery to FIFO head-of-line lease semantics so reconnect cannot bypass an in-flight command; successful result submission wakes the waiting stream after durable commit."
+      ]
     }
   ]
 }

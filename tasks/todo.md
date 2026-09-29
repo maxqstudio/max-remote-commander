@@ -23,9 +23,19 @@
 - [x] Phase 5B exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 5/5 work-branch PASS on run 36591264102
 - [x] Phase 5B identical-SHA main revalidation 5/5 PASS on run 36591432809; P5 accepted
 
+## P6 — Transport V2
+
+- [x] WebSocket command stream source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b
+- [x] Linux/Windows/macOS/race source lanes PASS on run 36595825418
+- [x] Strict versioned stream framing and unchanged signed CommandEnvelope authority
+- [x] Bounded reconnect, heartbeat/stale-session handling, and idle device-session refresh
+- [x] FIFO head-of-line lease behavior across reconnect
+- [x] HTTPS result acknowledgement and explicit long-poll fallback retained
+- [ ] P6 exact 5/5 work-branch governance acceptance
+- [ ] P6 identical-SHA main revalidation and closure
+
 ## Forward roadmap
 
-- [ ] P6 Transport V2 — WebSocket, reconnect, heartbeat, session rebinding
 - [ ] P7 Cloudflare Relay — Worker, Durable Objects, WebSocket/Hibernation
 - [ ] P8 MCP Gateway — structured capability adapter, no default unrestricted shell
 - [ ] P9 Multi-client Compatibility — ChatGPT-compatible, Codex/IDE, generic MCP conformance

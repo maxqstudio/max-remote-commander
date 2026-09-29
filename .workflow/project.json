@@ -12,7 +12,8 @@
       "cross-platform agent execution",
       "local policy enforcement",
       "auditable remote tool calls",
-      "provider-neutral LLM integration"
+      "provider-neutral LLM integration",
+      "outbound WebSocket command delivery with bounded reconnect and long-poll fallback"
     ]
   },
   "technology": {
@@ -20,7 +21,8 @@
       "Go"
     ],
     "frameworks": [
-      "Go standard library"
+      "Go standard library",
+      "github.com/coder/websocket v1.8.15"
     ],
     "persistence": [
       "create-once local device and controller Ed25519 identity seeds",
@@ -59,6 +61,8 @@
     "relay public exposure requires TLS termination and is not yet proven",
     "no PASS claim without executed evidence",
     "cross-platform behavior must be tested on Linux Windows and macOS",
-    "configured relay durable state must never persist bearer sessions or the state encryption key"
+    "configured relay durable state must never persist bearer sessions or the state encryption key",
+    "WebSocket command delivery is transport only and must not alter protocol-v1 signature device generation replay or agent-session authority",
+    "P6 result submission remains HTTPS so durable result acknowledgement semantics stay unchanged"
   ]
 }

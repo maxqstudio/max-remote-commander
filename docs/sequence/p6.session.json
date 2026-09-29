@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "session_id": "p6-transport-v2",
+  "phase": "P6 - Transport V2",
+  "mode": "DURING",
+  "scope": "CURRENT",
+  "critical": true,
+  "status": "ACTIVE",
+  "implementation_base_sha": "5b79d0eab9c9bbcffe7aedb931389399c26d0c99",
+  "plan": {
+    "required": false,
+    "contract": "",
+    "frozen": false,
+    "frozen_commit": "",
+    "sha256": "",
+    "diagram": ""
+  },
+  "actual": {
+    "graph": "docs/sequence/generated/p6.actual.json",
+    "diagram": "docs/sequence/generated/p6.actual.mmd",
+    "source_digest": "",
+    "entries": [
+      "internal/relay/stream.go::HTTPServer.deviceStream",
+      "internal/relay/stream.go::HTTPServer.writeDeviceCommands",
+      "internal/agent/ws_transport.go::WebSocketTransport.NextCommand",
+      "internal/agent/ws_transport.go::WebSocketTransport.connection",
+      "internal/agent/runner.go::Runner.Run",
+      "internal/relay/store.go::Store.NextCommand",
+      "internal/relay/store.go::Store.SubmitResult"
+    ]
+  },
+  "test_traceability_required": true,
+  "tests": [
+    "internal/protocol/stream_test.go",
+    "internal/relay/stream_test.go",
+    "internal/agent/ws_transport_test.go",
+    "internal/agent/runner_refresh_test.go",
+    "internal/relay/store_fifo_test.go",
+    "internal/agent/runner_test.go",
+    "internal/relay/command_auth_test.go"
+  ],
+  "runtime_trace": {
+    "required": false,
+    "graph": ""
+  },
+  "acceptance_report": "artifacts/sequence/p6.acceptance.json"
+}

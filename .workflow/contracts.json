@@ -68,10 +68,10 @@
     {
       "method": "GET",
       "path": "/v1/devices/{device}/commands/next",
-      "purpose": "Long-poll the next available command from an outbound paired device connection.",
+      "purpose": "Long-poll fallback for the next FIFO command when WebSocket transport is disabled.",
       "authority": "Current paired device session token",
-      "mutation": "Leases a command for bounded time.",
-      "error_behavior": "Expired rotated cross-device or pre-pairing sessions reject once paired."
+      "mutation": "Leases only the FIFO head command for bounded time.",
+      "error_behavior": "Expired rotated cross-device or pre-pairing sessions reject once paired; a leased head command cannot be bypassed by a later request."
     },
     {
       "method": "POST",
@@ -100,10 +100,10 @@
     {
       "method": "RUN",
       "path": "AgentRunner",
-      "purpose": "Maintain a paired outbound device session and execute verified structured commands through local policy approval executor and audit.",
+      "purpose": "Maintain a paired outbound device session, refresh it while an idle push transport is blocked, and execute verified structured commands through local policy approval executor and audit.",
       "authority": "Paired device identity plus paired controller public key and local policy",
       "mutation": "Creates fresh per-start agent session; may execute bounded local capability after required audit/approval.",
-      "error_behavior": "Fail closed on session binding verification audit approval or transport failure; remote payload cannot self-approve."
+      "error_behavior": "Fail closed on session binding verification audit approval or hard transport failure; refresh on stale/expired paired sessions; remote payload cannot self-approve."
     },
     {
       "method": "EXECUTE",
@@ -128,6 +128,14 @@
       "authority": "Configured provider URL model and runtime API key",
       "mutation": "No local persistent secret mutation.",
       "error_behavior": "Non-loopback HTTP invalid config redirects malformed/oversized responses and malformed tool arguments reject."
+    },
+    {
+      "method": "GET",
+      "path": "/v1/devices/{device}/stream",
+      "purpose": "Upgrade an authenticated paired-device outbound connection to a WebSocket command stream.",
+      "authority": "Current paired device session token",
+      "mutation": "Leases only the FIFO head command, sends strict versioned stream framing around the unchanged signed CommandEnvelope, and waits for durable result completion before advancing.",
+      "error_behavior": "Unauthorized or stale sessions reject before upgrade or close the stream; transport failures reconnect with bounded client backoff and do not weaken signed command verification."
     }
   ],
   "data_contracts": [
@@ -302,6 +310,22 @@
         "Snapshot size is bounded and defaults to 64 MiB.",
         "Snapshot schema is strict and validates device-key identity queue/result/request ownership and replay invariants before load and before save.",
         "Durable mutation failure restores prior in-memory durable maps and does not acknowledge the mutation."
+      ]
+    },
+    {
+      "name": "WebSocket command stream frame",
+      "source_of_truth": "internal/protocol/stream.go",
+      "mutability": "Immutable per delivered frame",
+      "legal_writes": [
+        "Relay wraps one already-validated queued signed CommandEnvelope for paired-device delivery"
+      ],
+      "retention": "In flight only; command authority remains in the signed CommandEnvelope and durable relay queue",
+      "invariants": [
+        "Stream version is exactly 1.",
+        "Type is command.",
+        "Request ID is bounded and must match the enclosed CommandEnvelope request ID at the agent client boundary.",
+        "Payload is valid JSON and remains the unchanged signed CommandEnvelope.",
+        "Transport framing is not command authority and cannot grant local approval."
       ]
     }
   ],

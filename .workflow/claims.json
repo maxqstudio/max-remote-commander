@@ -309,6 +309,33 @@
       ],
       "runtime_evidence": [],
       "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P6-TRANSPORT-001",
+      "claim": "The outbound agent defaults to an authenticated WebSocket command stream with strict framing, heartbeat, bounded reconnect and session refresh while signed command verification, local policy/approval, HTTPS result acknowledgement, and protocol-v1 authority remain unchanged.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "API_CONTRACTS.md",
+        "WORKFLOW_STATE_MACHINE.md"
+      ],
+      "source_owners": [
+        "internal/protocol/stream.go::DecodeStreamMessage(",
+        "internal/relay/stream.go::HTTPServer.deviceStream(",
+        "internal/relay/stream.go::HTTPServer.writeDeviceCommands(",
+        "internal/agent/ws_transport.go::WebSocketTransport.NextCommand(",
+        "internal/agent/runner.go::Runner.Run(",
+        "internal/relay/store.go::Store.NextCommand(",
+        "internal/relay/store.go::Store.SubmitResult("
+      ],
+      "tests": [
+        "internal/protocol/stream_test.go",
+        "internal/relay/stream_test.go",
+        "internal/agent/ws_transport_test.go",
+        "internal/agent/runner_refresh_test.go",
+        "internal/relay/store_fifo_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
     }
   ],
   "relations": []

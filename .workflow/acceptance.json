@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through P5 Protocol & Durability are accepted and revalidated on main. Phase 5B exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed all five blocking jobs on work branch run 36591264102 and identical-SHA main run 36591432809. P5 proves encrypted relay restart state, fail-closed replay/session semantics, and language-neutral protocol-v1 conformance vectors in the Go reference implementation. Independent Cloudflare/MCP consumers, WebSocket transport, physical crash/power-loss recovery, packaging, graphical multi-device UI, and physical end-to-end runtime remain NOT_PROVEN.",
+  "evidence_boundary": "Phase 0 through P5 Protocol & Durability are accepted and revalidated on main. P6 source candidate 5412f3111723834176adad1e35c46bbbe2f06c7b passed Linux Windows macOS and race source lanes on GitHub Actions run 36595825418, while STRICT governance is pending. P6 source evidence proves authenticated outbound WebSocket command delivery with HTTPS session/result boundaries, bounded reconnect, heartbeat/session refresh, strict stream framing, and FIFO head-of-line lease behavior in GitHub-hosted tests. Exact P6 work/main acceptance, Cloudflare deployment, physical network E2E, packaging, and physical crash/power-loss behavior remain NOT_PROVEN.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -146,14 +146,38 @@
       "id": "P5B-GOV-001",
       "requirement": "Exact Phase 5B candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation.",
       "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36595825418; internal/relay/stream_test.go; internal/agent/ws_transport_test.go; internal/protocol/stream_test.go",
+      "id": "P6-STREAM-001",
+      "requirement": "Authenticated paired-device WebSocket command delivery preserves the signed CommandEnvelope payload and strict versioned stream framing while long-poll remains an explicit fallback.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36595825418; internal/agent/ws_transport_test.go; internal/agent/runner_refresh_test.go; internal/relay/stream_test.go",
+      "id": "P6-RECONNECT-001",
+      "requirement": "WebSocket transport uses bounded reconnect backoff, does not retry hard unauthorized handshakes indefinitely, detects stale sessions, and refreshes the paired device session while idle.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "GitHub Actions run 36595825418; internal/relay/store_fifo_test.go; internal/relay/stream_test.go",
+      "id": "P6-FIFO-001",
+      "requirement": "Relay delivery is FIFO head-of-line across command leases so reconnect cannot bypass an in-flight command; successful result submission wakes waiting delivery after durable commit.",
+      "status": "PASS"
+    },
+    {
+      "evidence": "Pending P6 governance closure",
+      "id": "P6-GOV-001",
+      "requirement": "Exact P6 candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation.",
+      "status": "NOT_PROVEN"
     }
   ],
   "runtime_checks": [],
   "runtime_status": "NOT_PROVEN",
   "schema_version": 1,
   "sequence_mode": "DURING",
-  "sequence_session": "docs/sequence/phase-5b.session.json",
-  "sequence_sync_status": "PASS",
+  "sequence_session": "docs/sequence/p6.session.json",
+  "sequence_sync_status": "NOT_PROVEN",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
@@ -170,12 +194,12 @@
     "HUMAN_COMPREHENSION": "NOT_PROVEN",
     "PROJECT_DOCS_NORMALIZED": "PASS",
     "PROJECT_DOCS_SYNC": "PASS",
-    "PROJECT_STATE_SYNC": "PASS",
+    "PROJECT_STATE_SYNC": "NOT_PROVEN",
     "PROVENANCE_SYNC": "PASS",
     "REFERENCE_SYNC": "PASS",
     "RUNTIME_E2E": "NOT_PROVEN",
     "SEMANTIC_SYNC": "PASS",
-    "SEQUENCE_SYNC": "PASS",
+    "SEQUENCE_SYNC": "NOT_PROVEN",
     "SOURCE_TESTS": "PASS",
     "STRUCTURAL_SYNC": "PASS",
     "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"
