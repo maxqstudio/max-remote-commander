@@ -137,8 +137,12 @@ func TestRevocationInvalidatesControllerSessionAndGeneration(t *testing.T) {
 		t.Fatalf("old generation: %v", err)
 	}
 	newAssertion := signedControllerAssertion(t, second, priv2, now, "nonce-new")
+	if _, err := store.AuthenticateController(newAssertion, now); !errors.Is(err, ErrDeviceOffline) {
+		t.Fatalf("controller authenticated before device session: %v", err)
+	}
+	_ = authenticatePairingDevice(t, store, device, second, now, "second-generation-device-session")
 	if _, err := store.AuthenticateController(newAssertion, now); err != nil {
-		t.Fatalf("new pairing authentication: %v", err)
+		t.Fatalf("new pairing authentication after device session: %v", err)
 	}
 }
 
