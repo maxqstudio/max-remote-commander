@@ -15,6 +15,7 @@ var (
 	ErrControllerAssertion = errors.New("invalid controller assertion")
 	ErrControllerReplay    = errors.New("replayed controller assertion")
 	ErrPairingGeneration   = errors.New("pairing generation mismatch")
+	ErrDeviceOffline       = errors.New("paired device has no active authenticated session")
 )
 
 type ControllerAssertion struct {
@@ -60,16 +61,18 @@ func SignControllerAssertion(assertion *ControllerAssertion, privateKey ed25519.
 }
 
 type ControllerSession struct {
-	Token     string
-	ExpiresAt time.Time
-	DeviceID  string
-	Generation uint64
+	Token          string
+	ExpiresAt      time.Time
+	DeviceID       string
+	Generation     uint64
+	AgentSessionID string
 }
 
 type controllerSessionState struct {
-	tokenHash   [32]byte
-	expiresAt   time.Time
-	generation  uint64
+	tokenHash      [32]byte
+	expiresAt      time.Time
+	generation     uint64
+	agentSessionID string
 }
 
 type controllerNonceKey struct {
@@ -107,6 +110,11 @@ func (s *Store) AuthenticateController(assertion ControllerAssertion, now time.T
 	if !ed25519.Verify(pairing.ControllerPublicKey, payload, signature) {
 		return ControllerSession{}, ErrUnauthorized
 	}
+	deviceSession, online := s.sessions[assertion.DeviceID]
+	if !online || !deviceSession.paired || deviceSession.generation != pairing.Generation ||
+		!now.Before(deviceSession.expiresAt) || deviceSession.agentSessionID == "" {
+		return ControllerSession{}, ErrDeviceOffline
+	}
 
 	nowUnix := now.Unix()
 	for key, expiry := range s.controllerNonces {
@@ -130,25 +138,35 @@ func (s *Store) AuthenticateController(assertion ControllerAssertion, now time.T
 		tokenHash: hash,
 		expiresAt: expiresAt,
 		generation: assertion.Generation,
+		agentSessionID: deviceSession.agentSessionID,
 	}
 	return ControllerSession{
 		Token: token,
 		ExpiresAt: expiresAt,
 		DeviceID: assertion.DeviceID,
 		Generation: assertion.Generation,
+		AgentSessionID: deviceSession.agentSessionID,
 	}, nil
 }
 
-func (s *Store) PairedControllerAuthorized(deviceID, token string, now time.Time) bool {
+func (s *Store) pairedControllerAuthorizedLocked(deviceID, token string, now time.Time) bool {
 	if token == "" {
 		return false
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	pairing, paired := s.pairings[deviceID]
 	session, ok := s.controllerSessions[deviceID]
-	if !paired || !ok || pairing.Generation != session.generation || !now.Before(session.expiresAt) {
+	deviceSession, online := s.sessions[deviceID]
+	if !paired || !ok || !online || pairing.Generation != session.generation ||
+		!deviceSession.paired || deviceSession.generation != pairing.Generation ||
+		deviceSession.agentSessionID == "" || deviceSession.agentSessionID != session.agentSessionID ||
+		!now.Before(session.expiresAt) || !now.Before(deviceSession.expiresAt) {
 		return false
 	}
 	return secureEqual(session.tokenHash, token)
+}
+
+func (s *Store) PairedControllerAuthorized(deviceID, token string, now time.Time) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.pairedControllerAuthorizedLocked(deviceID, token, now)
 }
