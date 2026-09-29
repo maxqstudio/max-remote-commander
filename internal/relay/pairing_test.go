@@ -140,18 +140,23 @@ func TestRevocationRequiresDeviceSessionAndAllowsFreshPairing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	pairedSession := authenticatePairingDevice(t, store, device, first, now, "revoke-device-nonce")
 	if err := store.RevokePairing(deviceID, "wrong", now); !errors.Is(err, ErrUnauthorized) {
 		t.Fatalf("unauthorized revoke: %v", err)
 	}
-	if err := store.RevokePairing(deviceID, session.Token, now); err != nil {
+	if err := store.RevokePairing(deviceID, pairedSession.Token, now); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := store.Pairing(deviceID); !errors.Is(err, ErrNotPaired) {
 		t.Fatalf("still paired: %v", err)
 	}
 
+	bootstrapAgain, err := store.Register(deviceID, testRegistrationKey, now)
+	if err != nil {
+		t.Fatal(err)
+	}
 	code2, hash2, _ := identity.GeneratePairingCode()
-	if err := store.PublishPairingOffer(deviceID, session.Token, hash2, device.PublicKey(), time.Minute, now); err != nil {
+	if err := store.PublishPairingOffer(deviceID, bootstrapAgain.Token, hash2, device.PublicKey(), time.Minute, now); err != nil {
 		t.Fatal(err)
 	}
 	second, err := store.RedeemPairing(deviceID, code2, controllerPublicKey(t), now)
