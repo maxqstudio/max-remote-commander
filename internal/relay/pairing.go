@@ -112,6 +112,12 @@ func (s *Store) RedeemPairing(deviceID, code string, controllerPublicKey ed25519
 	}
 	s.pairings[deviceID] = pairing
 	delete(s.pairingOffers, deviceID)
+	delete(s.sessions, deviceID)
+	for key := range s.deviceNonces {
+		if key.deviceID == deviceID {
+			delete(s.deviceNonces, key)
+		}
+	}
 	return clonePairing(pairing), nil
 }
 
@@ -142,10 +148,16 @@ func (s *Store) RevokePairing(deviceID, sessionToken string, now time.Time) erro
 	}
 	delete(s.pairings, deviceID)
 	delete(s.pairingOffers, deviceID)
+	delete(s.sessions, deviceID)
 	delete(s.controllerSessions, deviceID)
 	for key := range s.controllerNonces {
 		if key.deviceID == deviceID {
 			delete(s.controllerNonces, key)
+		}
+	}
+	for key := range s.deviceNonces {
+		if key.deviceID == deviceID {
+			delete(s.deviceNonces, key)
 		}
 	}
 	s.pairingGeneration[deviceID]++
