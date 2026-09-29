@@ -27,7 +27,7 @@ jobs:
       - name: Vet
         run: go vet ./...
       - name: Build binaries
-        run: go build ./cmd/max-agent ./cmd/max-relay
+        run: go build ./cmd/max-agent ./cmd/max-relay ./cmd/max-chat
 
   race:
     name: Race and security regression
