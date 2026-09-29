@@ -20,17 +20,86 @@
     "RESULT_SUBMITTED"
   ],
   "transitions": [
-    "CONTROLLER_SIGNED->RELAY_VERIFIED",
-    "RELAY_VERIFIED->QUEUED",
-    "QUEUED->DEVICE_POLLED",
-    "DEVICE_POLLED->AGENT_VERIFIED",
-    "AGENT_VERIFIED->POLICY_CHECKED",
-    "POLICY_CHECKED->DENIED",
-    "POLICY_CHECKED->APPROVAL_REQUIRED",
-    "POLICY_CHECKED->EXECUTED",
-    "APPROVAL_REQUIRED->APPROVED",
-    "APPROVED->EXECUTED",
-    "EXECUTED->RESULT_SUBMITTED"
+    {
+      "from": "CONTROLLER_SIGNED",
+      "to": "RELAY_VERIFIED",
+      "action": "authenticate paired controller session and verify signed CommandEnvelope for current device and agent session",
+      "side_effects": [
+        "record command nonce only after successful verification"
+      ]
+    },
+    {
+      "from": "RELAY_VERIFIED",
+      "to": "QUEUED",
+      "action": "enqueue bounded verified request for the owning device",
+      "side_effects": [
+        "append request to bounded in-memory device queue"
+      ]
+    },
+    {
+      "from": "QUEUED",
+      "to": "DEVICE_POLLED",
+      "action": "authenticate current paired device session on outbound long poll",
+      "side_effects": []
+    },
+    {
+      "from": "DEVICE_POLLED",
+      "to": "AGENT_VERIFIED",
+      "action": "agent re-verifies controller signature freshness device/session binding and replay",
+      "side_effects": [
+        "record local replay nonce after valid verification"
+      ]
+    },
+    {
+      "from": "AGENT_VERIFIED",
+      "to": "POLICY_CHECKED",
+      "action": "evaluate local capability policy",
+      "side_effects": []
+    },
+    {
+      "from": "POLICY_CHECKED",
+      "to": "DENIED",
+      "action": "deny shell unknown or policy-denied capability",
+      "side_effects": []
+    },
+    {
+      "from": "POLICY_CHECKED",
+      "to": "APPROVAL_REQUIRED",
+      "action": "stop privileged capability at trusted local approval boundary",
+      "side_effects": []
+    },
+    {
+      "from": "POLICY_CHECKED",
+      "to": "EXECUTED",
+      "action": "execute only automatically allowed read-only capability",
+      "side_effects": [
+        "bounded local read-only effects"
+      ]
+    },
+    {
+      "from": "APPROVAL_REQUIRED",
+      "to": "APPROVED",
+      "action": "consume one-use short-lived exact-request local approval",
+      "side_effects": [
+        "consume local approval token"
+      ]
+    },
+    {
+      "from": "APPROVED",
+      "to": "EXECUTED",
+      "action": "execute approved privileged capability through bounded executor",
+      "side_effects": [
+        "bounded locally approved side effect"
+      ]
+    },
+    {
+      "from": "EXECUTED",
+      "to": "RESULT_SUBMITTED",
+      "action": "owning paired device session submits bounded result",
+      "side_effects": [
+        "complete queued request and retain bounded result"
+      ]
+    }
   ],
   "invariants": [
     "Shared bootstrap registration key cannot mint paired-device sessions.",
@@ -64,7 +133,16 @@
     "internal/executor/dispatcher.go"
   ],
   "tests": [
-    "go test ./internal/relay ./internal/protocol ./internal/policy ./internal/approval ./internal/executor ./internal/identity ./internal/audit"
+    "internal/relay/pairing_test.go",
+    "internal/relay/device_auth_test.go",
+    "internal/relay/controller_auth_test.go",
+    "internal/relay/command_auth_test.go",
+    "internal/relay/http_test.go",
+    "internal/protocol/verifier_test.go",
+    "internal/policy/capability_test.go",
+    "internal/approval/store_test.go",
+    "internal/executor/dispatcher_test.go",
+    "internal/audit/log_test.go"
   ],
   "sequence_session": "docs/sequence/phase-3.session.json"
 }
