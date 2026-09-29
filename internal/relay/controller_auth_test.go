@@ -75,7 +75,6 @@ func TestControllerSessionRequiresPairedPrivateKeyAndRejectsReplay(t *testing.T)
 func TestControllerSessionExpiresAndIsDeviceBound(t *testing.T) {
 	store, err := NewStore(Config{
 		RegistrationKey: testRegistrationKey,
-		ControllerKey: testControllerKey,
 		SessionTTL: time.Minute,
 		LeaseTTL: time.Second,
 		MaxQueue: 4,
