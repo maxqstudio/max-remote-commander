@@ -12,8 +12,14 @@
     },
     {
       "id": "device-do",
-      "label": "Per-device Durable Object",
+      "label": "Per-device Durable Object route",
       "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.fetch",
+      "kind": "source"
+    },
+    {
+      "id": "queue-command",
+      "label": "Authorize and queue controller command",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.queueCommand",
       "kind": "source"
     },
     {
@@ -23,15 +29,9 @@
       "kind": "source"
     },
     {
-      "id": "durable-queue",
-      "label": "Transactional device queue",
-      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.queueCommand",
-      "kind": "source"
-    },
-    {
-      "id": "agent-ws",
-      "label": "Hibernation WebSocket agent",
-      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.acceptAgentWebSocket",
+      "id": "deliver-head",
+      "label": "Deliver FIFO head",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.deliverHead",
       "kind": "source"
     },
     {
@@ -41,15 +41,15 @@
       "kind": "source"
     },
     {
-      "id": "result-store",
+      "id": "submit-result",
       "label": "Durable result acknowledgement",
       "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.submitResult",
       "kind": "source"
     },
     {
       "id": "controller-result",
-      "label": "Controller result response",
-      "locator": "cloudflare/relay/src/index.ts::fetch",
+      "label": "Controller result route",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.waitResult",
       "kind": "source"
     }
   ],
@@ -57,49 +57,56 @@
     {
       "from": "worker-entry",
       "to": "device-do",
-      "action": "route by validated device id",
+      "action": "route by validated device id through Durable Object binding",
       "requirement": "MUST",
       "verification": "SOURCE"
     },
     {
       "from": "device-do",
+      "to": "queue-command",
+      "action": "dispatch authenticated controller command request",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "queue-command",
       "to": "protocol-verify",
-      "action": "verify controller/device/session authority before mutation",
+      "action": "verify controller device generation session expiry and replay authority before storage",
       "requirement": "MUST",
       "verification": "SOURCE"
     },
     {
-      "from": "protocol-verify",
-      "to": "durable-queue",
-      "action": "persist accepted command and replay guard transactionally",
+      "from": "queue-command",
+      "to": "deliver-head",
+      "action": "after durable commit attempt delivery of FIFO head",
       "requirement": "MUST",
       "verification": "SOURCE"
     },
     {
-      "from": "durable-queue",
-      "to": "agent-ws",
-      "action": "deliver only current FIFO head to authenticated outbound agent socket",
-      "requirement": "MUST",
-      "verification": "SOURCE"
-    },
-    {
-      "from": "agent-ws",
+      "from": "deliver-head",
       "to": "local-agent",
-      "action": "carry unchanged signed CommandEnvelope; agent re-verifies locally",
+      "action": "send unchanged signed CommandEnvelope through authenticated Hibernation WebSocket",
       "requirement": "MUST",
-      "verification": "SOURCE"
+      "verification": "DOCUMENT"
     },
     {
       "from": "local-agent",
-      "to": "result-store",
-      "action": "submit bounded result under active device session",
+      "to": "submit-result",
+      "action": "submit bounded result under active paired device session",
+      "requirement": "MUST",
+      "verification": "DOCUMENT"
+    },
+    {
+      "from": "device-do",
+      "to": "submit-result",
+      "action": "dispatch authenticated device result request",
       "requirement": "MUST",
       "verification": "SOURCE"
     },
     {
-      "from": "result-store",
+      "from": "device-do",
       "to": "controller-result",
-      "action": "acknowledge result only after durable write succeeds",
+      "action": "dispatch authenticated controller result wait",
       "requirement": "MUST",
       "verification": "SOURCE"
     },
@@ -107,7 +114,7 @@
       "from": "worker-entry",
       "to": "local-agent",
       "action": "direct remote execution bypass",
-      "requirement": "FORBID",
+      "requirement": "MUST_NOT",
       "verification": "SOURCE"
     }
   ]
