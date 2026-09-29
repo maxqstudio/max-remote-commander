@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/maxqstudio/max-remote-commander/internal/identity"
+	"github.com/maxqstudio/max-remote-commander/internal/protocol"
 )
 
 func authRequest(t *testing.T, method, url, token string, body any) *http.Request {
@@ -171,7 +172,7 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 	var controllerSession ControllerSession
 	decodeJSONResponse(t, controllerResp, &controllerSession)
 
-	bootstrapQueue := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/commands", testControllerKey, map[string]any{
+	bootstrapQueue := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/commands", "legacy-global-controller-token", map[string]any{
 		"request_id":"req-bootstrap",
 		"payload":map[string]any{"tool":"filesystem.read"},
 	})
@@ -184,9 +185,23 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 		t.Fatalf("bootstrap controller bypass status %d", bootstrapResp.StatusCode)
 	}
 
+	commandEnvelope := protocol.CommandEnvelope{
+		Version: protocol.CurrentVersion,
+		RequestID: "req-http",
+		DeviceID: deviceID,
+		SessionID: deviceSession.AgentSessionID,
+		IssuedAt: now.Unix(),
+		ExpiresAt: now.Add(time.Minute).Unix(),
+		Nonce: "http-command-nonce",
+		Tool: "filesystem.read",
+		Arguments: json.RawMessage(`{"path":"note.txt"}`),
+	}
+	if err := commandEnvelope.Sign(controllerPriv); err != nil {
+		t.Fatal(err)
+	}
 	queueReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/commands", controllerSession.Token, map[string]any{
 		"request_id":"req-http",
-		"payload":map[string]any{"tool":"filesystem.read"},
+		"payload":commandEnvelope,
 	})
 	queueResp, err := http.DefaultClient.Do(queueReq)
 	if err != nil {
@@ -264,9 +279,15 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 	if revokeResp.StatusCode != http.StatusNoContent {
 		t.Fatalf("revoke status %d", revokeResp.StatusCode)
 	}
+	afterRevokeEnvelope := commandEnvelope
+	afterRevokeEnvelope.RequestID = "req-after-revoke"
+	afterRevokeEnvelope.Nonce = "http-command-after-revoke"
+	if err := afterRevokeEnvelope.Sign(controllerPriv); err != nil {
+		t.Fatal(err)
+	}
 	afterRevoke := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/commands", controllerSession.Token, map[string]any{
 		"request_id":"req-after-revoke",
-		"payload":map[string]any{"tool":"filesystem.read"},
+		"payload":afterRevokeEnvelope,
 	})
 	afterResp, err := http.DefaultClient.Do(afterRevoke)
 	if err != nil {
