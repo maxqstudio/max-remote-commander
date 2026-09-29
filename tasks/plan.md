@@ -69,8 +69,8 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [x] Add bounded reconnect backoff, heartbeat/stale-session handling, and idle session refresh.
 - [x] Enforce FIFO head-of-line lease semantics across reconnect.
 - [x] Linux/Windows/macOS/race source lanes PASS for candidate 5412f3111723834176adad1e35c46bbbe2f06c7b on run 36595825418.
-- [ ] Exact P6 5-job STRICT work-branch acceptance under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259.
-- [ ] Identical-SHA main revalidation and P6 closure.
+- [x] Exact P6 SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed 5/5 on work run 36611213711 under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259.
+- [x] Identical-SHA main run 36611401330 passed 5/5; P6 Transport V2 accepted and closed.
 
 ### P7-P19 production roadmap
 - [ ] P7 Cloudflare Relay — Worker, Durable Objects, and WebSocket/Hibernation.

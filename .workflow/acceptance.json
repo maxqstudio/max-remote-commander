@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through P5 are accepted and revalidated on main. P6 pre-migration SHA da89c5625d7f78dd9a2941f912cacbf326e29f0a passed all five jobs on run 36596829111 under the previous Skill_Workflow pin, but the Owner requested migration to latest Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 before P6 acceptance. The latest workflow adds mandatory .workflow/roadmap.json and ROADMAP_SYNC. P6 runtime/source semantics remain unchanged; final latest-governance work/main acceptance remains NOT_PROVEN.",
+  "evidence_boundary": "Phase 0 through P6 Transport V2 are accepted and revalidated on main. P6 exact SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed all five blocking jobs on work run 36611213711 and identical-SHA main run 36611401330 under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259. P6 proves authenticated outbound WebSocket command delivery, strict stream framing, bounded reconnect/backoff, heartbeat/session refresh, FIFO lease safety, HTTPS durable result acknowledgement, and long-poll fallback in GitHub-hosted cross-platform tests. Cloudflare deployment, MCP integration, physical network E2E, packaging, OS-native protected key storage, and physical crash/power-loss behavior remain NOT_PROVEN.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -166,16 +166,16 @@
       "status": "PASS"
     },
     {
-      "evidence": "Pending P6 governance closure",
+      "evidence": "GitHub Actions work run 36611213711 and identical-SHA main run 36611401330 at 8e13e0374cee8724dd5dbda766a373f800d44afd",
       "id": "P6-GOV-001",
       "requirement": "Exact P6 candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation.",
-      "status": "NOT_PROVEN"
+      "status": "PASS"
     },
     {
-      "evidence": "Upstream Skill_Workflow main run 36594694151 PASS; target-project revalidation pending.",
+      "evidence": "Skill_Workflow upstream main run 36594694151 PASS; target work run 36611213711 and identical-SHA main run 36611401330 PASS at 8e13e0374cee8724dd5dbda766a373f800d44afd",
       "id": "P6-WORKFLOW-LATEST-001",
       "requirement": "P6 adopts Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 with synchronized roadmap authority, generated ROADMAP.md, ROADMAP_SYNC, and project-local vendored governance tools before final acceptance.",
-      "status": "NOT_PROVEN"
+      "status": "PASS"
     }
   ],
   "runtime_checks": [],
@@ -183,7 +183,7 @@
   "schema_version": 1,
   "sequence_mode": "DURING",
   "sequence_session": "docs/sequence/p6.session.json",
-  "sequence_sync_status": "NOT_PROVEN",
+  "sequence_sync_status": "PASS",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
@@ -206,7 +206,7 @@
     "ROADMAP_SYNC": "PASS",
     "RUNTIME_E2E": "NOT_PROVEN",
     "SEMANTIC_SYNC": "PASS",
-    "SEQUENCE_SYNC": "NOT_PROVEN",
+    "SEQUENCE_SYNC": "PASS",
     "SOURCE_TESTS": "PASS",
     "STRUCTURAL_SYNC": "PASS",
     "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"

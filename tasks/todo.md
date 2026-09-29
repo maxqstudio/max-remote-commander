@@ -33,8 +33,8 @@
 - [x] HTTPS result acknowledgement and explicit long-poll fallback retained
 - [x] P6 pre-migration 5/5 PASS at da89c5625d7f78dd9a2941f912cacbf326e29f0a on run 36596829111 under prior workflow pin
 - [x] Migrate governance authority to Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 with roadmap.json and vendored tool pack
-- [ ] P6 exact 5/5 work-branch governance acceptance under latest Skill_Workflow
-- [ ] P6 identical-SHA main revalidation and closure
+- [x] P6 exact SHA 8e13e0374cee8724dd5dbda766a373f800d44afd 5/5 work-branch PASS on run 36611213711 under latest Skill_Workflow
+- [x] P6 identical-SHA main revalidation 5/5 PASS on run 36611401330; P6 accepted
 
 ## Forward roadmap
 

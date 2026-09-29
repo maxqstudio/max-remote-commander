@@ -110,6 +110,17 @@
         "Vendored the latest project-local governance tool pack. The project-specific Go-aware sequence generator is retained as an extension and updated for deterministic LF output.",
         "P6 run 36596829111 remains useful pre-migration evidence but is not final acceptance; P6 must be revalidated under the latest workflow."
       ]
+    },
+    {
+      "date": "2026-09-30",
+      "title": "P6 Transport V2 accepted under latest governance",
+      "type": "feature",
+      "changes": [
+        "Accepted exact SHA 8e13e0374cee8724dd5dbda766a373f800d44afd after work run 36611213711 and identical-SHA main run 36611401330 both passed Linux Windows macOS race and latest STRICT governance.",
+        "Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 roadmap governance, ROADMAP_SYNC, and project-local vendored tools are now the accepted project authority.",
+        "P6 closes with outbound WebSocket command push, bounded reconnect/backoff, heartbeat/session refresh, strict framing, FIFO head-of-line leases, HTTPS durable result acknowledgement, and explicit long-poll fallback.",
+        "Cloudflare relay, MCP, physical E2E, packaging, and OS-native protected key storage remain later roadmap phases."
+      ]
     }
   ]
 }

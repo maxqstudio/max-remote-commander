@@ -4,11 +4,11 @@ Secure, self-hosted, cross-platform remote computer agent gateway for LLM client
 
 ## Current project state
 
-- **P5 Protocol & Durability:** accepted and closed on `main`.
-- **P6 Transport V2:** WebSocket command transport source is implemented and cross-platform tested; final acceptance is being revalidated under the latest pinned Skill_Workflow governance.
-- **Not production-ready yet:** Cloudflare relay, MCP gateway, desktop/web UX, protected OS-native key storage, packaging, scale/reliability, and physical end-to-end acceptance remain later roadmap phases.
+- **P6 Transport V2:** accepted and closed on `main` at exact source SHA `8e13e0374cee8724dd5dbda766a373f800d44afd`.
+- **Next phase:** P7 Cloudflare Relay — Worker, Durable Objects, and WebSocket/Hibernation while preserving the existing protocol-v1 security boundary.
+- **Not production-ready yet:** Cloudflare deployment, MCP gateway, desktop/web UX, protected OS-native key storage, packaging, scale/reliability, and physical end-to-end acceptance remain later roadmap phases.
 
-The security boundary is unchanged by transport work: controller-signed structured commands are bound to the paired device and active agent session; the PC agent re-verifies them, applies local policy, requires trusted local approval for privileged capabilities, audits decisions, and executes only bounded capabilities. Raw shell is not a default capability.
+The accepted security boundary remains: controller-signed structured commands are bound to the paired device and active agent session; the PC agent re-verifies them, applies local policy, requires trusted local approval for privileged capabilities, audits decisions, and executes only bounded capabilities. Raw shell is not a default capability.
 
 ## Project documentation
 
