@@ -2,41 +2,51 @@
 
 # ARCHITECTURE
 
-Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
+Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
 
 ## Components
 
 | ID | Component | Purpose | Owns | Depends On |
 |---|---|---|---|---|
 | llm_client | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
-| relay_server | Relay Server | Routes controller commands to outbound-connected device sessions | bootstrap authentication, session rotation, bounded command leases, bounded result retention, SSE result stream | agent |
-| agent | PC Agent | Polls outbound for commands, verifies signed requests, and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor, relay_server |
-| protocol | Command Protocol | Defines signed expiring command envelopes and active-process replay checks | envelope format, signature verification, nonce replay state |  |
+| relay_server | Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results | pre-pairing registration bootstrap, pairing generations, device and controller sessions, signed command validation, bounded command leases, bounded result retention, SSE result stream | identity, protocol, agent |
+| agent | PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
+| identity | Identity | Persists device Ed25519 identity and derives deterministic device IDs and pairing codes | device private seed, device public key, device ID, pairing code generation |  |
+| protocol | Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID |  |
 | policy | Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
-| executor | Local Capability Executor | Executes bounded filesystem process and Git operations after policy authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, automatic capability dispatcher | policy |
+| approval | Local Approval Store | Issues one-use short-lived local approval grants bound to exact privileged requests | approval token hashes, request capability and argument bindings | policy |
+| executor | Local Capability Executor | Executes bounded filesystem process and Git operations after policy and approval authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, dispatcher | policy, approval |
+| audit | Audit Logger | Records bounded structured security events without secret-bearing raw payloads | JSONL audit schema, size bound, secret-safe fields |  |
 
 ## Data flow
 
-- llm_client -> relay_server: controller-authenticated structured command
-- relay_server -> agent: outbound long-poll command delivery under device session token
-- agent -> policy: untrusted structured capability intent after future envelope verification
-- policy -> executor: automatic allow only; privileged requests remain approval-required
+- agent -> relay_server: pre-pairing bootstrap session then Ed25519 device assertion for paired sessions
+- llm_client -> relay_server: paired controller assertion and short-lived controller session
+- llm_client -> relay_server: controller-signed CommandEnvelope bound to device and active agent session
+- relay_server -> agent: outbound long-poll delivery of already relay-validated signed command envelope
+- agent -> protocol: agent re-verifies controller signature device session freshness and replay before local policy
+- protocol -> policy: verified structured capability intent
+- policy -> approval: privileged capability requires trusted local approval
+- approval -> executor: one-use exact-request approval enables privileged execution
+- executor -> audit: structured decision and outcome metadata without raw secret-bearing payloads
 - executor -> agent: bounded local capability result
-- agent -> relay_server: device-session-authenticated result submission
-- relay_server -> llm_client: controller-authenticated SSE result event
+- agent -> relay_server: paired-device-session-authenticated result submission
+- relay_server -> llm_client: paired-controller-session-authenticated SSE result event
 
 ## External boundaries
 
-- Public network: Device traffic is outbound from the agent. Phase 2 relay binds loopback by default; public deployment requires external TLS termination and is not yet proven.
-- Relay bootstrap credentials: Registration and controller keys are distinct secrets of at least 32 bytes; session tokens are random, short-lived, hashed in memory, and rotated on reconnect.
-- Local filesystem and process boundary: Filesystem operations use Go os.Root; process execution requires an executable allowlist, bounded output and timeout, trusted workspace CWD, and explicit environment.
-- LLM provider API: Provider output is untrusted intent and cannot directly authorize privileged device operations.
+- Public network: Device traffic is outbound from the agent. Relay binds loopback by default; public deployment requires external TLS termination and remains unproven.
+- Initial bootstrap: The shared registration bootstrap key is only for an unpaired device to create a temporary pre-pairing session; it is rejected for paired devices and is not controller command authority.
+- Paired identity: Paired device and controller sessions require Ed25519 proof-of-possession, pairing generation, freshness, nonce replay checks, and current agent session binding.
+- Local privileged execution: Remote payloads cannot self-approve. Privileged capability grants are local one-use short-lived exact-request bindings.
+- Local secrets: Device private identity persists locally; POSIX permissions and symlink safety are enforced, while OS-native Windows key protection remains future hardening.
+- Audit data: Audit schema excludes raw arguments tokens stdout stderr and free-form messages; only bounded structured metadata and digests are accepted.
 
 ## Observed implementation inventory
 
-Source files: 20
-Source lines: 2365
-Languages: Go=20
+Source files: 36
+Source lines: 4898
+Languages: Go=36
 
 Structural facts come from the code extractor. Component meaning comes from
 .workflow/architecture.json.

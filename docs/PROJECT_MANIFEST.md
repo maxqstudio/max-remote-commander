@@ -10,10 +10,10 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/phase-2-relay
+Active branch: work/phase-3-identity-approval
 Current authoritative SHA: external final acceptance evidence
-Last accepted SHA: 6132e215fb15862471ec5a40acd72ca8d0422f88
-Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
+Last accepted SHA: c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
+Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
 
 ## Authorities
 Source authority: Canonical source history and releases

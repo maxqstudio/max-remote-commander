@@ -27,49 +27,60 @@ Users / External Systems
     -> State / Evidence Authorities
     -> External Runtime / Outputs
 
-Observed source inventory: 20 files, 1 language categories.
+Observed source inventory: 36 files, 1 language categories.
 
 ## Major components
 
 | Component | Purpose | Owns / Decides | Depends On |
 |---|---|---|---|
 | LLM Client | Requests typed tools and consumes streamed results | conversation and tool intents | relay_server |
-| Relay Server | Routes controller commands to outbound-connected device sessions | bootstrap authentication, session rotation, bounded command leases, bounded result retention, SSE result stream | agent |
-| PC Agent | Polls outbound for commands, verifies signed requests, and delegates only locally authorized capabilities | device identity, policy enforcement, executor | protocol, policy, executor, relay_server |
-| Command Protocol | Defines signed expiring command envelopes and active-process replay checks | envelope format, signature verification, nonce replay state |  |
+| Relay Server | Pairs device/controller identities, authenticates short-lived sessions, validates signed command envelopes, and routes bounded queues/results | pre-pairing registration bootstrap, pairing generations, device and controller sessions, signed command validation, bounded command leases, bounded result retention, SSE result stream | identity, protocol, agent |
+| PC Agent | Maintains device identity and per-start session, polls outbound, verifies signed requests, obtains trusted local approvals, and delegates bounded capabilities | device identity, agent session identity, policy enforcement, approval store, executor, audit integration boundary | identity, protocol, policy, approval, executor, audit, relay_server |
+| Identity | Persists device Ed25519 identity and derives deterministic device IDs and pairing codes | device private seed, device public key, device ID, pairing code generation |  |
+| Command Protocol | Defines signed expiring command envelopes, per-start session binding, and replay checks | envelope format, signature verification, nonce replay state, agent session ID |  |
 | Policy Engine | Makes automatic allow approval-required or deny decisions at the user device | capability authorization, default shell denial |  |
-| Local Capability Executor | Executes bounded filesystem process and Git operations after policy authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, automatic capability dispatcher | policy |
+| Local Approval Store | Issues one-use short-lived local approval grants bound to exact privileged requests | approval token hashes, request capability and argument bindings | policy |
+| Local Capability Executor | Executes bounded filesystem process and Git operations after policy and approval authorization | os.Root filesystem access, allowlisted argv process execution, constrained Git operations, dispatcher | policy, approval |
+| Audit Logger | Records bounded structured security events without secret-bearing raw payloads | JSONL audit schema, size bound, secret-safe fields |  |
 
 ## Main data flow
 
-- llm_client -> relay_server: controller-authenticated structured command
-- relay_server -> agent: outbound long-poll command delivery under device session token
-- agent -> policy: untrusted structured capability intent after future envelope verification
-- policy -> executor: automatic allow only; privileged requests remain approval-required
+- agent -> relay_server: pre-pairing bootstrap session then Ed25519 device assertion for paired sessions
+- llm_client -> relay_server: paired controller assertion and short-lived controller session
+- llm_client -> relay_server: controller-signed CommandEnvelope bound to device and active agent session
+- relay_server -> agent: outbound long-poll delivery of already relay-validated signed command envelope
+- agent -> protocol: agent re-verifies controller signature device session freshness and replay before local policy
+- protocol -> policy: verified structured capability intent
+- policy -> approval: privileged capability requires trusted local approval
+- approval -> executor: one-use exact-request approval enables privileged execution
+- executor -> audit: structured decision and outcome metadata without raw secret-bearing payloads
 - executor -> agent: bounded local capability result
-- agent -> relay_server: device-session-authenticated result submission
-- relay_server -> llm_client: controller-authenticated SSE result event
+- agent -> relay_server: paired-device-session-authenticated result submission
+- relay_server -> llm_client: paired-controller-session-authenticated SSE result event
 
 ## Main user workflows
 
-### FLOW-COMMAND — Remote command relay and local authorization flow
+### FLOW-COMMAND — Paired remote capability command
 
-Route a controller-authenticated command through a device-isolated outbound relay session, then preserve local policy as final execution authority and stream the bounded result back.
+Carry a controller-signed capability request from paired controller through relay and local verification/policy without letting remote input grant privilege.
 
-Authority: Relay authentication controls transport access; the local PC agent policy remains final execution authority.
+Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
 
-- controller_submitted -> relay_queued : authenticate controller and enqueue bounded request
-- relay_queued -> device_session_polled : authenticate current device session on outbound long poll
-- device_session_polled -> command_leased : lease first available command for bounded interval
-- command_leased -> locally_verified : future agent verifies signed envelope freshness and replay state
-- locally_verified -> policy_checked : evaluate local capability policy
-- policy_checked -> executed_or_rejected : automatic dispatcher executes only read-only allowed tools; privileged tools stop at approval-required
-- executed_or_rejected -> result_submitted : owning device session submits bounded result
-- result_submitted -> result_streamed : controller-authenticated SSE emits one result event
+- CONTROLLER_SIGNED -> RELAY_VERIFIED : authenticate paired controller session and verify signed CommandEnvelope for current device and agent session
+- RELAY_VERIFIED -> QUEUED : enqueue bounded verified request for the owning device
+- QUEUED -> DEVICE_POLLED : authenticate current paired device session on outbound long poll
+- DEVICE_POLLED -> AGENT_VERIFIED : agent re-verifies controller signature freshness device/session binding and replay
+- AGENT_VERIFIED -> POLICY_CHECKED : evaluate local capability policy
+- POLICY_CHECKED -> DENIED : deny shell unknown or policy-denied capability
+- POLICY_CHECKED -> APPROVAL_REQUIRED : stop privileged capability at trusted local approval boundary
+- POLICY_CHECKED -> EXECUTED : execute only automatically allowed read-only capability
+- APPROVAL_REQUIRED -> APPROVED : consume one-use short-lived exact-request local approval
+- APPROVED -> EXECUTED : execute approved privileged capability through bounded executor
+- EXECUTED -> RESULT_SUBMITTED : owning paired device session submits bounded result
 
 ## Lifecycle and state
 
-Current phase: Phase 2 - authenticated outbound relay
+Current phase: Phase 3 - pairing identity and trusted approval
 
 Current status: ACTIVE_CANDIDATE
 
@@ -107,52 +118,55 @@ compiler does not infer them from implementation names.
 
 ## Failure and recovery
 
-- FLOW-COMMAND: invalid or expired credentials fail closed
-- FLOW-COMMAND: unknown devices and requests reject
-- FLOW-COMMAND: full device queues reject
-- FLOW-COMMAND: cross-device session use rejects
-- FLOW-COMMAND: unknown and shell capabilities deny locally
-- FLOW-COMMAND: relay timeout does not fabricate a result
+- FLOW-COMMAND: Fail closed before side effects on auth signature session replay policy or approval failure.
+- FLOW-COMMAND: No fabricated result is emitted.
 
 ## Current project state
 
 Next authorized actions:
-- synchronize deterministic Project Truth for Phase 2
-- run exact-SHA Phase 2 acceptance
-- fast-forward accepted Phase 2 SHA to main
+- synchronize deterministic Project Truth for Phase 3
+- run exact-SHA Phase 3 acceptance
+- fast-forward accepted Phase 3 SHA to main
 - revalidate the same SHA on main
+- start Phase 4 chat-agent integration only after main revalidation
 
 Blocked actions:
 - expose relay publicly without TLS termination
 - claim relay state survives restart
-- treat bootstrap keys as final device identity
+- allow controller bootstrap secrets as command authority
+- mint paired-device sessions from the shared registration bootstrap key
 - auto-execute privileged local capabilities without trusted local approval
+- claim physical runtime or approval UI proven from GitHub-hosted CI
 
 Known blockers:
-- Phase 2 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
+- Phase 3 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
 
 ## Proven vs not proven
 
 ### Proven
 
-- Phase 1 exact SHA 6132e215fb15862471ec5a40acd72ca8d0422f88 passed all five GitHub Actions jobs on work branch run 36328313786 and main run 36328415659
-- Phase 2 relay source jobs passed Linux Windows macOS and race at run 36328789997
-- Relay registration rotates per-device session tokens and old tokens fail closed
-- Device session tokens are isolated by device ID and controller commands use a separate bootstrap authority
-- Per-device command queue and completed-result retention are bounded
+- Phase 2 exact SHA c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 passed all five GitHub Actions jobs on work branch run 36329243639 and main run 36329323271
+- Phase 3 source jobs passed Linux Windows macOS and race at run 36549467606 on source SHA f8f8f1d89c4af8619f53915b45aa7fbd41f8e0c2
+- Device identity uses persistent Ed25519 keys with deterministic device IDs, symlink rejection, restricted POSIX permissions, and concurrent first-start convergence
+- Pairing binds one device public key to one controller public key with one-use high-entropy pairing codes, generation counters, attempt limits, expiry, and revocation
+- Paired relay device sessions require short-lived Ed25519 device assertions bound to pairing generation and per-start agent session ID; shared registration bootstrap cannot mint a paired-device session
+- Paired controller sessions require Ed25519 assertions and are bound to device generation plus the active agent session
+- Relay command queue accepts only controller-signed CommandEnvelope payloads bound to current device and agent session and rejects command nonce replay
+- Privileged capability approvals are one-use, short-lived, and bound to request ID, capability, and exact argument digest
+- Secret-safe audit primitive writes bounded structured JSONL without raw arguments tokens stdout stderr or free-form messages
 
 ### Not proven
 
-- STRICT governance and cross-platform CI on the exact final Phase 2 closure SHA
-- main-branch revalidation of accepted Phase 2
-- durable relay queue/session/result state across relay restart
+- STRICT governance and cross-platform CI on the exact final Phase 3 closure SHA
+- main-branch revalidation of accepted Phase 3
+- user-facing trusted local approval prompt and issuance workflow
+- integration of audit events across the final running agent and relay lifecycle
+- durable relay pairing queue session result and nonce state across relay restart
 - public TLS deployment and reverse-proxy configuration
-- device Ed25519 pairing and per-device controller authorization
-- trusted local approval issuance and binding for privileged capabilities
+- OS-native protected key storage or explicit Windows ACL hardening for the device identity seed
 - physical remote-device runtime
-- chat client
+- chat client and LLM provider runtime
 - MCP adapter
-- restart-safe agent replay protection
 
 ## Important limitations
 

@@ -4,10 +4,12 @@
 
 | ID | Status | Summary | Evidence |
 |---|---|---|---|
-| SEC-REPLAY-RESTART-001 | OPEN | Agent nonce replay state is in-memory; restarting the agent loses unexpired nonce history. | internal/protocol/envelope.go::MemoryReplayStore |
-| P1-APPROVAL-001 | OPEN | Trusted local approval issuance and binding are not implemented; privileged executor primitives are not reachable through automatic remote dispatch. | internal/policy/capability.go and internal/executor/dispatcher.go |
-| P2-DURABILITY-001 | OPEN | Relay sessions queues leases and completed results are in-memory and are lost on relay restart. | internal/relay/store.go |
-| P2-IDENTITY-001 | OPEN | Phase 2 uses separate symmetric bootstrap registration/controller keys; final Ed25519 device pairing and per-device controller authorization are deferred to Phase 3. | internal/relay/store.go Config and Register |
+| SEC-REPLAY-RUNTIME-001 | OPEN | Per-start agent session binding and replay checks exist in source, but the final running agent loop that creates a fresh session each start is not yet implemented/proven. | internal/protocol/verifier.go and internal/relay/device_auth.go |
+| P3-APPROVAL-UI-001 | OPEN | Approval store and privileged dispatcher binding are implemented, but the user-facing trusted local approval prompt/issuer is not yet integrated. | internal/approval/store.go and internal/executor/dispatcher.go |
+| P2-DURABILITY-001 | OPEN | Relay pairings sessions queues leases nonces and completed results are in-memory and are lost on relay restart. | internal/relay/store.go |
+| P2-IDENTITY-001 | RESOLVED_SOURCE | Phase 3 replaces controller bootstrap authority with paired Ed25519 controller identity and requires Ed25519 device proof for paired-device sessions; only initial unpaired device bootstrap still uses the registration key. | internal/relay/pairing.go internal/relay/device_auth.go internal/relay/controller_auth.go |
 | P2-TLS-001 | OPEN | max-relay serves HTTP and defaults to loopback; public TLS termination/deployment is not yet implemented or proven. | cmd/max-relay/main.go |
+| P3-WINDOWS-KEYSTORE-001 | OPEN | Device identity rejects symlinks and enforces POSIX permissions, but Windows OS-native protected key storage or explicit ACL hardening is not yet implemented. | internal/identity/device.go |
+| P3-AUDIT-INTEGRATION-001 | OPEN | Secret-safe bounded audit logger is implemented, but final agent/relay runtime event integration is deferred. | internal/audit/log.go |
 
 Use explicit OPEN, FIXED/ACCEPTED, HISTORICAL, or NOT_PROVEN semantics.

@@ -13,11 +13,19 @@ Type: foundation
 Type: feature
 
 - Accepted exact SHA 6132e215fb15862471ec5a40acd72ca8d0422f88 after work-branch and main 5-job PASS.
-- Added os.Root filesystem executor, allowlisted argv-only process executor, constrained Git primitives, and fail-closed automatic dispatcher.
+- Added os.Root filesystem executor allowlisted argv-only process executor constrained Git primitives and fail-closed capability policy.
 
-## 2026-09-27 — Phase 2 authenticated outbound relay candidate
+## 2026-09-27 — Phase 2 accepted authenticated outbound relay
 
 Type: feature
 
-- Added separate registration/controller bootstrap authorities, rotating per-device relay sessions, bounded command leases and result retention.
-- Added outbound long-poll command delivery, device-authenticated result submission, controller-authenticated SSE result stream, and max-relay binary.
+- Accepted exact SHA c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 after work-branch run 36329243639 and main run 36329323271 5-job PASS.
+- Added outbound long-poll command relay bounded queues/results and loopback-by-default max-relay.
+
+## 2026-09-29 — Phase 3 pairing identity and trusted approval candidate
+
+Type: security
+
+- Added persistent Ed25519 device identity one-use pairing generations paired device/controller assertions and session binding.
+- Removed global controller bootstrap secret as command authority and require signed CommandEnvelope payloads bound to active agent session.
+- Added one-use exact-request local approval grants and bounded secret-safe audit primitive.

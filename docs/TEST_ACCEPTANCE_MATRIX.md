@@ -4,19 +4,22 @@
 
 ## Evidence boundary
 
-Phase 0 and Phase 1 are accepted on main. Phase 2 relay source behavior has GitHub-hosted cross-platform evidence, but exact final Phase 2 STRICT governance/main revalidation, durable relay state, public TLS deployment, Ed25519 pairing, trusted local approvals, physical remote runtime, LLM providers, MCP, and restart-safe agent replay protection remain NOT_PROVEN.
+Phase 0 through Phase 2 are accepted on main. Phase 3 security primitives have GitHub-hosted cross-platform source evidence at run 36549467606, but exact final Phase 3 STRICT governance/main revalidation, user-facing approval runtime, audit runtime integration, durable relay state, public TLS deployment, physical remote runtime, chat providers, and MCP remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
-Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
+Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
-| P1-FINAL-001 | Phase 1 exact accepted SHA passes Linux Windows macOS race and STRICT governance on work branch and main. | GitHub Actions work run 36328313786 and main run 36328415659 | PASS |
-| P2-SESSION-001 | Authenticated device registration/reconnect rotates short-lived session tokens and rejects old or cross-device session use. | GitHub Actions run 36328789997; internal/relay/store_test.go; internal/relay/http_test.go | PASS |
-| P2-QUEUE-001 | Known-device command queues are bounded, duplicate request IDs reject, and command leases permit bounded redelivery. | GitHub Actions run 36328789997; internal/relay/store_test.go | PASS |
-| P2-RESULT-001 | Only the owning device session can submit results, completed result retention is bounded, and controller-authenticated SSE returns the result. | GitHub Actions run 36328789997; internal/relay/store_test.go; internal/relay/http_test.go | PASS |
-| P2-XOS-001 | Relay source tests pass on Linux Windows macOS and race regression; final closure additionally builds both binaries. | GitHub Actions run 36328789997; cmd/max-relay/main.go | PASS |
-| P2-FINAL-001 | Exact final Phase 2 SHA passes Linux Windows macOS race and STRICT governance, then the identical SHA passes main revalidation. | Pending exact final Phase 2 CI | NOT_PROVEN |
+| P2-FINAL-001 | Phase 2 exact accepted SHA passes Linux Windows macOS race and STRICT governance on work branch and main. | GitHub Actions work run 36329243639 and main run 36329323271 at c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 | PASS |
+| P3-IDENTITY-001 | Device identity is persistent Ed25519 and concurrent first-start converges without overwrite or partial target visibility. | GitHub Actions run 36549467606; internal/identity/device_test.go | PASS |
+| P3-PAIRING-001 | Pairing binds device/controller keys with expiring attempt-bounded one-use codes generations and revocation. | GitHub Actions run 36549467606; internal/relay/pairing_test.go | PASS |
+| P3-DEVICE-AUTH-001 | Paired device sessions require Ed25519 proof and shared registration bootstrap cannot mint or retain authority after pairing. | GitHub Actions run 36549467606; internal/relay/device_auth_test.go; internal/relay/http_test.go | PASS |
+| P3-CONTROLLER-001 | Controller sessions require paired Ed25519 proof and are invalidated by device generation or agent-session change. | GitHub Actions run 36549467606; internal/relay/controller_auth_test.go; internal/relay/command_auth_test.go | PASS |
+| P3-COMMAND-001 | Relay accepts only controller-signed CommandEnvelope payloads bound to current device and agent session and rejects nonce replay. | GitHub Actions run 36549467606; internal/relay/command_auth_test.go; internal/relay/http_test.go | PASS |
+| P3-APPROVAL-001 | Privileged approvals are one-use short-lived and exact-request bound and cannot be self-asserted by remote request payload. | GitHub Actions run 36549467606; internal/approval/store_test.go; internal/executor/dispatcher_test.go | PASS |
+| P3-AUDIT-001 | Audit primitive is structured secret-safe bounded and rejects symlink/free-form misuse. | GitHub Actions run 36549467606; internal/audit/log_test.go | PASS |
+| P3-FINAL-001 | Exact final Phase 3 SHA passes Linux Windows macOS race and STRICT governance then identical SHA passes main revalidation. | Pending exact final Phase 3 CI | NOT_PROVEN |
 
 ## Test commands
 
@@ -32,7 +35,7 @@ Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a0
 ## Sequence contract evidence
 
 Sequence mode for this phase/session: DURING
-Sequence session contract: docs/sequence/phase-2.session.json
+Sequence session contract: docs/sequence/phase-3.session.json
 SEQUENCE_SYNC: NOT_PROVEN
 
 ## Project Truth Compiler evidence

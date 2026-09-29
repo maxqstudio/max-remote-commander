@@ -3,13 +3,13 @@
 # FLOW INDEX
 
 Authority SHA: external final acceptance evidence
-Source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
+Source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
 
 ## Flow inventory
 
 | Flow | Entry | Authority symbol | State mutation | Tests | Sequence session | Sequence status |
 |---|---|---|---|---|---|---|
-| FLOW-COMMAND | A controller queues a structured command for a known device. | internal/relay, cmd/max-relay, internal/protocol, internal/policy, internal/executor | relay_queued, device_session_polled, command_leased, locally_verified, policy_checked, executed_or_rejected, result_submitted, result_streamed | internal/relay/store_test.go, internal/relay/http_test.go, internal/protocol/envelope_test.go, internal/policy/capability_test.go, internal/executor/dispatcher_test.go | docs/sequence/phase-2.session.json | DECLARED |
+| FLOW-COMMAND | Device and controller are paired; device has an active Ed25519-authenticated relay session; controller has an active paired session bound to the same agent session. | internal/relay/pairing.go, internal/relay/device_auth.go, internal/relay/controller_auth.go, internal/relay/command_auth.go, internal/protocol/verifier.go, internal/policy/capability.go, internal/approval/store.go, internal/executor/dispatcher.go | RELAY_VERIFIED, QUEUED, DEVICE_POLLED, AGENT_VERIFIED, POLICY_CHECKED, DENIED, APPROVAL_REQUIRED, EXECUTED, APPROVED, EXECUTED, RESULT_SUBMITTED | internal/relay/pairing_test.go, internal/relay/device_auth_test.go, internal/relay/controller_auth_test.go, internal/relay/command_auth_test.go, internal/relay/http_test.go, internal/protocol/verifier_test.go, internal/policy/capability_test.go, internal/approval/store_test.go, internal/executor/dispatcher_test.go, internal/audit/log_test.go | docs/sequence/phase-3.session.json | DECLARED |
 
 ## Observed Python HTTP routes
 

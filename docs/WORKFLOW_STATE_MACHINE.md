@@ -2,64 +2,64 @@
 
 # WORKFLOW STATE MACHINE
 
-## FLOW-COMMAND — Remote command relay and local authorization flow
+## FLOW-COMMAND — Paired remote capability command
 
-Purpose: Route a controller-authenticated command through a device-isolated outbound relay session, then preserve local policy as final execution authority and stream the bounded result back.
+Purpose: Carry a controller-signed capability request from paired controller through relay and local verification/policy without letting remote input grant privilege.
 Critical: TRUE
-Entry condition: A controller queues a structured command for a known device.
-Authority: Relay authentication controls transport access; the local PC agent policy remains final execution authority.
+Entry condition: Device and controller are paired; device has an active Ed25519-authenticated relay session; controller has an active paired session bound to the same agent session.
+Authority: Paired Ed25519 identities plus local PC-agent policy and trusted local approval
 
 ### States
 
-- controller_submitted
-- relay_queued
-- device_session_polled
-- command_leased
-- locally_verified
-- policy_checked
-- executed_or_rejected
-- result_submitted
-- result_streamed
+- CONTROLLER_SIGNED
+- RELAY_VERIFIED
+- QUEUED
+- DEVICE_POLLED
+- AGENT_VERIFIED
+- POLICY_CHECKED
+- APPROVAL_REQUIRED
+- APPROVED
+- EXECUTED
+- DENIED
+- RESULT_SUBMITTED
 
 ### Legal transitions
 
 | From | To | Action | Authority | Side effects |
 |---|---|---|---|---|
-| controller_submitted | relay_queued | authenticate controller and enqueue bounded request | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | append request to bounded in-memory device queue |
-| relay_queued | device_session_polled | authenticate current device session on outbound long poll | Relay authentication controls transport access; the local PC agent policy remains final execution authority. |  |
-| device_session_polled | command_leased | lease first available command for bounded interval | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | set in-memory lease deadline |
-| command_leased | locally_verified | future agent verifies signed envelope freshness and replay state | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | record nonce only after valid verification |
-| locally_verified | policy_checked | evaluate local capability policy | Relay authentication controls transport access; the local PC agent policy remains final execution authority. |  |
-| policy_checked | executed_or_rejected | automatic dispatcher executes only read-only allowed tools; privileged tools stop at approval-required | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | bounded local read-only effects only for automatic tools |
-| executed_or_rejected | result_submitted | owning device session submits bounded result | Relay authentication controls transport access; the local PC agent policy remains final execution authority. | complete queued request and retain bounded result |
-| result_submitted | result_streamed | controller-authenticated SSE emits one result event | Relay authentication controls transport access; the local PC agent policy remains final execution authority. |  |
+| CONTROLLER_SIGNED | RELAY_VERIFIED | authenticate paired controller session and verify signed CommandEnvelope for current device and agent session | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record command nonce only after successful verification |
+| RELAY_VERIFIED | QUEUED | enqueue bounded verified request for the owning device | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | append request to bounded in-memory device queue |
+| QUEUED | DEVICE_POLLED | authenticate current paired device session on outbound long poll | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
+| DEVICE_POLLED | AGENT_VERIFIED | agent re-verifies controller signature freshness device/session binding and replay | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | record local replay nonce after valid verification |
+| AGENT_VERIFIED | POLICY_CHECKED | evaluate local capability policy | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
+| POLICY_CHECKED | DENIED | deny shell unknown or policy-denied capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
+| POLICY_CHECKED | APPROVAL_REQUIRED | stop privileged capability at trusted local approval boundary | Paired Ed25519 identities plus local PC-agent policy and trusted local approval |  |
+| POLICY_CHECKED | EXECUTED | execute only automatically allowed read-only capability | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded local read-only effects |
+| APPROVAL_REQUIRED | APPROVED | consume one-use short-lived exact-request local approval | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | consume local approval token |
+| APPROVED | EXECUTED | execute approved privileged capability through bounded executor | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | bounded locally approved side effect |
+| EXECUTED | RESULT_SUBMITTED | owning paired device session submits bounded result | Paired Ed25519 identities plus local PC-agent policy and trusted local approval | complete queued request and retain bounded result |
 
 ### Invariants
 
-- registration and controller bootstrap secrets are distinct
-- session token is bound to one device ID
-- old token is invalid after reconnect rotation
-- controller cannot use device session token as controller authority
-- cross-device result submission rejects
-- local policy remains final execution authority
-- remote payload cannot self-assert trusted local approval
+- Shared bootstrap registration key cannot mint paired-device sessions.
+- Global symmetric controller command authority does not exist.
+- Relay and agent both require the signed command to target the current device and agent session.
+- Command nonce replay rejects.
+- Remote request cannot self-assert local approval.
+- Shell and unknown capabilities deny by default.
+- Privileged approval is one-use and exact-request bound.
 
 ### Failure behavior
 
-- invalid or expired credentials fail closed
-- unknown devices and requests reject
-- full device queues reject
-- cross-device session use rejects
-- unknown and shell capabilities deny locally
-- relay timeout does not fabricate a result
+- Fail closed before side effects on auth signature session replay policy or approval failure.
+- No fabricated result is emitted.
 
 ### Restart behavior
 
-- relay restart loses in-memory sessions queues and results and therefore requires device reconnect; durability is OPEN
-- agent restart-safe nonce replay remains OPEN
+- Fresh agent session ID makes old signed commands stale; final running agent integration remains to be proven.
+- Relay in-memory state is lost on relay restart and durability is not claimed.
 
 ### Rollback behavior
 
-- stop relay listener
-- rotate bootstrap secrets
-- revert candidate commit if acceptance regression is confirmed
+- No automatic rollback of completed external side effects.
+- Revocation invalidates paired controller/device sessions for the revoked generation.

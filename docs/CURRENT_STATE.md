@@ -3,20 +3,20 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: 6132e215fb15862471ec5a40acd72ca8d0422f88
+Authority verified at SHA: c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
 Governance profile: strict
 
 ## Current phase
-Phase: Phase 2 - authenticated outbound relay
+Phase: Phase 3 - pairing identity and trusted approval
 Status: ACTIVE_CANDIDATE
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/phase-2-relay
+Branch: work/phase-3-identity-approval
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: 6132e215fb15862471ec5a40acd72ca8d0422f88
+Last accepted SHA: c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
 Current candidate SHA: external final acceptance evidence
-Current source digest: b30eebe17777505271053359400cff8b9bbde0b022199db85a286f6a006265f6
+Current source digest: f2ae950d805d892a7fedfef3e8966f44b56c48fc8104ab84906880162af87925
 
 ## Runtime
 Environment: see SOURCE_AUTHORITY_MAP.md and RUNBOOK.md
@@ -33,42 +33,49 @@ PROJECT_DOCS_SYNC: PASS
 ## Sequence governance
 Sequence policy: REQUIRED
 Current sequence mode: DURING
-Current sequence session: docs/sequence/phase-2.session.json
+Current sequence session: docs/sequence/phase-3.session.json
 SEQUENCE_SYNC: NOT_PROVEN
 
 ## Proven
-- Phase 1 exact SHA 6132e215fb15862471ec5a40acd72ca8d0422f88 passed all five GitHub Actions jobs on work branch run 36328313786 and main run 36328415659
-- Phase 2 relay source jobs passed Linux Windows macOS and race at run 36328789997
-- Relay registration rotates per-device session tokens and old tokens fail closed
-- Device session tokens are isolated by device ID and controller commands use a separate bootstrap authority
-- Per-device command queue and completed-result retention are bounded
+- Phase 2 exact SHA c0dfc797509c5afadd8f6cc847cdd45fb5ecf513 passed all five GitHub Actions jobs on work branch run 36329243639 and main run 36329323271
+- Phase 3 source jobs passed Linux Windows macOS and race at run 36549467606 on source SHA f8f8f1d89c4af8619f53915b45aa7fbd41f8e0c2
+- Device identity uses persistent Ed25519 keys with deterministic device IDs, symlink rejection, restricted POSIX permissions, and concurrent first-start convergence
+- Pairing binds one device public key to one controller public key with one-use high-entropy pairing codes, generation counters, attempt limits, expiry, and revocation
+- Paired relay device sessions require short-lived Ed25519 device assertions bound to pairing generation and per-start agent session ID; shared registration bootstrap cannot mint a paired-device session
+- Paired controller sessions require Ed25519 assertions and are bound to device generation plus the active agent session
+- Relay command queue accepts only controller-signed CommandEnvelope payloads bound to current device and agent session and rejects command nonce replay
+- Privileged capability approvals are one-use, short-lived, and bound to request ID, capability, and exact argument digest
+- Secret-safe audit primitive writes bounded structured JSONL without raw arguments tokens stdout stderr or free-form messages
 
 ## Not proven
-- STRICT governance and cross-platform CI on the exact final Phase 2 closure SHA
-- main-branch revalidation of accepted Phase 2
-- durable relay queue/session/result state across relay restart
+- STRICT governance and cross-platform CI on the exact final Phase 3 closure SHA
+- main-branch revalidation of accepted Phase 3
+- user-facing trusted local approval prompt and issuance workflow
+- integration of audit events across the final running agent and relay lifecycle
+- durable relay pairing queue session result and nonce state across relay restart
 - public TLS deployment and reverse-proxy configuration
-- device Ed25519 pairing and per-device controller authorization
-- trusted local approval issuance and binding for privileged capabilities
+- OS-native protected key storage or explicit Windows ACL hardening for the device identity seed
 - physical remote-device runtime
-- chat client
+- chat client and LLM provider runtime
 - MCP adapter
-- restart-safe agent replay protection
 
 ## Known blockers
-- Phase 2 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
+- Phase 3 cannot be accepted until deterministic Project Truth is synchronized and all five CI jobs pass on the exact final work-branch SHA
 
 ## Known defects
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- synchronize deterministic Project Truth for Phase 2
-- run exact-SHA Phase 2 acceptance
-- fast-forward accepted Phase 2 SHA to main
+- synchronize deterministic Project Truth for Phase 3
+- run exact-SHA Phase 3 acceptance
+- fast-forward accepted Phase 3 SHA to main
 - revalidate the same SHA on main
+- start Phase 4 chat-agent integration only after main revalidation
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination
 - claim relay state survives restart
-- treat bootstrap keys as final device identity
+- allow controller bootstrap secrets as command authority
+- mint paired-device sessions from the shared registration bootstrap key
 - auto-execute privileged local capabilities without trusted local approval
+- claim physical runtime or approval UI proven from GitHub-hosted CI
