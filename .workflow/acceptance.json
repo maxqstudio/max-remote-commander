@@ -58,40 +58,40 @@
       "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36555366255; internal/agent/runner_test.go; cmd/max-agent/main_test.go",
       "id": "P4-RUNNER-001",
       "requirement": "Runnable outbound agent integrates identity session verification local policy approval executor and audit without allowing remote self-approval.",
-      "status": "PASS",
-      "evidence": "GitHub Actions run 36555366255; internal/agent/runner_test.go; cmd/max-agent/main_test.go"
+      "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36555366255; internal/controller/client_test.go; internal/controller/executor_test.go",
       "id": "P4-CONTROLLER-001",
       "requirement": "Controller bridge uses paired Ed25519 authority, signs commands for the relay-provided active agent session, and refreshes after agent-session change.",
-      "status": "PASS",
-      "evidence": "GitHub Actions run 36555366255; internal/controller/client_test.go; internal/controller/executor_test.go"
+      "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36555366255; internal/chat/chat_test.go",
       "id": "P4-CHAT-001",
       "requirement": "Provider-neutral chat loop exposes only declared structured tools, validates tool JSON, and bounds tool rounds.",
-      "status": "PASS",
-      "evidence": "GitHub Actions run 36555366255; internal/chat/chat_test.go"
+      "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36555366255; internal/providers/openaicompat/provider_test.go",
       "id": "P4-PROVIDER-001",
       "requirement": "OpenAI-compatible adapter is HTTPS-by-default except loopback, redirect-refusing by default, response-bounded, and rejects malformed tool calls.",
-      "status": "PASS",
-      "evidence": "GitHub Actions run 36555366255; internal/providers/openaicompat/provider_test.go"
+      "status": "PASS"
     },
     {
+      "evidence": "GitHub Actions run 36555366255; cmd/max-chat/main_test.go",
       "id": "P4-CLI-001",
       "requirement": "max-chat uses local controller identity/state, stdin pairing code, environment-only provider key, and builds across Linux Windows and macOS.",
-      "status": "PASS",
-      "evidence": "GitHub Actions run 36555366255; cmd/max-chat/main_test.go"
+      "status": "PASS"
     },
     {
+      "evidence": "Pending Phase 4 governance closure",
       "id": "P4-GOV-001",
       "requirement": "Exact Phase 4 candidate passes Linux Windows macOS race and STRICT governance on work branch and identical SHA passes main revalidation.",
-      "status": "NOT_PROVEN",
-      "evidence": "Pending Phase 4 governance closure"
+      "status": "NOT_PROVEN"
     }
   ],
   "runtime_checks": [],
