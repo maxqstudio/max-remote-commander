@@ -23,7 +23,6 @@ var (
 
 type Config struct {
 	RegistrationKey string
-	ControllerKey   string
 	SessionTTL      time.Duration
 	LeaseTTL        time.Duration
 	MaxQueue        int
@@ -68,7 +67,6 @@ type Store struct {
 	mu sync.Mutex
 
 	registrationHash [32]byte
-	controllerHash   [32]byte
 	sessionTTL       time.Duration
 	leaseTTL         time.Duration
 	maxQueue         int
@@ -95,11 +93,8 @@ type Store struct {
 }
 
 func NewStore(cfg Config) (*Store, error) {
-	if len(cfg.RegistrationKey) < 32 || len(cfg.ControllerKey) < 32 {
-		return nil, errors.New("relay bootstrap keys must be at least 32 bytes")
-	}
-	if cfg.RegistrationKey == cfg.ControllerKey {
-		return nil, errors.New("registration and controller keys must be distinct")
+	if len(cfg.RegistrationKey) < 32 {
+		return nil, errors.New("relay registration bootstrap key must be at least 32 bytes")
 	}
 	if cfg.SessionTTL <= 0 {
 		cfg.SessionTTL = 15 * time.Minute
@@ -127,7 +122,6 @@ func NewStore(cfg Config) (*Store, error) {
 	}
 	return &Store{
 		registrationHash: sha256.Sum256([]byte(cfg.RegistrationKey)),
-		controllerHash: sha256.Sum256([]byte(cfg.ControllerKey)),
 		sessionTTL: cfg.SessionTTL,
 		leaseTTL: cfg.LeaseTTL,
 		maxQueue: cfg.MaxQueue,
@@ -177,10 +171,6 @@ func randomToken() (string, [32]byte, error) {
 	}
 	token := base64.RawURLEncoding.EncodeToString(raw)
 	return token, sha256.Sum256([]byte(token)), nil
-}
-
-func (s *Store) ControllerAuthorized(secret string) bool {
-	return secureEqual(s.controllerHash, secret)
 }
 
 func (s *Store) Register(deviceID, registrationKey string, now time.Time) (Session, error) {
