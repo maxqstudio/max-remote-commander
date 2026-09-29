@@ -89,32 +89,36 @@ func persistSeed(path string, seed []byte) error {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+	temp, err := os.CreateTemp(dir, ".maxrc-device-*")
 	if err != nil {
 		return err
 	}
-	removeOnFailure := true
-	defer func() {
-		_ = file.Close()
-		if removeOnFailure {
-			_ = os.Remove(path)
-		}
-	}()
+	tempPath := temp.Name()
+	defer os.Remove(tempPath)
+	if err := temp.Chmod(0o600); err != nil {
+		_ = temp.Close()
+		return err
+	}
+	if _, err := temp.Write(seed); err != nil {
+		_ = temp.Close()
+		return err
+	}
+	if err := temp.Sync(); err != nil {
+		_ = temp.Close()
+		return err
+	}
+	if err := temp.Close(); err != nil {
+		return err
+	}
+	if err := os.Link(tempPath, path); err != nil {
+		return err
+	}
 	if runtime.GOOS != "windows" {
-		if err := file.Chmod(0o600); err != nil {
+		if err := os.Chmod(path, 0o600); err != nil {
+			_ = os.Remove(path)
 			return err
 		}
 	}
-	if _, err := file.Write(seed); err != nil {
-		return err
-	}
-	if err := file.Sync(); err != nil {
-		return err
-	}
-	if err := file.Close(); err != nil {
-		return err
-	}
-	removeOnFailure = false
 	return nil
 }
 
