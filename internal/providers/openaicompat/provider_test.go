@@ -142,8 +142,8 @@ func TestDefaultClientRefusesRedirect(t *testing.T) {
 		t.Fatal("redirect target should not be reached")
 	}))
 	defer target.Close()
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		http.Redirect(w, &http.Request{}, target.URL, http.StatusFound)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL, http.StatusFound)
 	}))
 	defer server.Close()
 
