@@ -25,7 +25,7 @@ func NewGit(workspaceRoot string, env []string, maxTimeout time.Duration, maxOut
 	runner, err := NewProcessRunner(
 		workspaceRoot,
 		[]Executable{{Name: "git"}},
-		env,
+		sanitizeGitEnv(env),
 		maxTimeout,
 		maxOutput,
 	)
@@ -36,6 +36,38 @@ func NewGit(workspaceRoot string, env []string, maxTimeout time.Duration, maxOut
 		maxTimeout = DefaultProcessTimeout
 	}
 	return &Git{runner: runner, timeout: maxTimeout}, nil
+}
+
+func sanitizeGitEnv(env []string) []string {
+	allowed := map[string]bool{
+		"SYSTEMROOT": true,
+		"WINDIR": true,
+		"COMSPEC": true,
+		"PATHEXT": true,
+		"TEMP": true,
+		"TMP": true,
+		"TMPDIR": true,
+		"LANG": true,
+		"LC_ALL": true,
+		"LC_CTYPE": true,
+	}
+	out := make([]string, 0, len(env)+4)
+	for _, item := range env {
+		key, _, ok := strings.Cut(item, "=")
+		if !ok {
+			continue
+		}
+		if allowed[strings.ToUpper(key)] {
+			out = append(out, item)
+		}
+	}
+	out = append(out,
+		"GIT_CONFIG_NOSYSTEM=1",
+		"GIT_CONFIG_GLOBAL="+os.DevNull,
+		"GIT_TERMINAL_PROMPT=0",
+		"GIT_ASKPASS=",
+	)
+	return out
 }
 
 func (g *Git) Status(ctx context.Context) (ProcessResult, error) {
@@ -71,6 +103,8 @@ func (g *Git) Clone(ctx context.Context, rawURL, destination string) (ProcessRes
 	return g.runner.Run(ctx, "git", []string{
 		"-c", "core.hooksPath=",
 		"-c", "protocol.file.allow=never",
+		"-c", "credential.helper=",
+		"-c", "core.askPass=",
 		"clone",
 		"--no-recurse-submodules",
 		"--",
