@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/maxqstudio/max-remote-commander/internal/identity"
+	"github.com/maxqstudio/max-remote-commander/internal/protocol"
 	"github.com/maxqstudio/max-remote-commander/internal/relay"
 )
 
@@ -143,9 +144,7 @@ func TestControllerQueueRejectsInvalidArguments(t *testing.T) {
 		Generation: 1,
 		AgentSessionID: "session",
 	}, privateKey, "req-1", "filesystem.read", json.RawMessage("{"))
-	if !errors.Is(err, ErrRelayResponse) && !errors.Is(err, context.Canceled) {
-		if !errors.Is(err, json.InvalidUnmarshalError{}) && err == nil {
-			t.Fatal("invalid arguments accepted")
-		}
+	if !errors.Is(err, protocol.ErrInvalidEnvelope) {
+		t.Fatalf("got %v", err)
 	}
 }
