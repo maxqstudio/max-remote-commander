@@ -60,7 +60,7 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 		t.Fatal(err)
 	}
 	deviceID := device.ID()
-	registerReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/session", testRegistrationKey, nil)
+	registerReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/bootstrap-session", testRegistrationKey, nil)
 	registerResp, err := http.DefaultClient.Do(registerReq)
 	if err != nil {
 		t.Fatal(err)
@@ -68,14 +68,14 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 	if registerResp.StatusCode != http.StatusCreated {
 		t.Fatalf("register status %d", registerResp.StatusCode)
 	}
-	var deviceSession Session
-	decodeJSONResponse(t, registerResp, &deviceSession)
+	var bootstrapSession Session
+	decodeJSONResponse(t, registerResp, &bootstrapSession)
 
 	code, codeHash, err := identity.GeneratePairingCode()
 	if err != nil {
 		t.Fatal(err)
 	}
-	offerReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/pairing-offer", deviceSession.Token, map[string]any{
+	offerReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/pairing-offer", bootstrapSession.Token, map[string]any{
 		"code_hash": base64.RawURLEncoding.EncodeToString(codeHash[:]),
 		"device_public_key": base64.RawURLEncoding.EncodeToString(device.PublicKey()),
 		"ttl_seconds": 60,
@@ -107,6 +107,48 @@ func TestHTTPPairedRelayRoundTripAndNoBootstrapControllerBypass(t *testing.T) {
 	var paired map[string]any
 	decodeJSONResponse(t, redeemResp, &paired)
 	generation := uint64(paired["generation"].(float64))
+
+	bootstrapPoll := authRequest(t, http.MethodGet, server.URL+"/v1/devices/"+deviceID+"/commands/next?wait_ms=1", bootstrapSession.Token, nil)
+	bootstrapPollResp, err := http.DefaultClient.Do(bootstrapPoll)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bootstrapPollResp.Body.Close()
+	if bootstrapPollResp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("old bootstrap device session remained valid: %d", bootstrapPollResp.StatusCode)
+	}
+
+	deviceAssertion := DeviceAssertion{
+		DeviceID: deviceID,
+		Generation: generation,
+		AgentSessionID: "http-agent-session",
+		IssuedAt: now.Unix(),
+		ExpiresAt: now.Add(30*time.Second).Unix(),
+		Nonce: "http-device-nonce",
+	}
+	if err := SignDeviceAssertion(&deviceAssertion, device.PrivateKey()); err != nil {
+		t.Fatal(err)
+	}
+	deviceSessionReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/session", "", deviceAssertion)
+	deviceSessionResp, err := http.DefaultClient.Do(deviceSessionReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deviceSessionResp.StatusCode != http.StatusCreated {
+		t.Fatalf("device session status %d", deviceSessionResp.StatusCode)
+	}
+	var deviceSession Session
+	decodeJSONResponse(t, deviceSessionResp, &deviceSession)
+
+	rebootstrapReq := authRequest(t, http.MethodPost, server.URL+"/v1/devices/"+deviceID+"/bootstrap-session", testRegistrationKey, nil)
+	rebootstrapResp, err := http.DefaultClient.Do(rebootstrapReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rebootstrapResp.Body.Close()
+	if rebootstrapResp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("paired device accepted shared bootstrap key: %d", rebootstrapResp.StatusCode)
+	}
 
 	assertion := ControllerAssertion{
 		DeviceID: deviceID,
