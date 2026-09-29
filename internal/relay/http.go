@@ -49,7 +49,8 @@ func (s *HTTPServer) Handler() http.Handler {
 		w.Header().Set("Cache-Control", "no-store")
 		_, _ = w.Write([]byte("ok\n"))
 	})
-	mux.HandleFunc("POST /v1/devices/{device}/session", s.register)
+	mux.HandleFunc("POST /v1/devices/{device}/bootstrap-session", s.bootstrapSession)
+	mux.HandleFunc("POST /v1/devices/{device}/session", s.deviceSession)
 	mux.HandleFunc("POST /v1/devices/{device}/pairing-offer", s.publishPairingOffer)
 	mux.HandleFunc("POST /v1/devices/{device}/pairing/redeem", s.redeemPairing)
 	mux.HandleFunc("POST /v1/devices/{device}/controller-session", s.controllerSession)
@@ -132,7 +133,7 @@ func writeError(w http.ResponseWriter, status int, message string) {
 
 func relayStatus(err error) int {
 	switch {
-	case errors.Is(err, ErrUnauthorized):
+	case errors.Is(err, ErrUnauthorized), errors.Is(err, ErrDeviceAssertion), errors.Is(err, ErrDeviceIdentityRequired):
 		return http.StatusUnauthorized
 	case errors.Is(err, ErrPairingCodeInvalid), errors.Is(err, ErrControllerAssertion):
 		return http.StatusUnauthorized
@@ -144,7 +145,7 @@ func relayStatus(err error) int {
 		return http.StatusGone
 	case errors.Is(err, ErrQueueFull), errors.Is(err, ErrPairingAttempts):
 		return http.StatusTooManyRequests
-	case errors.Is(err, ErrDuplicateRequest), errors.Is(err, ErrAlreadyPaired), errors.Is(err, ErrControllerReplay), errors.Is(err, ErrPairingGeneration):
+	case errors.Is(err, ErrDuplicateRequest), errors.Is(err, ErrAlreadyPaired), errors.Is(err, ErrControllerReplay), errors.Is(err, ErrDeviceReplay), errors.Is(err, ErrPairingGeneration):
 		return http.StatusConflict
 	case errors.Is(err, ErrWrongDevice):
 		return http.StatusForbidden
@@ -153,13 +154,31 @@ func relayStatus(err error) int {
 	}
 }
 
-func (s *HTTPServer) register(w http.ResponseWriter, r *http.Request) {
+func (s *HTTPServer) bootstrapSession(w http.ResponseWriter, r *http.Request) {
 	token, ok := bearer(r)
 	if !ok {
 		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	session, err := s.Store.Register(r.PathValue("device"), token, s.now())
+	if err != nil {
+		writeError(w, relayStatus(err), err.Error())
+		return
+	}
+	writeJSON(w, http.StatusCreated, session)
+}
+
+func (s *HTTPServer) deviceSession(w http.ResponseWriter, r *http.Request) {
+	var assertion DeviceAssertion
+	if err := decodeBody(w, r, &assertion); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid JSON body")
+		return
+	}
+	if assertion.DeviceID != r.PathValue("device") {
+		writeError(w, http.StatusBadRequest, "device id mismatch")
+		return
+	}
+	session, err := s.Store.AuthenticateDevice(assertion, s.now())
 	if err != nil {
 		writeError(w, relayStatus(err), err.Error())
 		return
