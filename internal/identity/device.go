@@ -31,6 +31,13 @@ func New() (*Device, error) {
 	return &Device{private: append(ed25519.PrivateKey(nil), privateKey...)}, nil
 }
 
+func Load(path string) (*Device, error) {
+	if path == "" {
+		return nil, ErrInvalidSeed
+	}
+	return load(path)
+}
+
 func LoadOrCreate(path string) (*Device, error) {
 	if path == "" {
 		return nil, ErrInvalidSeed
