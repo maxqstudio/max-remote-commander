@@ -20,8 +20,8 @@
 - [x] Identical-SHA main revalidation 5/5 PASS on run 36588253106
 - [x] Phase 5B canonical protocol + restart vectors source candidate 501cd78a2bfa06825471ae1a45ce64a5647d0807
 - [x] Phase 5B Linux/Windows/macOS/race source lanes PASS on run 36589988772
-- [ ] Phase 5B exact 5/5 work-branch governance acceptance
-- [ ] Phase 5B identical-SHA main revalidation and P5 closure
+- [x] Phase 5B exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 5/5 work-branch PASS on run 36591264102
+- [x] Phase 5B identical-SHA main revalidation 5/5 PASS on run 36591432809; P5 accepted
 
 ## Forward roadmap
 

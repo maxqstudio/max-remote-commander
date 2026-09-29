@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through Phase 5A are accepted and revalidated on main, including Phase 5A truth-only closure SHA b85a8af38e26046b22c5dc33c686de97dbf558cb on work run 36588860214 and main run 36589194145. Phase 5B source candidate 501cd78a2bfa06825471ae1a45ce64a5647d0807 passed Linux Windows macOS and race source lanes on GitHub Actions run 36589988772, while STRICT governance is pending. Published protocol-v1 fixtures now exercise deterministic signing/canonicalization and fail-closed restart queue semantics in the Go reference implementation; independent Cloudflare/MCP consumers, WebSocket transport, physical crash/power-loss recovery, packaging, and physical end-to-end runtime remain NOT_PROVEN.",
+  "evidence_boundary": "Phase 0 through P5 Protocol & Durability are accepted and revalidated on main. Phase 5B exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 passed all five blocking jobs on work branch run 36591264102 and identical-SHA main run 36591432809. P5 proves encrypted relay restart state, fail-closed replay/session semantics, and language-neutral protocol-v1 conformance vectors in the Go reference implementation. Independent Cloudflare/MCP consumers, WebSocket transport, physical crash/power-loss recovery, packaging, graphical multi-device UI, and physical end-to-end runtime remain NOT_PROVEN.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -142,10 +142,10 @@
       "status": "PASS"
     },
     {
-      "evidence": "Pending Phase 5B governance closure",
+      "evidence": "GitHub Actions work run 36591264102 and main run 36591432809 at exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4",
       "id": "P5B-GOV-001",
       "requirement": "Exact Phase 5B candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation.",
-      "status": "NOT_PROVEN"
+      "status": "PASS"
     }
   ],
   "runtime_checks": [],
@@ -153,7 +153,7 @@
   "schema_version": 1,
   "sequence_mode": "DURING",
   "sequence_session": "docs/sequence/phase-5b.session.json",
-  "sequence_sync_status": "NOT_PROVEN",
+  "sequence_sync_status": "PASS",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
@@ -170,12 +170,12 @@
     "HUMAN_COMPREHENSION": "NOT_PROVEN",
     "PROJECT_DOCS_NORMALIZED": "PASS",
     "PROJECT_DOCS_SYNC": "PASS",
-    "PROJECT_STATE_SYNC": "NOT_PROVEN",
+    "PROJECT_STATE_SYNC": "PASS",
     "PROVENANCE_SYNC": "PASS",
     "REFERENCE_SYNC": "PASS",
     "RUNTIME_E2E": "NOT_PROVEN",
     "SEMANTIC_SYNC": "PASS",
-    "SEQUENCE_SYNC": "NOT_PROVEN",
+    "SEQUENCE_SYNC": "PASS",
     "SOURCE_TESTS": "PASS",
     "STRUCTURAL_SYNC": "PASS",
     "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"

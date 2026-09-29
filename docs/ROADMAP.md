@@ -59,6 +59,7 @@ Cloudflare relay       Self-hosted Go relay
 | P2 | CLOSED | Relay/controller trust and policy foundation |
 | P3 | CLOSED | Bounded executor, local approval, audit, and cross-platform security regression |
 | P4 | CLOSED | Runnable outbound agent, controller bridge, provider-neutral chat loop, OpenAI-compatible adapter, and max-chat |
+| P5 | CLOSED | Encrypted relay durability, fail-closed restart/replay/session semantics, and protocol-v1 cross-client conformance vectors |
 
 ## Production roadmap
 
@@ -82,13 +83,13 @@ Cloudflare relay       Self-hosted Go relay
 
 ## Current execution checkpoint
 
-**Phase 5A encrypted relay durability is accepted.** Source SHA `f3a2ce567e50a2c0e8b96071a3253644b92d02da` passed work run `36588006526` and identical-SHA main run `36588253106`; truth-only closure SHA `b85a8af38e26046b22c5dc33c686de97dbf558cb` passed work run `36588860214` and main run `36589194145`.
+**P5 Protocol & Durability is accepted and closed.** Phase 5B exact SHA `5c6db407f0ec3061387c5c4a59039ae5431bffb4` passed all five blocking jobs on work run `36591264102` and identical-SHA main run `36591432809`.
 
-**Phase 5B canonical protocol and restart vectors is source-complete but not yet accepted.** Candidate `501cd78a2bfa06825471ae1a45ce64a5647d0807` passed Linux, Windows, macOS, and race lanes on run `36589988772`; STRICT governance is pending synchronization.
+The accepted P5 boundary includes encrypted restart-critical relay state, persisted replay protection, fail-closed stale-session/expiry pruning, and executable language-neutral protocol-v1 signing/restart fixtures. Future Cloudflare, MCP, and other adapters must conform to these vectors rather than fork the protocol or weaken security binding.
 
-The protocol-v1 fixtures are the compatibility boundary for future Cloudflare/MCP implementations. They lock canonical Ed25519 signing bytes/signatures and the restart rule that an unexpired queued command may remain deliverable only when the reauthenticated agent session ID is unchanged. Rotated-session or expired queued commands are pruned rather than rebound.
+The next roadmap phase is **P6 Transport V2**: WebSocket transport, reconnect, heartbeat, bounded backoff, and session rebinding while keeping the agent outbound-only and protocol-v1 unchanged.
 
-P5 is not closed until the final Phase 5B exact SHA passes all five work-branch lanes and identical-SHA main revalidation. GitHub-hosted restart tests do not prove physical crash or power-loss recovery.
+Physical crash/power-loss recovery, Cloudflare deployment, MCP integration, packaging, and physical end-to-end runtime remain unproven until their later acceptance phases.
 
 ## MCP V1 capability boundary
 

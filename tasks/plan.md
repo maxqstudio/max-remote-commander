@@ -60,7 +60,7 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 ### Phase 5B: Canonical protocol and restart vectors
 - [x] Freeze deterministic protocol/restart test vectors shared by future transports and adapters.
 - [x] Prove signing/canonicalization/replay/expiry and same-session/rotated-session/expired restart conformance in Linux/Windows/macOS/race source lanes on run 36589988772; independent cross-language consumers remain future-phase evidence.
-- [ ] Close P5 Protocol & Durability only after exact work/main acceptance.
+- [x] Close P5 Protocol & Durability at exact SHA 5c6db407f0ec3061387c5c4a59039ae5431bffb4 after work run 36591264102 and identical-SHA main run 36591432809.
 
 ### P6-P19 production roadmap
 - [ ] P6 Transport V2 — WebSocket reconnect, heartbeat, bounded backoff, and session rebinding.
