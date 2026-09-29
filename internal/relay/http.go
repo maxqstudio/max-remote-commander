@@ -137,7 +137,7 @@ func relayStatus(err error) int {
 		return http.StatusUnauthorized
 	case errors.Is(err, ErrPairingCodeInvalid), errors.Is(err, ErrControllerAssertion):
 		return http.StatusUnauthorized
-	case errors.Is(err, ErrInvalidIdentifier), errors.Is(err, ErrInvalidPublicKey), errors.Is(err, ErrPairingMismatch):
+	case errors.Is(err, ErrInvalidIdentifier), errors.Is(err, ErrInvalidPublicKey), errors.Is(err, ErrPairingMismatch), errors.Is(err, ErrInvalidCommandEnvelope):
 		return http.StatusBadRequest
 	case errors.Is(err, ErrUnknownDevice), errors.Is(err, ErrUnknownRequest), errors.Is(err, ErrPairingOfferMissing), errors.Is(err, ErrNotPaired):
 		return http.StatusNotFound
@@ -145,7 +145,7 @@ func relayStatus(err error) int {
 		return http.StatusGone
 	case errors.Is(err, ErrQueueFull), errors.Is(err, ErrPairingAttempts):
 		return http.StatusTooManyRequests
-	case errors.Is(err, ErrDuplicateRequest), errors.Is(err, ErrAlreadyPaired), errors.Is(err, ErrControllerReplay), errors.Is(err, ErrDeviceReplay), errors.Is(err, ErrPairingGeneration):
+	case errors.Is(err, ErrDuplicateRequest), errors.Is(err, ErrAlreadyPaired), errors.Is(err, ErrControllerReplay), errors.Is(err, ErrDeviceReplay), errors.Is(err, ErrCommandReplay), errors.Is(err, ErrPairingGeneration), errors.Is(err, ErrAgentSessionMismatch), errors.Is(err, ErrDeviceOffline):
 		return http.StatusConflict
 	case errors.Is(err, ErrWrongDevice):
 		return http.StatusForbidden
@@ -279,7 +279,9 @@ func (s *HTTPServer) revokePairing(w http.ResponseWriter, r *http.Request) {
 
 func (s *HTTPServer) queueCommand(w http.ResponseWriter, r *http.Request) {
 	deviceID := r.PathValue("device")
-	if !s.requirePairedController(w, r, deviceID) {
+	token, ok := bearer(r)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	var body commandBody
@@ -292,7 +294,7 @@ func (s *HTTPServer) queueCommand(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "payload is required")
 		return
 	}
-	if err := s.Store.QueueCommand(deviceID, Command{RequestID: body.RequestID, Payload: payload}); err != nil {
+	if err := s.Store.QueuePairedCommand(deviceID, token, Command{RequestID: body.RequestID, Payload: payload}, s.now()); err != nil {
 		writeError(w, relayStatus(err), err.Error())
 		return
 	}
