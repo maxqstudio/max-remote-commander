@@ -10,7 +10,7 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/phase-4-closure
+Active branch: work/phase-4-finalize
 Current authoritative SHA: external final acceptance evidence
 Last accepted SHA: 8c205dd1b1ee01fe3c73d44264493610a2704666
 Current source digest: 2de9a77e7ca973ec9fbad8f4ab4ea7afba300cb8fd520a7d1df1c8d82805986e

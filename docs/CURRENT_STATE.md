@@ -12,7 +12,7 @@ Status: ACCEPTED_CLOSED
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/phase-4-closure
+Branch: work/phase-4-finalize
 Authoritative SHA: external final acceptance evidence
 Last accepted SHA: 8c205dd1b1ee01fe3c73d44264493610a2704666
 Current candidate SHA: external final acceptance evidence
@@ -40,6 +40,7 @@ SEQUENCE_SYNC: PASS
 - Phase 3 exact accepted source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 passed all five GitHub Actions jobs on work branch run 36550259782 and main run 36550406590
 - Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192
 - The identical Phase 4 SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on main run 36558681560
+- Phase 4 truth-only closure SHA 6520f50d6b1f8c470265fee6de6a296d754997a3 passed Linux Windows macOS race and STRICT governance on work branch run 36559020716 and main run 36559186242
 - max-agent is a runnable outbound-only client that loads persistent identity and pairing state, authenticates a fresh per-start agent session, long-polls commands, re-verifies signed envelopes, applies local policy and approval, audits decisions/outcomes, and submits results
 - Interactive local approval is opt-in and defaults to deny; privileged execution requires a one-use exact-request local approval issued on the remote PC
 - Git execution isolates user credential/config environment and disables credential helpers, askpass, and terminal prompts for remote clone operations
@@ -63,7 +64,6 @@ SEQUENCE_SYNC: PASS
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- revalidate this truth-only Phase 4 closure on the work branch and main
 - start Phase 5 graphical multi-device UI MCP durability TLS packaging protected-key-storage and physical E2E work
 
 ## Explicitly blocked
