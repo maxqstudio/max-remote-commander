@@ -90,6 +90,7 @@ type Store struct {
 	controllerSessions map[string]controllerSessionState
 	controllerNonces   map[controllerNonceKey]int64
 	deviceNonces       map[deviceNonceKey]int64
+	commandNonces      map[commandNonceKey]int64
 }
 
 func NewStore(cfg Config) (*Store, error) {
@@ -143,6 +144,7 @@ func NewStore(cfg Config) (*Store, error) {
 		controllerSessions: make(map[string]controllerSessionState),
 		controllerNonces: make(map[controllerNonceKey]int64),
 		deviceNonces: make(map[deviceNonceKey]int64),
+		commandNonces: make(map[commandNonceKey]int64),
 	}, nil
 }
 
