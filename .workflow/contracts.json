@@ -96,6 +96,38 @@
       "authority": "Local runtime only",
       "mutation": "Appends one validated event and fsyncs.",
       "error_behavior": "Symlink path invalid fields free-form values closed logger or size exhaustion reject."
+    },
+    {
+      "method": "RUN",
+      "path": "AgentRunner",
+      "purpose": "Maintain a paired outbound device session and execute verified structured commands through local policy approval executor and audit.",
+      "authority": "Paired device identity plus paired controller public key and local policy",
+      "mutation": "Creates fresh per-start agent session; may execute bounded local capability after required audit/approval.",
+      "error_behavior": "Fail closed on session binding verification audit approval or transport failure; remote payload cannot self-approve."
+    },
+    {
+      "method": "EXECUTE",
+      "path": "RemoteExecutor",
+      "purpose": "Bridge one provider-neutral tool call to a controller-signed relay command and return its result.",
+      "authority": "Local controller Ed25519 private key plus current relay controller session",
+      "mutation": "Queues one signed request and may refresh controller session after agent-session change.",
+      "error_behavior": "Invalid JSON/session/auth failures reject; stale session refresh never reuses the stale request ID."
+    },
+    {
+      "method": "RUN",
+      "path": "ChatSession",
+      "purpose": "Run a bounded provider-neutral assistant/tool loop using only declared structured tools.",
+      "authority": "Declared tool definitions and local controller executor",
+      "mutation": "Appends conversation/tool-result history only.",
+      "error_behavior": "Unknown tools malformed JSON duplicate call IDs invalid tool results or round exhaustion fail closed."
+    },
+    {
+      "method": "POST",
+      "path": "OpenAICompatibleProvider",
+      "purpose": "Map provider-neutral messages and tools to an OpenAI-compatible chat-completions endpoint.",
+      "authority": "Configured provider URL model and runtime API key",
+      "mutation": "No local persistent secret mutation.",
+      "error_behavior": "Non-loopback HTTP invalid config redirects malformed/oversized responses and malformed tool arguments reject."
     }
   ],
   "data_contracts": [
@@ -216,48 +248,106 @@
         "Command queue and result retention are bounded.",
         "Durability is not claimed."
       ]
+    },
+    {
+      "name": "Local agent pairing state",
+      "source_of_truth": "internal/agent/state.go",
+      "mutability": "Created once after successful pairing",
+      "legal_writes": [
+        "Successful receipt-authenticated pairing completion only"
+      ],
+      "retention": "Until local unpair/reset",
+      "invariants": [
+        "Device ID generation and controller public key are required.",
+        "Target path may not be a symlink.",
+        "POSIX group/other permissions reject.",
+        "Existing state is never silently overwritten."
+      ]
+    },
+    {
+      "name": "Local controller pairing state",
+      "source_of_truth": "internal/controller/state.go",
+      "mutability": "Created once after controller redeems pairing",
+      "legal_writes": [
+        "Successful controller pairing only"
+      ],
+      "retention": "Until local controller reset",
+      "invariants": [
+        "Device ID and generation are required.",
+        "Target path may not be a symlink.",
+        "POSIX group/other permissions reject.",
+        "Existing state is never silently overwritten."
+      ]
+    },
+    {
+      "name": "Provider runtime credential",
+      "source_of_truth": "MAXRC_LLM_API_KEY process environment",
+      "mutability": "Runtime only",
+      "legal_writes": [
+        "Set by launching user/environment"
+      ],
+      "retention": "Process lifetime only",
+      "invariants": [
+        "max-chat does not persist the API key.",
+        "Non-loopback provider transport requires HTTPS.",
+        "Default provider client refuses redirects."
+      ]
     }
   ],
   "ui_surfaces": [
     {
-      "name": "Local approval prompt",
-      "status": "PLANNED_RUNTIME_INTEGRATION",
+      "name": "Local terminal approval prompt",
+      "status": "IMPLEMENTED_SOURCE",
       "backend_authority": "Local capability policy plus local approval store",
       "visible_data": [
-        "device/controller identity",
         "request ID",
         "capability",
-        "human-readable bounded argument summary produced locally"
+        "secret-safe locally generated summary",
+        "arguments SHA-256"
       ],
       "actions": [
         "approve once",
-        "deny"
+        "deny/default deny"
       ],
       "forbidden_actions": [
         "accept approval asserted by remote payload",
-        "display or persist secrets by default",
+        "display raw write content by default",
         "silently grant shell"
       ]
     },
     {
-      "name": "Chat client",
-      "status": "PLANNED_PHASE_4",
-      "backend_authority": "Paired controller session plus relay plus local PC-agent verification/policy",
+      "name": "max-chat terminal client",
+      "status": "IMPLEMENTED_SOURCE",
+      "backend_authority": "Paired controller session plus provider-neutral chat core plus local PC-agent verification/policy",
       "visible_data": [
-        "paired devices",
-        "chat messages",
-        "tool requests",
-        "approval state",
-        "bounded execution results"
+        "paired device ID",
+        "terminal chat messages",
+        "assistant output",
+        "tool results/errors"
       ],
       "actions": [
-        "select paired device",
+        "pair one device via local stdin code",
         "submit chat request",
-        "observe tool state"
+        "exit session"
       ],
       "forbidden_actions": [
-        "silently approve privileged execution",
-        "represent unverified runtime result as successful"
+        "persist provider API key",
+        "silently approve privileged remote execution",
+        "represent unverified result as success"
+      ]
+    },
+    {
+      "name": "Graphical multi-device chat UI",
+      "status": "DEFERRED_PHASE_5",
+      "backend_authority": "Not yet implemented",
+      "visible_data": [
+        "NOT_PROVEN"
+      ],
+      "actions": [
+        "device selector planned"
+      ],
+      "forbidden_actions": [
+        "claim implemented before source/runtime evidence"
       ]
     }
   ],
@@ -279,8 +369,8 @@
     },
     {
       "name": "Build binaries",
-      "command": "go build ./cmd/max-agent ./cmd/max-relay",
-      "expected": "agent and relay build on current runner OS"
+      "command": "go build ./cmd/max-agent ./cmd/max-relay ./cmd/max-chat",
+      "expected": "agent relay and chat client build on current runner OS"
     }
   ]
 }

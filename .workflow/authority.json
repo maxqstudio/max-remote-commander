@@ -9,8 +9,8 @@
     },
     {
       "concern": "working_candidate",
-      "authority": "work/phase-0-foundation until Phase 0 acceptance",
-      "meaning": "Current unaccepted candidate",
+      "authority": "work/phase-4-agent-chat",
+      "meaning": "Current unaccepted Phase 4 governance candidate",
       "mutable": true
     },
     {

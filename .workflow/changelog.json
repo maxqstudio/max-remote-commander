@@ -36,6 +36,17 @@
         "Added persistent Ed25519 device identity, one-use pairing generations, paired device/controller assertions, active agent-session binding, and signed command replay defense.",
         "Added one-use exact-request local approval grants and bounded secret-safe audit primitive."
       ]
+    },
+    {
+      "date": "2026-09-29",
+      "title": "Phase 4 source candidate complete",
+      "type": "feature",
+      "changes": [
+        "Source candidate 8174d1775c01b1b09b0381611486718f462f59b8 passed Linux Windows macOS and race lanes on GitHub Actions run 36555366255; STRICT governance closure remains pending.",
+        "Added runnable outbound max-agent integration with local terminal approval, audit integration, persisted pairing state, and Git credential-environment isolation.",
+        "Added paired controller bridge, provider-neutral bounded chat loop, OpenAI-compatible/local-provider adapter, and cross-platform max-chat terminal client.",
+        "Graphical multi-device chat UI/device selector is explicitly deferred to Phase 5."
+      ]
     }
   ]
 }

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "session_id": "phase-4-runnable-agent-chat",
+  "phase": "Phase 4 - runnable agent and terminal chat integration",
+  "mode": "DURING",
+  "scope": "CURRENT",
+  "critical": true,
+  "status": "ACTIVE",
+  "implementation_base_sha": "95d60a599d2ea6ab75831c54bad5c999ab7d6901",
+  "plan": {
+    "required": false,
+    "contract": "",
+    "frozen": false,
+    "frozen_commit": "",
+    "sha256": "",
+    "diagram": ""
+  },
+  "actual": {
+    "graph": "docs/sequence/generated/phase-4.actual.json",
+    "diagram": "docs/sequence/generated/phase-4.actual.mmd",
+    "source_digest": "",
+    "entries": [
+      "cmd/max-chat/main.go::runREPL",
+      "internal/chat/chat.go::Session.Run",
+      "internal/controller/executor.go::RemoteExecutor.Execute",
+      "internal/controller/client.go::Client.QueueTool",
+      "internal/agent/runner.go::Runner.Run",
+      "internal/agent/runner.go::Runner.handleCommand",
+      "internal/providers/openaicompat/provider.go::Provider.Complete"
+    ]
+  },
+  "test_traceability_required": true,
+  "tests": [
+    "cmd/max-chat/main_test.go",
+    "internal/chat/chat_test.go",
+    "internal/controller/client_test.go",
+    "internal/controller/executor_test.go",
+    "cmd/max-agent/main_test.go",
+    "internal/agent/runner_test.go",
+    "internal/providers/openaicompat/provider_test.go"
+  ],
+  "runtime_trace": {
+    "required": false,
+    "graph": ""
+  },
+  "acceptance_report": "artifacts/sequence/phase-4.acceptance.json"
+}

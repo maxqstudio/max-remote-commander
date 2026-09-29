@@ -37,13 +37,19 @@ Build a secure self-hosted cross-platform remote computer agent gateway for LLM 
 - [x] Synchronize deterministic Phase 3 Project Truth.
 - [x] Exact source SHA 95d60a599d2ea6ab75831c54bad5c999ab7d6901 5-job PASS on work branch and identical-SHA main revalidation.
 
-### Phase 4: Chat agent and runnable client
-- [ ] Outbound agent loop integrating identity/session/verifier/policy/approval/executor/audit.
-- [ ] Provider-neutral LLM tool-call interface.
-- [ ] Chat UI with device selector and local approval flow.
-- [ ] OpenAI-compatible and local provider adapters.
+### Phase 4: Runnable agent and terminal chat integration
+- [x] Outbound agent loop integrating identity/session/verifier/policy/approval/executor/audit.
+- [x] Provider-neutral bounded LLM tool-call interface.
+- [x] Interactive trusted local terminal approval flow with default deny.
+- [x] Paired controller bridge with active-agent-session refresh.
+- [x] OpenAI-compatible and loopback-local provider adapter.
+- [x] Cross-platform `max-chat` terminal client.
+- [ ] Exact Phase 4 STRICT governance acceptance and main revalidation.
 
-### Phase 5: MCP, durability, TLS, packaging, E2E
+Phase 4 scope decision: graphical multi-device chat UI/device selector moves to Phase 5; it is not claimed as implemented.
+
+### Phase 5: Graphical UI, MCP, durability, TLS, packaging, E2E
+- [ ] Graphical multi-device chat UI/device selector.
 - [ ] MCP adapter.
 - [ ] Durable relay state/replay strategy.
 - [ ] TLS/reverse-proxy deployment contract.

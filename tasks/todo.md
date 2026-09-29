@@ -3,17 +3,21 @@
 - [x] Phase 0 accepted/revalidated on main
 - [x] Phase 1 accepted/revalidated on main at 6132e215fb15862471ec5a40acd72ca8d0422f88
 - [x] Phase 2 accepted/revalidated on main at c0dfc797509c5afadd8f6cc847cdd45fb5ecf513
-- [x] Phase 3 accepted source at 95d60a599d2ea6ab75831c54bad5c999ab7d6901
-- [x] Phase 3 work run 36550259782 5/5 PASS
-- [x] Phase 3 main run 36550406590 5/5 PASS
-- [x] Persistent Ed25519 device identity
-- [x] Pairing code + generation + revocation
-- [x] Paired device Ed25519 relay session
-- [x] Paired controller Ed25519 session
-- [x] Active agent-session binding
-- [x] Signed command envelope validation in relay
-- [x] Relay command nonce replay guard
-- [x] One-use exact-request local approvals
-- [x] Bounded secret-safe audit primitive
-- [ ] Revalidate post-acceptance Phase 3 truth-only closure
-- [ ] Start Phase 4 runnable agent/chat integration
+- [x] Phase 3 accepted/revalidated on main at 95d60a599d2ea6ab75831c54bad5c999ab7d6901
+- [x] Phase 4 runnable outbound max-agent source
+- [x] Phase 4 trusted local terminal approval and audit integration source
+- [x] Phase 4 Git credential-environment isolation
+- [x] Phase 4 paired controller bridge and agent-session refresh
+- [x] Phase 4 provider-neutral bounded chat tool loop
+- [x] Phase 4 OpenAI-compatible / loopback-local provider adapter
+- [x] Phase 4 cross-platform max-chat terminal client
+- [x] Phase 4 source candidate 8174d1775c01b1b09b0381611486718f462f59b8 source lanes PASS on run 36555366255
+- [ ] Synchronize Phase 4 Project Truth and sequence evidence
+- [ ] Phase 4 exact work-branch 5/5 PASS
+- [ ] Phase 4 merge to main and identical-SHA 5/5 revalidation
+- [ ] Phase 5 graphical multi-device UI/device selector
+- [ ] Phase 5 MCP adapter
+- [ ] Phase 5 durable relay state/replay strategy
+- [ ] Phase 5 public TLS/reverse-proxy deployment proof
+- [ ] Phase 5 packaging/protected-key-storage hardening
+- [ ] Physical multi-OS end-to-end acceptance and release artifacts

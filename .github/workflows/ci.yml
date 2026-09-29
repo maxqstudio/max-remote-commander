@@ -64,14 +64,18 @@ jobs:
         run: |
           python .workflow/tools/generate_sequence_actual.py \
             --root "$GITHUB_WORKSPACE" \
-            --output-json docs/sequence/generated/phase-2.actual.json \
-            --output-mermaid docs/sequence/generated/phase-2.actual.mmd \
-            --entry "internal/relay/http.go::HTTPServer.Handler" \
-            --entry "internal/relay/store.go::Store.NextCommand" \
-            --entry "internal/relay/store.go::Store.SubmitResult"
+            --output-json docs/sequence/generated/phase-4.actual.json \
+            --output-mermaid docs/sequence/generated/phase-4.actual.mmd \
+            --entry "cmd/max-chat/main.go::runREPL" \
+            --entry "internal/chat/chat.go::Session.Run" \
+            --entry "internal/controller/executor.go::RemoteExecutor.Execute" \
+            --entry "internal/controller/client.go::Client.QueueTool" \
+            --entry "internal/agent/runner.go::Runner.Run" \
+            --entry "internal/agent/runner.go::Runner.handleCommand" \
+            --entry "internal/providers/openaicompat/provider.go::Provider.Complete"
       - name: Validate sequence contract
         shell: bash
-        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-2.session.json
+        run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_sequence_contract.py" --root "$GITHUB_WORKSPACE" --session docs/sequence/phase-4.session.json
       - name: Validate generated docs
         shell: bash
         run: python "$RUNNER_TEMP/Skill_Workflow/scripts/validate_project_docs.py" --root "$GITHUB_WORKSPACE"
@@ -80,3 +84,14 @@ jobs:
         run: |
           git diff --exit-code
           test -z "$(git status --porcelain --untracked-files=all --ignored=no)"
+
+      - name: Upload deterministic governance snapshot
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: phase-4-governance-snapshot
+          if-no-files-found: error
+          path: |
+            .workflow/generated/
+            docs/
+            artifacts/sequence/

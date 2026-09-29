@@ -3,7 +3,7 @@ profile: strict
 contracts:
   api_contracts: required
   data_contracts: required
-  ui_information_architecture: not_applicable
+  ui_information_architecture: required
   runbook: required
   decisions: required
   known_defects: required

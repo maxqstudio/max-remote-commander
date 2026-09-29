@@ -3,13 +3,13 @@
   "defects": [
     {
       "id": "SEC-REPLAY-RUNTIME-001",
-      "status": "OPEN",
+      "status": "RESOLVED_SOURCE",
       "summary": "Per-start agent session binding and replay checks exist in source, but the final running agent loop that creates a fresh session each start is not yet implemented/proven.",
       "evidence": "internal/protocol/verifier.go and internal/relay/device_auth.go"
     },
     {
       "id": "P3-APPROVAL-UI-001",
-      "status": "OPEN",
+      "status": "RESOLVED_SOURCE",
       "summary": "Approval store and privileged dispatcher binding are implemented, but the user-facing trusted local approval prompt/issuer is not yet integrated.",
       "evidence": "internal/approval/store.go and internal/executor/dispatcher.go"
     },
@@ -39,9 +39,21 @@
     },
     {
       "id": "P3-AUDIT-INTEGRATION-001",
-      "status": "OPEN",
+      "status": "RESOLVED_SOURCE",
       "summary": "Secret-safe bounded audit logger is implemented, but final agent/relay runtime event integration is deferred.",
       "evidence": "internal/audit/log.go"
+    },
+    {
+      "id": "P4-GRAPHICAL-UI-001",
+      "status": "OPEN",
+      "summary": "Phase 4 proves terminal max-chat and terminal local approval, but graphical multi-device UI/device selector is deferred to Phase 5.",
+      "evidence": "cmd/max-chat/main.go; tasks/plan.md"
+    },
+    {
+      "id": "P4-LIVE-RUNTIME-001",
+      "status": "OPEN",
+      "summary": "GitHub CI proves source behavior and cross-OS builds, but physical remote-device runtime and live external LLM provider end-to-end behavior remain unproven.",
+      "evidence": "GitHub Actions run 36555366255"
     }
   ]
 }

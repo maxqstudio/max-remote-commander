@@ -17,33 +17,38 @@
   },
   "technology": {
     "languages": [
-      "Go",
-      "TypeScript"
+      "Go"
     ],
     "frameworks": [
-      "Go standard library initially",
-      "React planned for chat client"
+      "Go standard library"
     ],
     "persistence": [
-      "local device identity and policy configuration planned",
-      "relay state is in-memory in Phase 2"
+      "create-once local device and controller Ed25519 identity seeds",
+      "create-once local device/controller pairing state",
+      "bounded append-only local audit JSONL",
+      "relay operational state remains in-memory"
     ],
     "external_systems": [
       "GitHub Actions",
-      "LLM provider APIs",
-      "MCP clients"
+      "OpenAI-compatible LLM provider APIs",
+      "MCP clients (planned)"
     ]
   },
   "entry_points": [
     {
       "name": "max-agent",
       "path": "cmd/max-agent/main.go",
-      "purpose": "Cross-platform user-device agent executable"
+      "purpose": "Outbound-only paired user-device agent executable"
     },
     {
       "name": "max-relay",
       "path": "cmd/max-relay/main.go",
-      "purpose": "Authenticated outbound relay server executable"
+      "purpose": "Authenticated relay server executable"
+    },
+    {
+      "name": "max-chat",
+      "path": "cmd/max-chat/main.go",
+      "purpose": "Paired terminal chat/controller client using provider-neutral tool calls"
     }
   ],
   "constraints": [

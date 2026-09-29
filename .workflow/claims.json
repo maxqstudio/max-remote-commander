@@ -141,6 +141,97 @@
       ],
       "runtime_evidence": [],
       "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P4-RUNNER-001",
+      "claim": "The runnable outbound agent creates a fresh active session, re-verifies controller-signed commands, applies local policy/approval, audits before privileged side effects, and submits bounded results.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "WORKFLOW_STATE_MACHINE.md",
+        "API_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/agent/runner.go::NewRunner(",
+        "internal/agent/runner.go::Runner.Run(",
+        "internal/agent/runner.go::Runner.handleCommand("
+      ],
+      "tests": [
+        "internal/agent/runner_test.go",
+        "cmd/max-agent/main_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P4-CONTROLLER-001",
+      "claim": "The controller signs each tool request for the relay-provided active agent session and refreshes controller authority when that session changes.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "API_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/controller/client.go::Client.OpenSession(",
+        "internal/controller/client.go::Client.QueueTool(",
+        "internal/controller/executor.go::RemoteExecutor.Execute("
+      ],
+      "tests": [
+        "internal/controller/client_test.go",
+        "internal/controller/executor_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P4-CHAT-001",
+      "claim": "The chat core is provider-neutral, exposes only declared structured tools, validates tool-call/result JSON, and enforces a bounded round limit.",
+      "documents": [
+        "ARCHITECTURE.md",
+        "API_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "internal/chat/chat.go::Session.Run(",
+        "internal/chat/chat.go::RemoteTools("
+      ],
+      "tests": [
+        "internal/chat/chat_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P4-PROVIDER-001",
+      "claim": "The OpenAI-compatible adapter requires HTTPS except loopback, refuses redirects by default, bounds responses, and rejects malformed tool calls.",
+      "documents": [
+        "API_CONTRACTS.md",
+        "RUNBOOK.md"
+      ],
+      "source_owners": [
+        "internal/providers/openaicompat/provider.go::New(",
+        "internal/providers/openaicompat/provider.go::Provider.Complete("
+      ],
+      "tests": [
+        "internal/providers/openaicompat/provider_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P4-LOCAL-APPROVAL-001",
+      "claim": "The implemented terminal approval path defaults to deny and can issue one-use local approval only after explicit local yes input; remote requests cannot carry trusted approval.",
+      "documents": [
+        "DATA_CONTRACTS.md",
+        "WORKFLOW_STATE_MACHINE.md"
+      ],
+      "source_owners": [
+        "cmd/max-agent/main.go::consoleApprover.Approve(",
+        "internal/agent/runner.go::Runner.handleCommand("
+      ],
+      "tests": [
+        "cmd/max-agent/main_test.go",
+        "internal/agent/runner_test.go"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
     }
   ],
   "relations": []

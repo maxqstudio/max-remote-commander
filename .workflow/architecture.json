@@ -2,6 +2,48 @@
   "schema_version": 1,
   "components": [
     {
+      "id": "chat_core",
+      "name": "Provider-neutral Chat Core",
+      "purpose": "Runs a bounded structured tool-call loop without binding the command protocol to one LLM provider",
+      "owns": [
+        "conversation tool loop",
+        "declared remote tool schemas",
+        "tool-call validation and round limit"
+      ],
+      "depends_on": [
+        "controller_client",
+        "llm_provider_adapter"
+      ]
+    },
+    {
+      "id": "controller_client",
+      "name": "Paired Controller Client",
+      "purpose": "Persists local controller trust state, authenticates controller sessions, signs remote commands, refreshes stale sessions, and consumes results",
+      "owns": [
+        "controller Ed25519 identity",
+        "controller pairing state",
+        "controller session refresh",
+        "signed command submission"
+      ],
+      "depends_on": [
+        "relay_server",
+        "protocol"
+      ]
+    },
+    {
+      "id": "llm_provider_adapter",
+      "name": "OpenAI-compatible Provider Adapter",
+      "purpose": "Maps provider-neutral chat messages/tools to an OpenAI-compatible chat-completions boundary",
+      "owns": [
+        "HTTPS/loopback provider transport",
+        "API-key header injection from runtime environment",
+        "provider response bounds and tool-call parsing"
+      ],
+      "depends_on": [
+        "chat_core"
+      ]
+    },
+    {
       "id": "llm_client",
       "name": "LLM Client",
       "purpose": "Requests typed tools and consumes streamed results",
@@ -128,29 +170,29 @@
   ],
   "data_flows": [
     {
-      "from": "agent",
-      "to": "relay_server",
-      "meaning": "pre-pairing bootstrap session then Ed25519 device assertion for paired sessions"
+      "from": "llm_provider_adapter",
+      "to": "chat_core",
+      "meaning": "assistant text or validated structured tool calls"
     },
     {
-      "from": "llm_client",
-      "to": "relay_server",
-      "meaning": "paired controller assertion and short-lived controller session"
+      "from": "chat_core",
+      "to": "controller_client",
+      "meaning": "declared structured tool request only"
     },
     {
-      "from": "llm_client",
+      "from": "controller_client",
       "to": "relay_server",
-      "meaning": "controller-signed CommandEnvelope bound to device and active agent session"
+      "meaning": "paired controller assertion and controller-signed CommandEnvelope bound to current agent session"
     },
     {
       "from": "relay_server",
       "to": "agent",
-      "meaning": "outbound long-poll delivery of already relay-validated signed command envelope"
+      "meaning": "outbound long-poll delivery of relay-validated signed command envelope"
     },
     {
       "from": "agent",
       "to": "protocol",
-      "meaning": "agent re-verifies controller signature device session freshness and replay before local policy"
+      "meaning": "agent re-verifies controller signature device/session freshness and replay before local policy"
     },
     {
       "from": "protocol",
@@ -170,7 +212,7 @@
     {
       "from": "executor",
       "to": "audit",
-      "meaning": "structured decision and outcome metadata without raw secret-bearing payloads"
+      "meaning": "decision and outcome metadata without raw secret-bearing payloads"
     },
     {
       "from": "executor",
@@ -184,8 +226,13 @@
     },
     {
       "from": "relay_server",
-      "to": "llm_client",
+      "to": "controller_client",
       "meaning": "paired-controller-session-authenticated SSE result event"
+    },
+    {
+      "from": "controller_client",
+      "to": "chat_core",
+      "meaning": "validated JSON tool result returned to conversation"
     }
   ],
   "external_boundaries": [
@@ -212,6 +259,10 @@
     {
       "name": "Audit data",
       "contract": "Audit schema excludes raw arguments tokens stdout stderr and free-form messages; only bounded structured metadata and digests are accepted."
+    },
+    {
+      "name": "LLM provider",
+      "contract": "Provider API key is supplied at runtime and not persisted by max-chat. Non-loopback provider endpoints require HTTPS and default HTTP redirects are refused."
     }
   ]
 }
