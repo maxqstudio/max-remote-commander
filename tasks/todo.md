@@ -45,7 +45,13 @@
 
 ## Forward roadmap
 
-- [ ] P7 Cloudflare Relay — Worker, Durable Objects, WebSocket/Hibernation
+- [x] P7 BEFORE plan frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0
+- [ ] P7A protocol-v1 TypeScript conformance + Worker router
+- [ ] P7B SQLite Durable Object persistence
+- [ ] P7C Hibernation WebSocket agent transport
+- [ ] P7D controller/result routing + Go compatibility
+- [ ] P7E staging deployment + Free-plan budget evidence
+- [ ] P7 final exact work/main acceptance
 - [ ] P8 MCP Gateway — structured capability adapter, no default unrestricted shell
 - [ ] P9 Multi-client Compatibility — ChatGPT-compatible, Codex/IDE, generic MCP conformance
 - [ ] P10 Device & Permission Model — multi-device, scopes, revoke, per-device policy

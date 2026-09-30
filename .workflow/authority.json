@@ -9,8 +9,8 @@
     },
     {
       "concern": "working_candidate",
-      "authority": "main",
-      "meaning": "No unaccepted product candidate; P7 is next authorized phase",
+      "authority": "work/p7-cloudflare-relay-v2",
+      "meaning": "Current unaccepted P7 Cloudflare Relay candidate",
       "mutable": true
     },
     {

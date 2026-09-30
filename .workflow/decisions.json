@@ -77,6 +77,13 @@
       "status": "ACCEPTED",
       "decision": "Advance the project governance pin to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8; vendor the latest STRICT selftest and cross-document validator exactly, and retain the project-specific Go-aware sequence generator as an extension with its compatibility declaration updated to the same authority.",
       "rationale": "The upstream release fixes HTTP route predecessor retention in the generic sequence generator and Python class-method path-symbol validation. MAX Remote Commander must consume the validator/selftest fixes while preserving its Go-aware sequence extraction rather than replacing it with the generic Python/JS extractor."
+    },
+    {
+      "id": "DEC-012",
+      "title": "Cloudflare relay is a protocol-v1 adapter around per-device SQLite Durable Objects",
+      "status": "ACCEPTED",
+      "decision": "Implement P7 as a TypeScript Cloudflare Worker router plus one SQLite-backed Durable Object per device. Agent WebSockets terminate at the Durable Object using the Hibernation API. The Cloudflare layer must preserve the accepted protocol-v1 signed envelope, device/generation/session/replay authority, and local agent policy/approval boundary; it is not a new security protocol.",
+      "rationale": "Cloudflare recommends SQLite-backed Durable Objects for new namespaces and Hibernation WebSockets for long-lived mostly-idle connections. A per-device Durable Object provides strongly consistent transactional storage and a single coordination point without exposing inbound ports on the user PC."
     }
   ]
 }

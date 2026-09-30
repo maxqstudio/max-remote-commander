@@ -143,6 +143,17 @@
         "P6 application/runtime semantics were not changed by this migration.",
         "P7 Cloudflare Relay is the next authorized product phase."
       ]
+    },
+    {
+      "date": "2026-10-01",
+      "title": "P7 Cloudflare Relay planning started",
+      "type": "feature",
+      "changes": [
+        "Advanced state.json and roadmap.json together from P6 to P7.",
+        "Froze the P7 BEFORE sequence plan at commit 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 before Cloudflare source implementation.",
+        "Selected a TypeScript Worker router plus one SQLite-backed Durable Object per device with Hibernation WebSocket agent ingress.",
+        "P7 will reuse protocol-v1 authority and local agent policy/approval rather than inventing transport-level privilege."
+      ]
     }
   ]
 }

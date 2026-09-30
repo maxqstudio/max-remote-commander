@@ -76,7 +76,16 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 - [x] P6 runtime/source accepted and closed.
 - [x] Revalidated governance-only upgrade to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8: exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11, work run 36742358170, identical-SHA main run 36742647290, all 5/5 PASS.
 
-### P7-P19 production roadmap
+### P7: Cloudflare Relay
+- [x] Freeze BEFORE sequence plan before Cloudflare implementation.
+- [ ] P7A TypeScript protocol-v1 conformance and Worker routing foundation.
+- [ ] P7B SQLite Durable Object durable trust/queue/result/replay state.
+- [ ] P7C Hibernation WebSocket agent transport.
+- [ ] P7D controller command/result routing and Go client compatibility.
+- [ ] P7E deployed staging E2E plus Free-plan resource budget evidence.
+- [ ] Exact P7 work/main acceptance under current Skill_Workflow.
+
+### P8-P19 production roadmap
 - [ ] P7 Cloudflare Relay — Worker, Durable Objects, and WebSocket/Hibernation.
 - [ ] P8 MCP Gateway — structured capability adapter with no default unrestricted shell.
 - [ ] P9 Multi-client Compatibility.

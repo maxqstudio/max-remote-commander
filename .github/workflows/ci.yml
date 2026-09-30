@@ -43,6 +43,8 @@ jobs:
   governance:
     name: Skill Workflow STRICT
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -85,6 +87,32 @@ jobs:
       - name: Generate deterministic Project Truth docs
         shell: bash
         run: python .workflow/tools/sync_project_truth.py --root "$GITHUB_WORKSPACE"
+      - name: Generate frozen P7 sequence plan diagram
+        shell: bash
+        run: |
+          python .workflow/tools/generate_sequence_plan.py \
+            --plan docs/sequence/plans/p7-cloudflare.plan.json \
+            --output docs/sequence/generated/p7-cloudflare.plan.mmd
+
+      - name: Verify P7 plan freeze lineage
+        shell: bash
+        run: |
+          test "$(git show 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0:docs/sequence/plans/p7-cloudflare.plan.json | sha256sum | awk '{print $1}')" = "e74de93187544f2044185f2f3c25edfc7d5f6d4eb790d9f21f9801638223a680"
+
+      - name: Generate P7 actual sequence evidence
+        if: hashFiles('cloudflare/relay/src/index.ts') != ''
+        shell: bash
+        run: |
+          python .workflow/tools/generate_sequence_actual.py \
+            --root "$GITHUB_WORKSPACE" \
+            --output-json docs/sequence/generated/p7-cloudflare.actual.json \
+            --output-mermaid docs/sequence/generated/p7-cloudflare.actual.mmd \
+            --entry "cloudflare/relay/src/index.ts::fetch"
+
+      - name: Validate P7 sequence contract
+        if: hashFiles('cloudflare/relay/src/index.ts') != ''
+        shell: bash
+        run: python .workflow/tools/validate_sequence_contract.py --root "$GITHUB_WORKSPACE" --session docs/sequence/p7.session.json
       - name: Generate Go-aware DURING actual sequence evidence
         shell: bash
         run: |
@@ -105,6 +133,17 @@ jobs:
       - name: Validate generated docs
         shell: bash
         run: python .workflow/tools/validate_project_docs.py --root "$GITHUB_WORKSPACE"
+      - name: Sync deterministic generated truth on P7 v2 work branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/work/p7-cloudflare-relay-v2'
+        shell: bash
+        run: |
+          git add .workflow/acceptance.json .workflow/generated/code_facts.json docs/*.md
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: regenerate P7 project truth"
+            git push origin HEAD:work/p7-cloudflare-relay-v2
+          fi
       - name: Verify tracked governance state is deterministic
         shell: bash
         run: |

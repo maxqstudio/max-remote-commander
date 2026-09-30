@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through P6 Transport V2 remain accepted. The governance baseline is now Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8. Exact target SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290. P6 runtime/source acceptance remains anchored to 8e13e0374cee8724dd5dbda766a373f800d44afd; the governance upgrade changes no application runtime behavior. P7 Cloudflare Relay remains not started.",
+  "evidence_boundary": "Phase 0 through P6 are accepted. P7 Cloudflare Relay is now CURRENT with a BEFORE sequence plan frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 before Cloudflare source implementation. No Cloudflare source, deployment, cross-language conformance, staging E2E, or Free-plan resource evidence is yet claimed.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -182,14 +182,50 @@
       "id": "GOV-WORKFLOW-024E2EA-001",
       "requirement": "Repository governance is pinned to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8; upstream validator fixes are vendored and target-project STRICT validation passes without changing accepted P6 runtime behavior.",
       "status": "PASS"
+    },
+    {
+      "id": "P7-PLAN-001",
+      "requirement": "P7 BEFORE sequence plan is frozen before Cloudflare implementation source exists.",
+      "evidence": "docs/sequence/plans/p7-cloudflare.plan.json frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0; SHA-256 e74de93187544f2044185f2f3c25edfc7d5f6d4eb790d9f21f9801638223a680",
+      "status": "PASS"
+    },
+    {
+      "id": "P7-PROTOCOL-001",
+      "requirement": "Cloudflare TypeScript implementation conforms to accepted protocol-v1 signing and replay/session fixtures.",
+      "evidence": "Pending P7A implementation.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-DURABILITY-001",
+      "requirement": "Per-device SQLite Durable Object persists trust queue result and replay state transactionally while bearer sessions remain short-lived.",
+      "evidence": "Pending P7B implementation.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-WEBSOCKET-001",
+      "requirement": "Hibernation WebSocket agent transport preserves outbound-only connectivity and stale-session rejection.",
+      "evidence": "Pending P7C implementation.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-DEPLOY-001",
+      "requirement": "Cloudflare staging and Free-plan budget evidence are executed rather than inferred from local tests.",
+      "evidence": "Pending P7E deployment evidence.",
+      "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-GOV-001",
+      "requirement": "Exact final P7 work SHA passes all blocking lanes and identical SHA passes main revalidation.",
+      "evidence": "Pending P7 closure.",
+      "status": "NOT_PROVEN"
     }
   ],
   "runtime_checks": [],
   "runtime_status": "NOT_PROVEN",
   "schema_version": 1,
-  "sequence_mode": "DURING",
-  "sequence_session": "docs/sequence/p6.session.json",
-  "sequence_sync_status": "PASS",
+  "sequence_mode": "BEFORE",
+  "sequence_session": "docs/sequence/p7.session.json",
+  "sequence_sync_status": "NOT_PROVEN",
   "test_commands": [
     "go test ./... -count=1",
     "go test -race ./... -count=1",
@@ -212,7 +248,7 @@
     "ROADMAP_SYNC": "PASS",
     "RUNTIME_E2E": "NOT_PROVEN",
     "SEMANTIC_SYNC": "PASS",
-    "SEQUENCE_SYNC": "PASS",
+    "SEQUENCE_SYNC": "NOT_PROVEN",
     "SOURCE_TESTS": "PASS",
     "STRUCTURAL_SYNC": "PASS",
     "TEST_RUNTIME_TRACEABILITY": "NOT_PROVEN"
