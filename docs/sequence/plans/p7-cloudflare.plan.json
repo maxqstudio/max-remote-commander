@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "flow_id": "FLOW-P7-CLOUDFLARE-RELAY",
+  "title": "P7 Cloudflare paired command and result flow",
+  "status": "FROZEN",
+  "nodes": [
+    {
+      "id": "worker-entry",
+      "label": "Cloudflare Worker route",
+      "locator": "cloudflare/relay/src/index.ts::fetch",
+      "kind": "source"
+    },
+    {
+      "id": "device-do",
+      "label": "Per-device Durable Object route",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.fetch",
+      "kind": "source"
+    },
+    {
+      "id": "queue-command",
+      "label": "Authorize and queue controller command",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.queueCommand",
+      "kind": "source"
+    },
+    {
+      "id": "protocol-verify",
+      "label": "Protocol-v1 authority checks",
+      "locator": "cloudflare/relay/src/protocol.ts::verifySignedCommand",
+      "kind": "source"
+    },
+    {
+      "id": "deliver-head",
+      "label": "Deliver FIFO head",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.deliverHead",
+      "kind": "source"
+    },
+    {
+      "id": "local-agent",
+      "label": "MAX Agent verifier/policy/approval",
+      "locator": "internal/agent/runner.go::Runner.Run",
+      "kind": "source"
+    },
+    {
+      "id": "submit-result",
+      "label": "Durable result acknowledgement",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.submitResult",
+      "kind": "source"
+    },
+    {
+      "id": "controller-result",
+      "label": "Controller result route",
+      "locator": "cloudflare/relay/src/device_relay.ts::DeviceRelay.waitResult",
+      "kind": "source"
+    }
+  ],
+  "edges": [
+    {
+      "from": "worker-entry",
+      "to": "device-do",
+      "action": "route by validated device id through Durable Object binding",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "device-do",
+      "to": "queue-command",
+      "action": "dispatch authenticated controller command request",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "queue-command",
+      "to": "protocol-verify",
+      "action": "verify controller device generation session expiry and replay authority before storage",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "queue-command",
+      "to": "deliver-head",
+      "action": "after durable commit attempt delivery of FIFO head",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "deliver-head",
+      "to": "local-agent",
+      "action": "send unchanged signed CommandEnvelope through authenticated Hibernation WebSocket",
+      "requirement": "MUST",
+      "verification": "DOCUMENT"
+    },
+    {
+      "from": "local-agent",
+      "to": "submit-result",
+      "action": "submit bounded result under active paired device session",
+      "requirement": "MUST",
+      "verification": "DOCUMENT"
+    },
+    {
+      "from": "device-do",
+      "to": "submit-result",
+      "action": "dispatch authenticated device result request",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "device-do",
+      "to": "controller-result",
+      "action": "dispatch authenticated controller result wait",
+      "requirement": "MUST",
+      "verification": "SOURCE"
+    },
+    {
+      "from": "worker-entry",
+      "to": "local-agent",
+      "action": "direct remote execution bypass",
+      "requirement": "MUST_NOT",
+      "verification": "SOURCE"
+    }
+  ]
+}
