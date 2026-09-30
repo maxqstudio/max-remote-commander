@@ -10,9 +10,9 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/governance-skill-workflow-024e2ea
+Active branch: main
 Current authoritative SHA: external final acceptance evidence
-Last accepted SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
+Last accepted SHA: 1664a1db23f26252ad11e7ce9d6507b44ca1ba11
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
 ## Authorities

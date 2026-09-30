@@ -93,7 +93,7 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 Current phase: P6 - Transport V2
 
-Current status: GOVERNANCE_MIGRATION_IN_PROGRESS
+Current status: ACCEPTED_CLOSED
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -102,7 +102,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 | Concern | Authority | Meaning |
 |---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases |
-| working_candidate | work/governance-skill-workflow-024e2ea | Governance-only migration candidate; accepted P6 application/runtime source remains unchanged |
+| working_candidate | main | No unaccepted product candidate; P7 is next authorized phase |
 | governance | maxqstudio/Skill_Workflow@024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 | Pinned current STRICT project workflow rules, roadmap contract, deterministic documentation/sequence validators, route-predecessor reachability fix, and path-symbol validation fix |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution |
@@ -114,7 +114,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 ### Mutable current state
 
 - source: Canonical source history and releases
-- working_candidate: Governance-only migration candidate; accepted P6 application/runtime source remains unchanged
+- working_candidate: No unaccepted product candidate; P7 is next authorized phase
 - roadmap: Machine-readable phase plan and current-phase authority; docs/ROADMAP.md is generated and state.json phase must match roadmap current_phase
 
 ### Immutable history / evidence
@@ -139,10 +139,10 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- adopt Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 without changing accepted P6 runtime behavior
-- regenerate deterministic Project Truth and validate roadmap/sequence/cross-document gates
-- obtain exact 5-job PASS on the governance-migration branch
-- fast-forward accepted governance-only SHA to main and revalidate before starting P7
+- start P7 Cloudflare Relay on a new work branch from accepted latest-governance main
+- update .workflow/state.json and .workflow/roadmap.json together so P7 becomes CURRENT
+- implement Cloudflare Worker plus Durable Object relay as a thin protocol-v1-conformant transport/state adapter
+- preserve outbound-only agent connectivity, device generation, replay, agent-session binding, local policy, approval, and audit semantics
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -182,11 +182,10 @@ Known blockers:
 - Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151
 - P6 exact accepted SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed Linux Windows macOS race and latest STRICT governance on work run 36611213711 and identical-SHA main run 36611401330
 - P6 Transport V2 is closed under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259: outbound WebSocket command delivery, bounded reconnect/backoff, heartbeat/session refresh, FIFO head-of-line lease safety, strict framing, HTTPS durable result acknowledgement, and explicit long-poll fallback are accepted
-- Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575; target-project adoption remains pending
+- Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575 and target exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290
 
 ### Not proven
 
-- target-project revalidation under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY

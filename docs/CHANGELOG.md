@@ -107,3 +107,12 @@ Type: governance
 - Vendored the latest STRICT selftest and cross-document consistency validator, including Python class-method path-symbol validation.
 - Retained the project-specific Go-aware sequence extractor; the upstream HTTP route predecessor change is generic-extractor-specific and does not replace the Go AST extension.
 - Accepted P6 runtime/source semantics remain unchanged; this migration requires target work/main governance revalidation before P7 starts.
+
+## 2026-10-01 — Skill_Workflow 024e2ea governance accepted
+
+Type: governance
+
+- Exact governance SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290.
+- Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 is now the accepted project governance authority.
+- P6 application/runtime semantics were not changed by this migration.
+- P7 Cloudflare Relay is the next authorized product phase.

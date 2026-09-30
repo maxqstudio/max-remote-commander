@@ -3,20 +3,20 @@
 # CURRENT STATE
 
 Last updated: generated from current specs
-Authority verified at SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
+Authority verified at SHA: 1664a1db23f26252ad11e7ce9d6507b44ca1ba11
 Governance profile: strict
 
 ## Current phase
 Phase: P6 - Transport V2
-Status: GOVERNANCE_MIGRATION_IN_PROGRESS
+Status: ACCEPTED_CLOSED
 Roadmap phase: P6 - Transport V2
 ROADMAP_SYNC: PASS
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/governance-skill-workflow-024e2ea
+Branch: main
 Authoritative SHA: external final acceptance evidence
-Last accepted SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
+Last accepted SHA: 1664a1db23f26252ad11e7ce9d6507b44ca1ba11
 Current candidate SHA: external final acceptance evidence
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
 
@@ -62,10 +62,9 @@ SEQUENCE_SYNC: PASS
 - Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151
 - P6 exact accepted SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed Linux Windows macOS race and latest STRICT governance on work run 36611213711 and identical-SHA main run 36611401330
 - P6 Transport V2 is closed under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259: outbound WebSocket command delivery, bounded reconnect/backoff, heartbeat/session refresh, FIFO head-of-line lease safety, strict framing, HTTPS durable result acknowledgement, and explicit long-poll fallback are accepted
-- Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575; target-project adoption remains pending
+- Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575 and target exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290
 
 ## Not proven
-- target-project revalidation under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
@@ -83,10 +82,10 @@ SEQUENCE_SYNC: PASS
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- adopt Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 without changing accepted P6 runtime behavior
-- regenerate deterministic Project Truth and validate roadmap/sequence/cross-document gates
-- obtain exact 5-job PASS on the governance-migration branch
-- fast-forward accepted governance-only SHA to main and revalidate before starting P7
+- start P7 Cloudflare Relay on a new work branch from accepted latest-governance main
+- update .workflow/state.json and .workflow/roadmap.json together so P7 becomes CURRENT
+- implement Cloudflare Worker plus Durable Object relay as a thin protocol-v1-conformant transport/state adapter
+- preserve outbound-only agent connectivity, device generation, replay, agent-session binding, local policy, approval, and audit semantics
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination
