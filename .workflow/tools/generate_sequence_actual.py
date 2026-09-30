@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Project-local Go-aware static sequence generator.
 
-Compatible with Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259.
+Compatible with Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8.
 It preserves the actual-graph contract while extending extraction to Go through
 go_sequence_ast.go. This project-specific extension remains under .workflow/tools
 so it does not alter the application source digest it measures.

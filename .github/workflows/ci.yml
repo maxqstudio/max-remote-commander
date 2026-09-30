@@ -43,6 +43,8 @@ jobs:
   governance:
     name: Skill Workflow STRICT
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -55,7 +57,7 @@ jobs:
         shell: bash
         run: |
           git clone https://github.com/maxqstudio/Skill_Workflow.git "$RUNNER_TEMP/Skill_Workflow"
-          git -C "$RUNNER_TEMP/Skill_Workflow" checkout c1d7e58a0fcadc606c8cf75c6283a17278f99259
+          git -C "$RUNNER_TEMP/Skill_Workflow" checkout 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
       - name: Verify vendored Skill_Workflow tools
         shell: bash
         run: |
@@ -80,7 +82,7 @@ jobs:
           do
             cmp ".workflow/tools/$name" "$RUNNER_TEMP/Skill_Workflow/scripts/$name"
           done
-          grep -Fq "Compatible with Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259." .workflow/tools/generate_sequence_actual.py
+          grep -Fq "Compatible with Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8." .workflow/tools/generate_sequence_actual.py
 
       - name: Generate deterministic Project Truth docs
         shell: bash
@@ -105,6 +107,17 @@ jobs:
       - name: Validate generated docs
         shell: bash
         run: python .workflow/tools/validate_project_docs.py --root "$GITHUB_WORKSPACE"
+      - name: Sync deterministic generated truth on governance migration branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/work/governance-skill-workflow-024e2ea'
+        shell: bash
+        run: |
+          git add .workflow/acceptance.json .workflow/generated/code_facts.json docs/*.md
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "chore: regenerate latest-governance project truth"
+            git push origin HEAD:work/governance-skill-workflow-024e2ea
+          fi
       - name: Verify tracked governance state is deterministic
         shell: bash
         run: |
