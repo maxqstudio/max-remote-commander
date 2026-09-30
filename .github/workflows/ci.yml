@@ -84,6 +84,10 @@ jobs:
           done
           grep -Fq "Compatible with Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8." .workflow/tools/generate_sequence_actual.py
 
+      - name: Self-test Go and TypeScript sequence extractor
+        shell: bash
+        run: python .workflow/tools/selftest_go_ts_sequence.py
+
       - name: Generate deterministic Project Truth docs
         shell: bash
         run: python .workflow/tools/sync_project_truth.py --root "$GITHUB_WORKSPACE"

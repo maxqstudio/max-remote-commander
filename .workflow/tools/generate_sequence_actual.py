@@ -27,6 +27,229 @@ EXCLUDED = {
     "dist", "build", "coverage", "vendor", "__pycache__",
 }
 
+TS_EXTENSIONS = {".js", ".jsx", ".ts", ".tsx"}
+TS_IDENT = r"[A-Za-z_$][A-Za-z0-9_$]*"
+
+
+def mask_ts_noncode(text: str) -> str:
+    """Mask JS/TS strings and comments while preserving offsets/newlines."""
+    out = list(text)
+    i = 0
+    n = len(text)
+    while i < n:
+        if text.startswith("//", i):
+            j = text.find("\n", i + 2)
+            if j < 0:
+                j = n
+            for k in range(i, j):
+                out[k] = " "
+            i = j
+            continue
+        if text.startswith("/*", i):
+            j = text.find("*/", i + 2)
+            if j < 0:
+                j = n - 2
+            end = min(n, j + 2)
+            for k in range(i, end):
+                if out[k] != "\n":
+                    out[k] = " "
+            i = end
+            continue
+        if text[i] in {'"', "'", "`"}:
+            quote = text[i]
+            out[i] = " "
+            i += 1
+            while i < n:
+                ch = text[i]
+                if ch == "\\":
+                    out[i] = " "
+                    if i + 1 < n:
+                        if out[i + 1] != "\n":
+                            out[i + 1] = " "
+                        i += 2
+                    else:
+                        i += 1
+                    continue
+                if ch == quote:
+                    out[i] = " "
+                    i += 1
+                    break
+                if ch != "\n":
+                    out[i] = " "
+                i += 1
+            continue
+        i += 1
+    return "".join(out)
+
+
+def brace_depths(masked: str) -> list[int]:
+    depth = 0
+    result = [0] * (len(masked) + 1)
+    for i, ch in enumerate(masked):
+        result[i] = depth
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth = max(0, depth - 1)
+    result[len(masked)] = depth
+    return result
+
+
+def matching_brace(masked: str, start: int) -> int:
+    if start < 0 or start >= len(masked) or masked[start] != "{":
+        return -1
+    depth = 0
+    for i in range(start, len(masked)):
+        if masked[i] == "{":
+            depth += 1
+        elif masked[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return i
+    return -1
+
+
+def collect_ts_symbols(root: Path) -> tuple[list[dict], list[dict]]:
+    """Narrow deterministic JS/TS symbol/call extractor for governed flows."""
+    nodes: list[dict] = []
+    bodies: dict[str, tuple[str, str | None]] = {}
+
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in TS_EXTENSIONS:
+            continue
+        rel = path.relative_to(root)
+        if any(part in EXCLUDED for part in rel.parts):
+            continue
+        rel_text = rel.as_posix()
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        masked = mask_ts_noncode(text)
+        depths = brace_depths(masked)
+
+        function_re = re.compile(
+            rf"(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s+({TS_IDENT})"
+            rf"\s*\([^)]*\)\s*(?::\s*[^{{]+)?\s*{{"
+        )
+        for match in function_re.finditer(masked):
+            if depths[match.start()] != 0:
+                continue
+            open_brace = masked.find("{", match.start(), match.end())
+            close_brace = matching_brace(masked, open_brace)
+            if close_brace < 0:
+                continue
+            name = match.group(1)
+            symbol = f"{rel_text}::{name}"
+            nodes.append({
+                "id": symbol,
+                "label": symbol,
+                "locator": symbol,
+                "kind": "function",
+                "language": "JavaScript/TypeScript",
+            })
+            bodies[symbol] = (masked[open_brace + 1:close_brace], None)
+
+        class_re = re.compile(rf"(?:export\s+)?(?:default\s+)?class\s+({TS_IDENT})[^{{]*{{")
+        method_re = re.compile(
+            rf"(?:(?:public|private|protected|static|async|readonly|override|abstract)\s+)*"
+            rf"({TS_IDENT})\s*\([^)]*\)\s*(?::\s*[^{{]+)?\s*{{"
+        )
+        for class_match in class_re.finditer(masked):
+            if depths[class_match.start()] != 0:
+                continue
+            class_name = class_match.group(1)
+            class_open = masked.find("{", class_match.start(), class_match.end())
+            class_close = matching_brace(masked, class_open)
+            if class_close < 0:
+                continue
+            class_body = masked[class_open + 1:class_close]
+            class_depths = brace_depths(class_body)
+            for method_match in method_re.finditer(class_body):
+                if class_depths[method_match.start()] != 0:
+                    continue
+                method_name = method_match.group(1)
+                method_open = class_body.find("{", method_match.start(), method_match.end())
+                method_close = matching_brace(class_body, method_open)
+                if method_close < 0:
+                    continue
+                symbol = f"{rel_text}::{class_name}.{method_name}"
+                nodes.append({
+                    "id": symbol,
+                    "label": symbol,
+                    "locator": symbol,
+                    "kind": "method",
+                    "language": "JavaScript/TypeScript",
+                })
+                bodies[symbol] = (
+                    class_body[method_open + 1:method_close],
+                    class_name,
+                )
+
+    unique_nodes: dict[str, dict] = {}
+    for node in nodes:
+        unique_nodes.setdefault(str(node["id"]), node)
+    nodes = sorted(unique_nodes.values(), key=lambda item: str(item["id"]))
+
+    leaf_map: dict[str, list[str]] = defaultdict(list)
+    class_method_map: dict[tuple[str, str], str] = {}
+    for node in nodes:
+        symbol = str(node["id"])
+        tail = symbol.split("::", 1)[-1]
+        leaf = tail.rsplit(".", 1)[-1]
+        leaf_map[leaf].append(symbol)
+        if "." in tail:
+            class_name, method_name = tail.rsplit(".", 1)
+            class_method_map[(class_name, method_name)] = symbol
+
+    edges: list[dict] = []
+    member_call = re.compile(rf"\b({TS_IDENT})\.({TS_IDENT})\s*\(")
+    direct_call = re.compile(rf"(?<![.\w$])({TS_IDENT})\s*\(")
+    keywords = {"if", "for", "while", "switch", "catch", "return", "new", "typeof"}
+
+    for caller, (body, class_name) in bodies.items():
+        emitted: set[tuple[str, str]] = set()
+        for match in member_call.finditer(body):
+            owner, method = match.groups()
+            target = None
+            if owner == "this" and class_name:
+                target = class_method_map.get((class_name, method))
+            else:
+                candidates = [x for x in leaf_map.get(method, []) if x != caller]
+                if len(candidates) == 1:
+                    target = candidates[0]
+            if target and (caller, target) not in emitted:
+                emitted.add((caller, target))
+                edges.append({
+                    "from": caller,
+                    "to": target,
+                    "action": f"call {method}",
+                    "evidence": "STATIC",
+                    "resolver": "ts_symbol_scan",
+                })
+
+        member_spans = [(m.start(2), m.end(2)) for m in member_call.finditer(body)]
+        for match in direct_call.finditer(body):
+            name = match.group(1)
+            if name in keywords:
+                continue
+            if any(start <= match.start(1) < end for start, end in member_spans):
+                continue
+            candidates = [x for x in leaf_map.get(name, []) if x != caller]
+            if len(candidates) == 1:
+                target = candidates[0]
+                if (caller, target) not in emitted:
+                    emitted.add((caller, target))
+                    edges.append({
+                        "from": caller,
+                        "to": target,
+                        "action": f"call {name}",
+                        "evidence": "STATIC",
+                        "resolver": "ts_symbol_scan",
+                    })
+
+    return nodes, sorted(
+        edges,
+        key=lambda edge: (str(edge["from"]), str(edge["to"]), str(edge["action"])),
+    )
+
 
 def source_files(root: Path) -> list[Path]:
     result = []
@@ -138,9 +361,28 @@ def main() -> int:
         return proc.returncode
 
     extracted = json.loads(proc.stdout)
-    nodes = sorted(extracted.get("nodes", []), key=lambda n: n["id"])
+    go_nodes = extracted.get("nodes", [])
+    go_edges = extracted.get("edges", [])
+    ts_nodes, ts_edges = collect_ts_symbols(root)
+
+    node_map: dict[str, dict] = {}
+    for node in [*go_nodes, *ts_nodes]:
+        node_id = str(node.get("id", ""))
+        if node_id:
+            node_map.setdefault(node_id, node)
+    nodes = sorted(node_map.values(), key=lambda n: str(n["id"]))
+
+    edge_map: dict[tuple[str, str, str, str], dict] = {}
+    for edge in [*go_edges, *ts_edges]:
+        key = (
+            str(edge.get("from", "")),
+            str(edge.get("to", "")),
+            str(edge.get("action", "")),
+            str(edge.get("resolver", "")),
+        )
+        edge_map.setdefault(key, edge)
     edges = sorted(
-        extracted.get("edges", []),
+        edge_map.values(),
         key=lambda e: (str(e.get("from")), str(e.get("to")), str(e.get("action"))),
     )
     known = {n["id"] for n in nodes}
@@ -164,12 +406,14 @@ def main() -> int:
         "edges": edges,
         "coverage": {
             "go_ast": True,
+            "typescript_symbol_scan": True,
             "runtime_trace": False,
             "limitations": [
                 "interface dynamic dispatch",
                 "reflection",
                 "callbacks/events",
                 "cross-package selector resolution when the target leaf is ambiguous",
+                "TypeScript overloads/dynamic dispatch and computed property calls",
             ],
         },
     }
