@@ -9,8 +9,8 @@
     },
     {
       "concern": "working_candidate",
-      "authority": "work/governance-skill-workflow-024e2ea",
-      "meaning": "Governance-only migration candidate; accepted P6 application/runtime source remains unchanged",
+      "authority": "main",
+      "meaning": "No unaccepted product candidate; P7 is next authorized phase",
       "mutable": true
     },
     {

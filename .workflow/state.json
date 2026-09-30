@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "phase": "P6 - Transport V2",
-  "status": "GOVERNANCE_MIGRATION_IN_PROGRESS",
-  "working_branch": "work/governance-skill-workflow-024e2ea",
-  "last_accepted_sha": "8e13e0374cee8724dd5dbda766a373f800d44afd",
+  "status": "ACCEPTED_CLOSED",
+  "working_branch": "main",
+  "last_accepted_sha": "1664a1db23f26252ad11e7ce9d6507b44ca1ba11",
   "last_accepted_branch": "main",
   "proven": [
     "Phase 4 exact accepted SHA 8c205dd1b1ee01fe3c73d44264493610a2704666 passed Linux Windows macOS race and STRICT governance on work branch run 36558524192 and identical-SHA main run 36558681560",
@@ -29,10 +29,9 @@
     "Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151",
     "P6 exact accepted SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed Linux Windows macOS race and latest STRICT governance on work run 36611213711 and identical-SHA main run 36611401330",
     "P6 Transport V2 is closed under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259: outbound WebSocket command delivery, bounded reconnect/backoff, heartbeat/session refresh, FIFO head-of-line lease safety, strict framing, HTTPS durable result acknowledgement, and explicit long-poll fallback are accepted",
-    "Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575; target-project adoption remains pending"
+    "Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575 and target exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290"
   ],
   "not_proven": [
-    "target-project revalidation under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8",
     "cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures",
     "physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests",
     "state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY",
@@ -45,10 +44,10 @@
   ],
   "blockers": [],
   "next_authorized_actions": [
-    "adopt Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 without changing accepted P6 runtime behavior",
-    "regenerate deterministic Project Truth and validate roadmap/sequence/cross-document gates",
-    "obtain exact 5-job PASS on the governance-migration branch",
-    "fast-forward accepted governance-only SHA to main and revalidate before starting P7"
+    "start P7 Cloudflare Relay on a new work branch from accepted latest-governance main",
+    "update .workflow/state.json and .workflow/roadmap.json together so P7 becomes CURRENT",
+    "implement Cloudflare Worker plus Durable Object relay as a thin protocol-v1-conformant transport/state adapter",
+    "preserve outbound-only agent connectivity, device generation, replay, agent-session binding, local policy, approval, and audit semantics"
   ],
   "blocked_actions": [
     "expose relay publicly without TLS termination",

@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through P6 Transport V2 remain accepted. P6 runtime/source acceptance at 8e13e0374cee8724dd5dbda766a373f800d44afd is unchanged. Governance is being upgraded from Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 to 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8, whose upstream Governance Selftest run 36654539575 passed. The target-project governance-only migration must pass exact work-branch and main revalidation before P7 starts.",
+  "evidence_boundary": "Phase 0 through P6 Transport V2 remain accepted. The governance baseline is now Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8. Exact target SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290. P6 runtime/source acceptance remains anchored to 8e13e0374cee8724dd5dbda766a373f800d44afd; the governance upgrade changes no application runtime behavior. P7 Cloudflare Relay remains not started.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -178,10 +178,10 @@
       "status": "PASS"
     },
     {
-      "evidence": "Skill_Workflow upstream run 36654539575 PASS; target-project work/main evidence pending.",
+      "evidence": "Skill_Workflow upstream run 36654539575 PASS; target work run 36742358170 and identical-SHA main run 36742647290 PASS at 1664a1db23f26252ad11e7ce9d6507b44ca1ba11",
       "id": "GOV-WORKFLOW-024E2EA-001",
       "requirement": "Repository governance is pinned to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8; upstream validator fixes are vendored and target-project STRICT validation passes without changing accepted P6 runtime behavior.",
-      "status": "NOT_PROVEN"
+      "status": "PASS"
     }
   ],
   "runtime_checks": [],
@@ -198,7 +198,7 @@
   ],
   "truth_gates": {
     "BEHAVIORAL_SYNC": "PASS",
-    "CROSS_DOCUMENT_CONSISTENCY": "NOT_PROVEN",
+    "CROSS_DOCUMENT_CONSISTENCY": "PASS",
     "DOC_LAYOUT": "PASS",
     "DOC_READABILITY": "PASS",
     "DOC_SOURCE_TRACEABILITY": "PASS",

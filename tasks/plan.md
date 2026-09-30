@@ -74,7 +74,7 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 
 ### Governance baseline before P7
 - [x] P6 runtime/source accepted and closed.
-- [ ] Revalidate governance-only upgrade to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 on work branch and main.
+- [x] Revalidated governance-only upgrade to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8: exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11, work run 36742358170, identical-SHA main run 36742647290, all 5/5 PASS.
 
 ### P7-P19 production roadmap
 - [ ] P7 Cloudflare Relay — Worker, Durable Objects, and WebSocket/Hibernation.

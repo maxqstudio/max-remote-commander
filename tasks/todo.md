@@ -40,8 +40,8 @@
 
 - [x] P6 accepted and closed before this governance-only migration
 - [x] Skill_Workflow upstream 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 run 36654539575 PASS
-- [ ] Target exact 5/5 PASS under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
-- [ ] Identical-SHA main revalidation under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
+- [x] Target exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 5/5 PASS under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 on run 36742358170
+- [x] Identical-SHA main revalidation 5/5 PASS on run 36742647290
 
 ## Forward roadmap
 
