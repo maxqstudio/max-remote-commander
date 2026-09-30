@@ -2,8 +2,8 @@
 
 # ROADMAP
 
-Current project phase: P6 - Transport V2
-Current roadmap phase: P6 - Transport V2
+Current project phase: P7 - Cloudflare Relay
+Current roadmap phase: P7 - Cloudflare Relay
 ROADMAP_SYNC: PASS
 
 ## Phase plan
@@ -16,8 +16,8 @@ ROADMAP_SYNC: PASS
 | 4 | P3 - Pairing & Identity | Pairing, Trusted Approval, and Identity | CLOSED | Bind persistent device/controller identities, replay protection, session generations, local approvals, and audit. | Exact Phase 3 work SHA and identical main SHA pass Linux, Windows, macOS, race, and governance. |
 | 5 | P4 - Agent & Chat | Runnable Agent and Terminal Chat | CLOSED | Integrate runnable outbound agent, controller bridge, provider-neutral chat loop, and terminal max-chat. | Exact Phase 4 work SHA and identical main SHA pass all five blocking lanes. |
 | 6 | P5 - Protocol & Durability | Protocol & Durability | CLOSED | Persist restart-critical relay state and publish protocol-v1 signing/restart compatibility vectors without weakening session binding. | Encrypted durability, restart/replay semantics, protocol vectors, exact work acceptance, and main revalidation pass. |
-| 7 | P6 - Transport V2 | Transport V2 | CURRENT | Add outbound WebSocket command delivery with reconnect, heartbeat, bounded backoff, session refresh, FIFO lease safety, and long-poll fallback while preserving protocol-v1 authority. | Linux, Windows, macOS, race, and latest Skill_Workflow governance pass on the exact final work SHA.<br>Identical final P6 SHA is revalidated on main.<br>No inbound PC listener or transport-level privilege authority is introduced. |
-| 8 | P7 - Cloudflare Relay | Cloudflare Relay | PLANNED | Add Worker + Durable Object relay path with WebSocket/Hibernation and Cloudflare-appropriate durable routing. | Deployed Cloudflare test environment preserves shared protocol vectors and outbound-only device connectivity.<br>Free-tier/resource behavior is measured without weakening security. |
+| 7 | P6 - Transport V2 | Transport V2 | CLOSED | Add outbound WebSocket command delivery with reconnect, heartbeat, bounded backoff, session refresh, FIFO lease safety, and long-poll fallback while preserving protocol-v1 authority. | Linux, Windows, macOS, race, and latest Skill_Workflow governance pass on the exact final work SHA.<br>Identical final P6 SHA is revalidated on main.<br>No inbound PC listener or transport-level privilege authority is introduced. |
+| 8 | P7 - Cloudflare Relay | Cloudflare Relay | CURRENT | Add a protocol-v1-conformant Cloudflare Worker + per-device SQLite Durable Object relay with Hibernation WebSocket agent connectivity, durable controller/result routing, and measured Free-plan resource behavior. | TypeScript Cloudflare adapter passes accepted protocol-v1 signing and restart fixtures without weakening device, generation, expiry, replay, or agent-session binding.<br>SQLite Durable Object tests prove restart/hibernation-safe trust, queue, result, and replay semantics with bearer sessions remaining short-lived.<br>Hibernation WebSocket tests preserve outbound-only agent connectivity and stale-session rejection.<br>A deployed Cloudflare staging environment passes paired command/result E2E without opening an inbound PC port.<br>Free-plan request, CPU, storage, and connection budgets are measured and documented.<br>Exact final P7 work SHA and identical-SHA main revalidation pass all blocking lanes under current Skill_Workflow. |
 | 9 | P8 - MCP Gateway | MCP Gateway | PLANNED | Expose the existing structured capability protocol through an MCP adapter. | Discovery and calls map only to declared capabilities; unknown and unrestricted shell calls fail closed. |
 | 10 | P9 - Multi-client Compatibility | Multi-client Compatibility | PLANNED | Validate one backend contract across ChatGPT-compatible, Codex/IDE, and generic MCP clients. | Shared conformance suite passes without client-specific protocol forks. |
 | 11 | P10 - Device & Permission Model | Device & Permission Model | PLANNED | Add multi-device naming, selection, revocation, scopes, and per-device policy. | Device isolation, revocation, and scope regressions pass. |

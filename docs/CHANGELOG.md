@@ -116,3 +116,12 @@ Type: governance
 - Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 is now the accepted project governance authority.
 - P6 application/runtime semantics were not changed by this migration.
 - P7 Cloudflare Relay is the next authorized product phase.
+
+## 2026-10-01 — P7 Cloudflare Relay planning started
+
+Type: feature
+
+- Advanced state.json and roadmap.json together from P6 to P7.
+- Froze the P7 BEFORE sequence plan at commit 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 before Cloudflare source implementation.
+- Selected a TypeScript Worker router plus one SQLite-backed Durable Object per device with Hibernation WebSocket agent ingress.
+- P7 will reuse protocol-v1 authority and local agent policy/approval rather than inventing transport-level privilege.

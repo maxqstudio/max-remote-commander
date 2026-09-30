@@ -16,7 +16,7 @@ Status: CURRENT
 
 | Flow | Mode | Critical | Sequence session | Status |
 |---|---|---|---|---|
-| FLOW-COMMAND | DURING | YES | docs/sequence/p6.session.json | PASS |
+| FLOW-COMMAND | BEFORE | YES | docs/sequence/p6.session.json | NOT_PROVEN |
 
 ## Mismatch handling
 

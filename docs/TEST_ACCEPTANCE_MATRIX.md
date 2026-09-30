@@ -4,7 +4,7 @@
 
 ## Evidence boundary
 
-Phase 0 through P6 Transport V2 remain accepted. The governance baseline is now Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8. Exact target SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290. P6 runtime/source acceptance remains anchored to 8e13e0374cee8724dd5dbda766a373f800d44afd; the governance upgrade changes no application runtime behavior. P7 Cloudflare Relay remains not started.
+Phase 0 through P6 are accepted. P7 Cloudflare Relay is now CURRENT with a BEFORE sequence plan frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 before Cloudflare source implementation. No Cloudflare source, deployment, cross-language conformance, staging E2E, or Free-plan resource evidence is yet claimed.
 
 Final tested source: external final acceptance evidence.
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
@@ -41,6 +41,12 @@ Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2dd
 | P6-GOV-001 | Exact P6 candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation. | GitHub Actions work run 36611213711 and identical-SHA main run 36611401330 at 8e13e0374cee8724dd5dbda766a373f800d44afd | PASS |
 | P6-WORKFLOW-LATEST-001 | P6 adopts Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 with synchronized roadmap authority, generated ROADMAP.md, ROADMAP_SYNC, and project-local vendored governance tools before final acceptance. | Skill_Workflow upstream main run 36594694151 PASS; target work run 36611213711 and identical-SHA main run 36611401330 PASS at 8e13e0374cee8724dd5dbda766a373f800d44afd | PASS |
 | GOV-WORKFLOW-024E2EA-001 | Repository governance is pinned to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8; upstream validator fixes are vendored and target-project STRICT validation passes without changing accepted P6 runtime behavior. | Skill_Workflow upstream run 36654539575 PASS; target work run 36742358170 and identical-SHA main run 36742647290 PASS at 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 | PASS |
+| P7-PLAN-001 | P7 BEFORE sequence plan is frozen before Cloudflare implementation source exists. | docs/sequence/plans/p7-cloudflare.plan.json frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0; SHA-256 e74de93187544f2044185f2f3c25edfc7d5f6d4eb790d9f21f9801638223a680 | PASS |
+| P7-PROTOCOL-001 | Cloudflare TypeScript implementation conforms to accepted protocol-v1 signing and replay/session fixtures. | Pending P7A implementation. | NOT_PROVEN |
+| P7-DURABILITY-001 | Per-device SQLite Durable Object persists trust queue result and replay state transactionally while bearer sessions remain short-lived. | Pending P7B implementation. | NOT_PROVEN |
+| P7-WEBSOCKET-001 | Hibernation WebSocket agent transport preserves outbound-only connectivity and stale-session rejection. | Pending P7C implementation. | NOT_PROVEN |
+| P7-DEPLOY-001 | Cloudflare staging and Free-plan budget evidence are executed rather than inferred from local tests. | Pending P7E deployment evidence. | NOT_PROVEN |
+| P7-GOV-001 | Exact final P7 work SHA passes all blocking lanes and identical SHA passes main revalidation. | Pending P7 closure. | NOT_PROVEN |
 
 ## Test commands
 
@@ -60,9 +66,9 @@ ROADMAP_SYNC: PASS
 
 ## Sequence contract evidence
 
-Sequence mode for this phase/session: DURING
-Sequence session contract: docs/sequence/p6.session.json
-SEQUENCE_SYNC: PASS
+Sequence mode for this phase/session: BEFORE
+Sequence session contract: docs/sequence/p7.session.json
+SEQUENCE_SYNC: NOT_PROVEN
 
 ## Project Truth Compiler evidence
 

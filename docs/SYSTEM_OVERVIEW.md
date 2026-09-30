@@ -91,9 +91,9 @@ Authority: Paired Ed25519 identities plus local PC-agent policy and trusted loca
 
 ## Lifecycle and state
 
-Current phase: P6 - Transport V2
+Current phase: P7 - Cloudflare Relay
 
-Current status: ACCEPTED_CLOSED
+Current status: IN_PROGRESS
 
 See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 
@@ -102,7 +102,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 | Concern | Authority | Meaning |
 |---|---|---|
 | source | GitHub main after accepted phase merge | Canonical source history and releases |
-| working_candidate | main | No unaccepted product candidate; P7 is next authorized phase |
+| working_candidate | work/p7-cloudflare-relay-v2 | Current unaccepted P7 Cloudflare Relay candidate |
 | governance | maxqstudio/Skill_Workflow@024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 | Pinned current STRICT project workflow rules, roadmap contract, deterministic documentation/sequence validators, route-predecessor reachability fix, and path-symbol validation fix |
 | acceptance | GitHub Actions plus explicit runtime evidence where required | Acceptance never exceeds the strongest executed evidence |
 | runtime | explicitly paired user device runtime evidence | Real device behavior; GitHub CI alone does not prove physical-device execution |
@@ -114,7 +114,7 @@ See WORKFLOW_STATE_MACHINE.md for generated lifecycle contracts.
 ### Mutable current state
 
 - source: Canonical source history and releases
-- working_candidate: No unaccepted product candidate; P7 is next authorized phase
+- working_candidate: Current unaccepted P7 Cloudflare Relay candidate
 - roadmap: Machine-readable phase plan and current-phase authority; docs/ROADMAP.md is generated and state.json phase must match roadmap current_phase
 
 ### Immutable history / evidence
@@ -139,10 +139,11 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- start P7 Cloudflare Relay on a new work branch from accepted latest-governance main
-- update .workflow/state.json and .workflow/roadmap.json together so P7 becomes CURRENT
-- implement Cloudflare Worker plus Durable Object relay as a thin protocol-v1-conformant transport/state adapter
-- preserve outbound-only agent connectivity, device generation, replay, agent-session binding, local policy, approval, and audit semantics
+- implement P7A TypeScript protocol-v1 conformance against accepted signing and restart fixtures
+- implement P7B one SQLite Durable Object per device with transactional fail-closed persistence
+- implement P7C Hibernation WebSocket agent transport preserving outbound-only device connectivity
+- implement P7D controller command and durable result routing without transport-level authority
+- implement P7E staging deployment and Free-plan resource-budget evidence before P7 closure
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -183,9 +184,18 @@ Known blockers:
 - P6 exact accepted SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed Linux Windows macOS race and latest STRICT governance on work run 36611213711 and identical-SHA main run 36611401330
 - P6 Transport V2 is closed under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259: outbound WebSocket command delivery, bounded reconnect/backoff, heartbeat/session refresh, FIFO head-of-line lease safety, strict framing, HTTPS durable result acknowledgement, and explicit long-poll fallback are accepted
 - Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575 and target exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290
+- Latest governance baseline b968b023c322cc22dc804c5bbcb9370aee5f9ae1 passed all five jobs on read-only work run 36743427793 and identical-SHA main run 36743710503 under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
+- P7 BEFORE sequence plan is frozen before implementation at commit 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 with SHA-256 e74de93187544f2044185f2f3c25edfc7d5f6d4eb790d9f21f9801638223a680
 
 ### Not proven
 
+- P7 TypeScript protocol-v1 cross-language conformance
+- P7 SQLite Durable Object trust queue result and replay persistence
+- P7 Hibernation WebSocket agent transport
+- P7 Cloudflare controller and result routing
+- P7 deployed Cloudflare staging E2E
+- P7 Free-plan request CPU storage and connection budget evidence
+- P7 exact work-branch and identical-SHA main acceptance
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
