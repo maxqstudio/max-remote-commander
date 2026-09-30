@@ -8,13 +8,13 @@ Governance profile: strict
 
 ## Current phase
 Phase: P6 - Transport V2
-Status: ACCEPTED_CLOSED
+Status: GOVERNANCE_MIGRATION_IN_PROGRESS
 Roadmap phase: P6 - Transport V2
 ROADMAP_SYNC: PASS
 
 ## Source
 Repository: maxqstudio/max-remote-commander
-Branch: work/p6-transport-v2
+Branch: work/governance-skill-workflow-024e2ea
 Authoritative SHA: external final acceptance evidence
 Last accepted SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
 Current candidate SHA: external final acceptance evidence
@@ -62,8 +62,10 @@ SEQUENCE_SYNC: PASS
 - Skill_Workflow latest authority c1d7e58a0fcadc606c8cf75c6283a17278f99259 passed its upstream main governance self-test run 36594694151
 - P6 exact accepted SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed Linux Windows macOS race and latest STRICT governance on work run 36611213711 and identical-SHA main run 36611401330
 - P6 Transport V2 is closed under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259: outbound WebSocket command delivery, bounded reconnect/backoff, heartbeat/session refresh, FIFO head-of-line lease safety, strict framing, HTTPS durable result acknowledgement, and explicit long-poll fallback are accepted
+- Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575; target-project adoption remains pending
 
 ## Not proven
+- target-project revalidation under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
 - cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
@@ -81,10 +83,10 @@ SEQUENCE_SYNC: PASS
 See KNOWN_DEFECTS.md.
 
 ## Next authorized action
-- start P7 Cloudflare Relay on a new work branch from accepted P6 main
-- update .workflow/state.json and .workflow/roadmap.json together when P7 becomes CURRENT
-- implement Cloudflare Worker plus Durable Object relay as a thin protocol-v1-conformant transport and state adapter
-- preserve outbound-only agent connectivity, device generation, replay, agent-session binding, local policy, approval, and audit semantics
+- adopt Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 without changing accepted P6 runtime behavior
+- regenerate deterministic Project Truth and validate roadmap/sequence/cross-document gates
+- obtain exact 5-job PASS on the governance-migration branch
+- fast-forward accepted governance-only SHA to main and revalidate before starting P7
 
 ## Explicitly blocked
 - expose relay publicly without TLS termination

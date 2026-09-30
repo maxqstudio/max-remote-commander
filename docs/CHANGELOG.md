@@ -98,3 +98,12 @@ Type: feature
 - Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 roadmap governance, ROADMAP_SYNC, and project-local vendored tools are now the accepted project authority.
 - P6 closes with outbound WebSocket command push, bounded reconnect/backoff, heartbeat/session refresh, strict framing, FIFO head-of-line leases, HTTPS durable result acknowledgement, and explicit long-poll fallback.
 - Cloudflare relay, MCP, physical E2E, packaging, and OS-native protected key storage remain later roadmap phases.
+
+## 2026-10-01 — Skill_Workflow 024e2ea governance upgrade
+
+Type: governance
+
+- Pinned Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 after upstream Governance Selftest run 36654539575 passed.
+- Vendored the latest STRICT selftest and cross-document consistency validator, including Python class-method path-symbol validation.
+- Retained the project-specific Go-aware sequence extractor; the upstream HTTP route predecessor change is generic-extractor-specific and does not replace the Go AST extension.
+- Accepted P6 runtime/source semantics remain unchanged; this migration requires target work/main governance revalidation before P7 starts.

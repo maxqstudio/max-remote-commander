@@ -81,3 +81,11 @@ Status: ACCEPTED
 Pin Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259, make .workflow/roadmap.json the roadmap authority, generate docs/ROADMAP.md deterministically, and vendor the latest project-local governance tool pack while retaining the repo-specific Go-aware sequence extractor as a documented extension.
 
 Rationale: The latest workflow makes roadmap/state synchronization blocking and provides project-local deterministic tools. Replacing the Go-aware extractor with the generic upstream extractor would regress Go sequence coverage, so the project keeps that extension while adopting the latest contract and LF determinism.
+
+## DEC-011 — Advance governance pin to Skill_Workflow 024e2ea
+
+Status: ACCEPTED
+
+Advance the project governance pin to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8; vendor the latest STRICT selftest and cross-document validator exactly, and retain the project-specific Go-aware sequence generator as an extension with its compatibility declaration updated to the same authority.
+
+Rationale: The upstream release fixes HTTP route predecessor retention in the generic sequence generator and Python class-method path-symbol validation. MAX Remote Commander must consume the validator/selftest fixes while preserving its Go-aware sequence extraction rather than replacing it with the generic Python/JS extractor.

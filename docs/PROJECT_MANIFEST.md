@@ -10,7 +10,7 @@ Governance profile: strict
 
 ## Repositories
 Repository: maxqstudio/max-remote-commander
-Active branch: work/p6-transport-v2
+Active branch: work/governance-skill-workflow-024e2ea
 Current authoritative SHA: external final acceptance evidence
 Last accepted SHA: 8e13e0374cee8724dd5dbda766a373f800d44afd
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
@@ -74,4 +74,4 @@ Generated from PROJECT_PROFILE.yaml.
 - P6 result submission remains HTTPS so durable result acknowledgement semantics stay unchanged
 - .workflow/roadmap.json is the roadmap authority; docs/ROADMAP.md is generated and must not be maintained independently
 - phase transitions must update state.json and roadmap.json together and ROADMAP_SYNC must pass
-- project-local Skill_Workflow tools are pinned to c1d7e58a0fcadc606c8cf75c6283a17278f99259 except the documented Go-aware sequence extractor extension
+- project-local Skill_Workflow tools are pinned to 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 except the documented Go-aware sequence extractor extension

@@ -178,9 +178,9 @@
       "status": "PASS"
     },
     {
+      "evidence": "Skill_Workflow upstream run 36654539575 PASS; target-project work/main evidence pending.",
       "id": "GOV-WORKFLOW-024E2EA-001",
       "requirement": "Repository governance is pinned to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8; upstream validator fixes are vendored and target-project STRICT validation passes without changing accepted P6 runtime behavior.",
-      "evidence": "Skill_Workflow upstream run 36654539575 PASS; target-project work/main evidence pending.",
       "status": "NOT_PROVEN"
     }
   ],
@@ -205,7 +205,7 @@
     "DOC_TEST_TRACEABILITY": "PASS",
     "HUMAN_COMPREHENSION": "NOT_PROVEN",
     "PROJECT_DOCS_NORMALIZED": "PASS",
-    "PROJECT_DOCS_SYNC": "NOT_PROVEN",
+    "PROJECT_DOCS_SYNC": "PASS",
     "PROJECT_STATE_SYNC": "NOT_PROVEN",
     "PROVENANCE_SYNC": "PASS",
     "REFERENCE_SYNC": "PASS",

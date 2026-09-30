@@ -4,7 +4,7 @@
 
 ## Evidence boundary
 
-Phase 0 through P6 Transport V2 are accepted and revalidated on main. P6 exact SHA 8e13e0374cee8724dd5dbda766a373f800d44afd passed all five blocking jobs on work run 36611213711 and identical-SHA main run 36611401330 under Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259. P6 proves authenticated outbound WebSocket command delivery, strict stream framing, bounded reconnect/backoff, heartbeat/session refresh, FIFO lease safety, HTTPS durable result acknowledgement, and long-poll fallback in GitHub-hosted cross-platform tests. Cloudflare deployment, MCP integration, physical network E2E, packaging, OS-native protected key storage, and physical crash/power-loss behavior remain NOT_PROVEN.
+Phase 0 through P6 Transport V2 remain accepted. P6 runtime/source acceptance at 8e13e0374cee8724dd5dbda766a373f800d44afd is unchanged. Governance is being upgraded from Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 to 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8, whose upstream Governance Selftest run 36654539575 passed. The target-project governance-only migration must pass exact work-branch and main revalidation before P7 starts.
 
 Final tested source: external final acceptance evidence.
 Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2ddf4cf951
@@ -40,6 +40,7 @@ Current source digest: 9fd50c2e3acf58dbd8df16514990864471644c77d0fa5e7af8528a2dd
 | P6-FIFO-001 | Relay delivery is FIFO head-of-line across command leases so reconnect cannot bypass an in-flight command; successful result submission wakes waiting delivery after durable commit. | GitHub Actions run 36595825418; internal/relay/store_fifo_test.go; internal/relay/stream_test.go | PASS |
 | P6-GOV-001 | Exact P6 candidate passes Linux Windows macOS race and STRICT governance on the work branch and identical SHA passes main revalidation. | GitHub Actions work run 36611213711 and identical-SHA main run 36611401330 at 8e13e0374cee8724dd5dbda766a373f800d44afd | PASS |
 | P6-WORKFLOW-LATEST-001 | P6 adopts Skill_Workflow c1d7e58a0fcadc606c8cf75c6283a17278f99259 with synchronized roadmap authority, generated ROADMAP.md, ROADMAP_SYNC, and project-local vendored governance tools before final acceptance. | Skill_Workflow upstream main run 36594694151 PASS; target work run 36611213711 and identical-SHA main run 36611401330 PASS at 8e13e0374cee8724dd5dbda766a373f800d44afd | PASS |
+| GOV-WORKFLOW-024E2EA-001 | Repository governance is pinned to Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8; upstream validator fixes are vendored and target-project STRICT validation passes without changing accepted P6 runtime behavior. | Skill_Workflow upstream run 36654539575 PASS; target-project work/main evidence pending. | NOT_PROVEN |
 
 ## Test commands
 
