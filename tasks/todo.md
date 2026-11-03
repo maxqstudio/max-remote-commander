@@ -46,8 +46,11 @@
 ## Forward roadmap
 
 - [x] P7 BEFORE plan frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0
-- [ ] P7A protocol-v1 TypeScript conformance + Worker router
-- [ ] P7B SQLite Durable Object persistence
+- [x] P7A TypeScript protocol-v1 conformance (signed Go vectors, expiry, tampering, replay, session binding)
+- [x] P7B source-level transactional SQLite state engine with Node 24 SQLite tests (not yet wired to Durable Object)
+- [x] P7A/P7B source candidate d075aebb38c25695c27896979ce96f90fe3e7e7c six GitHub Actions jobs PASS on run 41637462721; 20/20 Node tests
+- [ ] P7A Worker router and securely authenticated pairing/session endpoints
+- [ ] P7B real Durable Object SQLite runtime integration and Workerd test evidence
 - [ ] P7C Hibernation WebSocket agent transport
 - [ ] P7D controller/result routing + Go compatibility
 - [ ] P7E staging deployment + Free-plan budget evidence

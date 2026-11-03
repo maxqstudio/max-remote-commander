@@ -327,6 +327,29 @@
         "Payload is valid JSON and remains the unchanged signed CommandEnvelope.",
         "Transport framing is not command authority and cannot grant local approval."
       ]
+    },
+    {
+      "name": "P7 Cloudflare SQLite state engine",
+      "source_of_truth": "cloudflare/relay/src/state.ts",
+      "mutability": "Source-tested synchronous SQLite mutations for one device per Durable Object; Cloudflare Workerd runtime wiring remains NOT_PROVEN",
+      "legal_writes": [
+        "internally verified pairing installation and generation increment",
+        "atomically verified command replay insertion and FIFO queue append",
+        "authenticated device-session rotation prunes stale-session commands",
+        "authenticated device result commits bounded payload and removes queued command",
+        "authorized revocation clears pairing, queue, results and replay state"
+      ],
+      "retention": "Results expire after 600 seconds; queue entries expire with signed command; replay entries retained until their expiry; all runtime/Free-tier retention is not yet proven",
+      "invariants": [
+        "Device/controller public keys and generation derive from trusted pairing state, never from a remote command payload.",
+        "No public endpoint may call installVerifiedPairing or commitVerifiedCommand without completing the corresponding cryptographic proof and authorization.",
+        "Command nonce replay and queue insertion occur in one SQLite transaction or both fail.",
+        "Agent-session identity and expiry remain ephemeral and must be re-established after restart.",
+        "Leasing is FIFO head-of-line; a pending head command cannot be bypassed.",
+        "Response and command bounds use UTF-8 encoded bytes rather than UTF-16 code unit count.",
+        "Go agent remains the final local policy, approval, bounded execution and audit authority.",
+        "Node-hosted SQLite PASS does not establish Cloudflare Durable Object or WebSocket runtime PASS."
+      ]
     }
   ],
   "ui_surfaces": [

@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "Phase 0 through P6 are accepted. P7 Cloudflare Relay is now CURRENT with a BEFORE sequence plan frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 before Cloudflare source implementation. No Cloudflare source, deployment, cross-language conformance, staging E2E, or Free-plan resource evidence is yet claimed.",
+  "evidence_boundary": "Phase 0 through P6 are accepted on main. P7A/P7B source candidate d075aebb38c25695c27896979ce96f90fe3e7e7c passed 6/6 GitHub Actions jobs on run 41637462721; 20/20 Node 24 tests verified Go protocol-v1 signing fixture compatibility and SQLite transactional state behavior. This is source/unit evidence only; Cloudflare Durable Object Workerd runtime, Worker pairing/controller/session HTTP routing, Hibernation WebSocket, staging deployment, free-tier resource measurements, MCP, and physical E2E remain NOT_PROVEN.",
   "human_comprehension_questions": {},
   "human_comprehension_status": "NOT_PROVEN",
   "requirements": [
@@ -190,13 +190,13 @@
       "status": "PASS"
     },
     {
-      "evidence": "Pending P7A implementation.",
+      "evidence": "GitHub Actions run 41637462721 at d075aebb38c25695c27896979ce96f90fe3e7e7c; cloudflare/relay/test/protocol.test.mjs; testdata/protocol/v1/signing-vectors.json",
       "id": "P7-PROTOCOL-001",
       "requirement": "Cloudflare TypeScript implementation conforms to accepted protocol-v1 signing and replay/session fixtures.",
-      "status": "NOT_PROVEN"
+      "status": "PASS"
     },
     {
-      "evidence": "Pending P7B implementation.",
+      "evidence": "Source-level SQLite state tests on run 41637462721 PASS, but Workerd Durable Object runtime and authenticated routing are NOT_PROVEN",
       "id": "P7-DURABILITY-001",
       "requirement": "Per-device SQLite Durable Object persists trust queue result and replay state transactionally while bearer sessions remain short-lived.",
       "status": "NOT_PROVEN"
@@ -218,6 +218,12 @@
       "id": "P7-GOV-001",
       "requirement": "Exact final P7 work SHA passes all blocking lanes and identical SHA passes main revalidation.",
       "status": "NOT_PROVEN"
+    },
+    {
+      "id": "P7-SQLITE-UNIT-001",
+      "requirement": "The pure TypeScript SQLite state engine enforces transactional command+replay commit, persisted trust/queue/result state, FIFO leases, revocation, session expiry and UTF-8 size bounds against a real SQLite engine in GitHub Actions.",
+      "evidence": "GitHub Actions run 41637462721 at d075aebb38c25695c27896979ce96f90fe3e7e7c; cloudflare/relay/src/state.ts; cloudflare/relay/test/state.test.mjs; Node 24 SQLite test evidence 20/20 across protocol+state suite",
+      "status": "PASS"
     }
   ],
   "runtime_checks": [],

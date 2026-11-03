@@ -78,8 +78,11 @@ Phase 4 scope decision: graphical multi-device chat UI/device selector moves to 
 
 ### P7: Cloudflare Relay
 - [x] Freeze BEFORE sequence plan before Cloudflare implementation.
-- [ ] P7A TypeScript protocol-v1 conformance and Worker routing foundation.
-- [ ] P7B SQLite Durable Object durable trust/queue/result/replay state.
+- [x] P7A TypeScript WebCrypto protocol-v1 signing/negative conformance fixtures (source/unit evidence).
+- [x] P7B SQLite state-engine source and Node 24 real SQLite persistence/rollback tests; Workerd runtime not yet proven.
+- [x] Exact source candidate d075aebb38c25695c27896979ce96f90fe3e7e7c passed all six GitHub Actions jobs on run 41637462721 including 20/20 Node tests.
+- [ ] P7A secure Worker router + pairing/device/controller authentication endpoints.
+- [ ] P7B Durable Object SQLite runtime adapter and integration tests.
 - [ ] P7C Hibernation WebSocket agent transport.
 - [ ] P7D controller command/result routing and Go client compatibility.
 - [ ] P7E deployed staging E2E plus Free-plan resource budget evidence.

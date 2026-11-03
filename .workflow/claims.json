@@ -336,6 +336,41 @@
       ],
       "runtime_evidence": [],
       "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P7-PROTOCOL-001",
+      "claim": "The Cloudflare TypeScript WebCrypto protocol-v1 verifier reproduces accepted Go Ed25519 fixture signatures and rejects malformed, replayed, expired, wrong-device or wrong-session signed requests in Node-hosted conformance tests.",
+      "documents": [
+        "TEST_ACCEPTANCE_MATRIX.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "cloudflare/relay/src/protocol.ts::verifySignedCommandSignature(",
+        "cloudflare/relay/src/protocol.ts::verifyAssertionSignature("
+      ],
+      "tests": [
+        "cloudflare/relay/test/protocol.test.mjs"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
+    },
+    {
+      "id": "TRUTH-P7-SQLITE-UNIT-001",
+      "claim": "The Cloudflare-targeted SQLite state-engine source survives test database recreation and commits command/nonces and results atomically in Node-hosted SQLite tests; Cloudflare Durable Object runtime remains unproven.",
+      "documents": [
+        "TEST_ACCEPTANCE_MATRIX.md",
+        "DATA_CONTRACTS.md"
+      ],
+      "source_owners": [
+        "cloudflare/relay/src/state.ts::commitVerifiedCommand(",
+        "cloudflare/relay/src/state.ts::activateAuthenticatedAgentSession(",
+        "cloudflare/relay/src/state.ts::completeResult("
+      ],
+      "tests": [
+        "cloudflare/relay/test/state.test.mjs"
+      ],
+      "runtime_evidence": [],
+      "status": "PASS"
     }
   ],
   "relations": []
