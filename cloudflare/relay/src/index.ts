@@ -19,8 +19,7 @@ function secureHeaders(response: Response): Response {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+export async function fetch(request: Request, env: Env): Promise<Response> {
     const pathname = new URL(request.url).pathname;
     if (pathname === "/healthz" && request.method === "GET")
       return secureHeaders(new Response("ok\n", { status: 200 }));
@@ -32,5 +31,6 @@ export default {
     // Namespace lookup is deterministic per full device ID, never a client-provided DO ID.
     const stub = env.DEVICE_RELAY.get(env.DEVICE_RELAY.idFromName(match[1]));
     return secureHeaders(await stub.fetch(request));
-  },
-};
+  }
+
+export default { fetch };
