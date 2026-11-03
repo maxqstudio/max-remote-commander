@@ -413,12 +413,9 @@ export class DeviceRelay extends DurableObject<Env> {
       if (!next) return;
       const frame = JSON.stringify({ version: 1, type: "command",
         request_id: next.requestId, payload: JSON.parse(next.envelopeJSON) });
-      console.log("WS_SEND_TRACE: matched", socket.readyState, next.requestId);
       try {
         socket.send(frame);
-        console.log("WS_SEND_TRACE: sent", socket.readyState);
-      } catch (error) {
-        console.error("WS_SEND_TRACE: failed", error instanceof Error ? error.name : "unknown");
+      } catch {
         try { socket.close(1011, "send failed"); } catch { /* disconnected */ }
         throw new DurableStateError("SOCKET_SEND_FAILED");
       }

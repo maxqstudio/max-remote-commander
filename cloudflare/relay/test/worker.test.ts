@@ -170,18 +170,6 @@ describe("P7A real Workerd paired command/result control flow", () => {
     const socket = stream.webSocket;
     expect(socket).toBeDefined();
     socket!.accept();
-    console.log("WS_PROBE: accepted client side state", socket!.readyState);
-    const handshakeMessage = new Promise<string>(resolve => {
-      socket!.addEventListener("message", event => resolve(String(event.data)), { once: true });
-    });
-    await runInDurableObject(deviceStub, async (_instance, state) => {
-      console.log("WS_PROBE: server socket count", state.getWebSockets().length);
-      state.getWebSockets()[0].send("probe");
-    });
-    console.log("WS_PROBE: probe sent, awaiting", socket!.readyState);
-    const probeData = await handshakeMessage;
-    console.log("WS_PROBE: received handshake probe", probeData);
-    expect(probeData).toBe("probe");
     const pushed = new Promise<string>((resolve, reject) => {
       socket!.addEventListener("message", event => resolve(event.data as string), { once: true });
       socket!.addEventListener("close", () => reject(new Error("stream closed before delivery")),
@@ -199,25 +187,6 @@ describe("P7A real Workerd paired command/result control flow", () => {
       .toBe(202);
     expect((await call(device.deviceId, "commands", "POST", controllerToken, wrapper)).status)
       .toBe(409);
-    const diagnosticStub = env.DEVICE_RELAY.get(env.DEVICE_RELAY.idFromName(device.deviceId));
-    const wsDiagnostics = await runInDurableObject(diagnosticStub, async (_instance, state) => {
-      const rawSockets = state.getWebSockets();
-      const store = new DurableRelayState(state.storage);
-      return {
-        sockets: rawSockets.length,
-        attachments: rawSockets.map(sock => sock.deserializeAttachment()),
-        queue: [...state.storage.sql.exec("SELECT request_id, leased_until FROM queue")],
-        paired: store.pairing()?.deviceId,
-      };
-    });
-    console.log("WS_PROBE: after queue", JSON.stringify(wsDiagnostics));
-    console.log("WS_PROBE: client after queue state", socket!.readyState);
-    await runInDurableObject(deviceStub, async (_instance, state) => {
-      const peer = state.getWebSockets()[0];
-      console.log("WS_PROBE: server after queue state", peer.readyState);
-      peer.send("after-queue-probe");
-    });
-    console.log("WS_PROBE: first queued, waiting for initial push");
     const frame = JSON.parse(await Promise.race([pushed,
       new Promise<string>((_r, reject) => setTimeout(() =>
         reject(new Error("first push not received")), 1800))])) as {
@@ -274,7 +243,6 @@ describe("P7A real Workerd paired command/result control flow", () => {
     }, controller.privateKey);
     expect((await call(device.deviceId, "commands", "POST", resumedControllerToken,
       { request_id: "req-after-hibernation", payload: nextCommand })).status).toBe(202);
-    console.log("WS_PROBE: after eviction, waiting for reauthenticated push");
     expect((JSON.parse(await Promise.race([rePushed,
       new Promise<string>((_r, reject) => setTimeout(() =>
         reject(new Error("hibernated push not received")), 1800))])) as {request_id:string}).request_id)
