@@ -125,3 +125,12 @@ Type: feature
 - Froze the P7 BEFORE sequence plan at commit 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 before Cloudflare source implementation.
 - Selected a TypeScript Worker router plus one SQLite-backed Durable Object per device with Hibernation WebSocket agent ingress.
 - P7 will reuse protocol-v1 authority and local agent policy/approval rather than inventing transport-level privilege.
+
+## 2026-11-03 — P7A protocol and P7B SQLite unit foundation
+
+Type: security
+
+- Exact source candidate d075aebb38c25695c27896979ce96f90fe3e7e7c passed all six GitHub Actions lanes on run 41637462721, including 20/20 Cloudflare-targeted Node 24 protocol and SQLite tests.
+- Reproduced Go protocol-v1 canonical signing vectors in TypeScript WebCrypto and separated signature verification from durable replay/command commit.
+- Implemented per-device SQLite state engine with atomic nonce+queue insert, persisted trust/queue/results/replay, FIFO lease, session rotation/revocation, session expiry and UTF-8 size bounds.
+- Worker, Workerd Durable Object runtime, Hibernation WebSocket, external deployment and Free-tier measurements remain NOT_PROVEN.

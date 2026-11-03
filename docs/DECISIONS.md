@@ -97,3 +97,11 @@ Status: ACCEPTED
 Implement P7 as a TypeScript Cloudflare Worker router plus one SQLite-backed Durable Object per device. Agent WebSockets terminate at the Durable Object using the Hibernation API. The Cloudflare layer must preserve the accepted protocol-v1 signed envelope, device/generation/session/replay authority, and local agent policy/approval boundary; it is not a new security protocol.
 
 Rationale: Cloudflare recommends SQLite-backed Durable Objects for new namespaces and Hibernation WebSockets for long-lived mostly-idle connections. A per-device Durable Object provides strongly consistent transactional storage and a single coordination point without exposing inbound ports on the user PC.
+
+## DEC-013 — Split cryptographic proof from atomic Cloudflare command persistence
+
+Status: ACCEPTED
+
+Verify controller Ed25519 signature, signed command freshness, device and agent-session binding before a SQLite transaction, then commit replay nonce and FIFO queue insertion atomically; do not expose state-engine mutation methods as public endpoints.
+
+Rationale: Cryptographic WebCrypto verification is asynchronous whereas Cloudflare SQLite transactionSync is synchronous. Keeping durable replay and enqueue in one transaction prevents consumed nonces and orphaned state on failed storage writes; final agent policy/approval remains the execution authority.

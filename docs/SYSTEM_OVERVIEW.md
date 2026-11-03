@@ -139,11 +139,11 @@ compiler does not infer them from implementation names.
 ## Current project state
 
 Next authorized actions:
-- implement P7A TypeScript protocol-v1 conformance against accepted signing and restart fixtures
-- implement P7B one SQLite Durable Object per device with transactional fail-closed persistence
-- implement P7C Hibernation WebSocket agent transport preserving outbound-only device connectivity
-- implement P7D controller command and durable result routing without transport-level authority
-- implement P7E staging deployment and Free-plan resource-budget evidence before P7 closure
+- implement P7B Durable Object runtime integration around the source-tested SQLite layer and re-run Workerd integration tests
+- implement P7C Hibernation WebSocket transport with stale-session rejection and unchanged signed command envelope
+- implement P7D secure pairing/session/controller/result HTTP routing under the current device/generation authority
+- measure Cloudflare staging/Free tier limits with explicit operator-controlled deployment evidence before P7 closure
+- adopt Skill_Workflow v2.1.0 as a separately tested governance migration; current project pin remains 024e2ea until migration acceptance
 
 Blocked actions:
 - expose relay publicly without TLS termination
@@ -186,17 +186,20 @@ Known blockers:
 - Skill_Workflow current authority 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 passed upstream Governance Selftest run 36654539575 and target exact SHA 1664a1db23f26252ad11e7ce9d6507b44ca1ba11 passed all five jobs on work run 36742358170 and identical-SHA main run 36742647290
 - Latest governance baseline b968b023c322cc22dc804c5bbcb9370aee5f9ae1 passed all five jobs on read-only work run 36743427793 and identical-SHA main run 36743710503 under Skill_Workflow 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8
 - P7 BEFORE sequence plan is frozen before implementation at commit 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 with SHA-256 e74de93187544f2044185f2f3c25edfc7d5f6d4eb790d9f21f9801638223a680
+- P7A/P7B source candidate d075aebb38c25695c27896979ce96f90fe3e7e7c passed all six GitHub Actions lanes (Go Linux Windows macOS, race, Cloudflare Node SQLite tests, STRICT) on run 41637462721; 20/20 Node tests PASS
+- P7A TypeScript Ed25519 device/controller assertions and controller-signed commands match accepted Go protocol-v1 signing fixtures and enforce replay, generation, agent-session, expiry, and strict JSON bounds
+- P7B SQLite state-engine unit tests prove transactional command+nonce insertion, persisted pairing generations/queues/results/replay, FIFO lease, session rotation, revocation, session expiry, and UTF-8 byte bounds under Node 24 SQLite
 
 ### Not proven
 
-- P7 TypeScript protocol-v1 cross-language conformance
+- P7 Cloudflare Durable Object Workerd runtime parity and live cryptographic/session wiring
+- P7 Worker/Cloudflare runtime consumer compatibility beyond shared Go fixture tests
 - P7 SQLite Durable Object trust queue result and replay persistence
 - P7 Hibernation WebSocket agent transport
 - P7 Cloudflare controller and result routing
 - P7 deployed Cloudflare staging E2E
 - P7 Free-plan request CPU storage and connection budget evidence
 - P7 exact work-branch and identical-SHA main acceptance
-- cross-language Cloudflare or MCP consumer conformance against the published protocol-v1 fixtures
 - physical deployed relay restart and crash/power-loss recovery behavior outside GitHub-hosted tests
 - state-key rotation or OS-native secret-store integration for MAXRC_STATE_KEY
 - public TLS deployment and reverse-proxy configuration

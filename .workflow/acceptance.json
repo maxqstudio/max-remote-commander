@@ -220,9 +220,9 @@
       "status": "NOT_PROVEN"
     },
     {
+      "evidence": "GitHub Actions run 41637462721 at d075aebb38c25695c27896979ce96f90fe3e7e7c; cloudflare/relay/src/state.ts; cloudflare/relay/test/state.test.mjs; Node 24 SQLite test evidence 20/20 across protocol+state suite",
       "id": "P7-SQLITE-UNIT-001",
       "requirement": "The pure TypeScript SQLite state engine enforces transactional command+replay commit, persisted trust/queue/result state, FIFO leases, revocation, session expiry and UTF-8 size bounds against a real SQLite engine in GitHub Actions.",
-      "evidence": "GitHub Actions run 41637462721 at d075aebb38c25695c27896979ce96f90fe3e7e7c; cloudflare/relay/src/state.ts; cloudflare/relay/test/state.test.mjs; Node 24 SQLite test evidence 20/20 across protocol+state suite",
       "status": "PASS"
     }
   ],
