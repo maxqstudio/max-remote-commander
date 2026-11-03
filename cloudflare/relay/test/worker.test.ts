@@ -186,6 +186,18 @@ describe("P7A real Workerd paired command/result control flow", () => {
       .toBe(202);
     expect((await call(device.deviceId, "commands", "POST", controllerToken, wrapper)).status)
       .toBe(409);
+    const diagnosticStub = env.DEVICE_RELAY.get(env.DEVICE_RELAY.idFromName(device.deviceId));
+    const wsDiagnostics = await runInDurableObject(diagnosticStub, async (_instance, state) => {
+      const rawSockets = state.getWebSockets();
+      const store = new DurableRelayState(state.storage);
+      return {
+        sockets: rawSockets.length,
+        attachments: rawSockets.map(sock => sock.deserializeAttachment()),
+        queue: [...state.storage.sql.exec("SELECT request_id, leased_until FROM queue")],
+        paired: store.pairing()?.deviceId,
+      };
+    });
+    console.log("WS_PROBE: after queue", JSON.stringify(wsDiagnostics));
     console.log("WS_PROBE: first queued, waiting for initial push");
     const frame = JSON.parse(await Promise.race([pushed,
       new Promise<string>((_r, reject) => setTimeout(() =>
