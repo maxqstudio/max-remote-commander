@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   canonicalAssertion, canonicalCommand, canonicalSha256,
-  verifyAssertion, verifySignedCommand, ProtocolError,
+  verifyAssertion, verifySignedCommand, verifySignedCommandSignature, ProtocolError,
 } from "../src/protocol.ts";
 
 const vectors = JSON.parse(readFileSync(
@@ -13,8 +13,8 @@ const vectors = JSON.parse(readFileSync(
 
 class MemoryReplay {
   constructor() { this.seen = new Set(); }
-  async use(device, generation, nonce) {
-    const key = device + ":" + generation + ":" + nonce;
+  async use(domain, device, generation, nonce) {
+    const key = domain + ":" + device + ":" + generation + ":" + nonce;
     if (this.seen.has(key)) return false;
     this.seen.add(key);
     return true;
@@ -65,6 +65,16 @@ test("device and controller assertions validate against Go Ed25519 signatures", 
     publicKey: vectors.identities.controller.public_key_b64url,
     now: controller.issued_at,
   }))).generation, controller.generation);
+});
+
+test("cryptographic proof does not consume replay before durable transaction", async () => {
+  const replay = new MemoryReplay();
+  const auth = scope({ replay });
+  const payload = wire(vectors.command_envelope.value);
+  await verifySignedCommandSignature(payload, auth);
+  await verifySignedCommandSignature(payload, auth);
+  await verifySignedCommand(payload, auth);
+  await rejectsCode(() => verifySignedCommand(payload, auth), "REPLAY");
 });
 
 test("command verifies against Go-signed Ed25519 fixture and rejects replay", async () => {

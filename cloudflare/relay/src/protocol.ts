@@ -15,7 +15,7 @@ export class ProtocolError extends Error {
 
 export interface ReplayGate {
   // Must be atomic and durable in the Durable Object implementation.
-  use(deviceId: string, generation: number, nonce: string, expiresAt: number, now: number): Promise<boolean>;
+  use(domain: "device" | "controller" | "command", deviceId: string, generation: number, nonce: string, expiresAt: number, now: number): Promise<boolean>;
 }
 
 export interface PairedAuthority {
@@ -240,10 +240,11 @@ export function canonicalCommand(wire: string): string {
     compactRawJSON(raw.get("arguments")!) + "}";
 }
 
-export async function verifyAssertion(
+/** Verifies proof only. The caller must atomically persist replay and its side effect. */
+export async function verifyAssertionSignature(
   kind: "device" | "controller",
   wire: string,
-  authority: PairedAuthority,
+  authority: Omit<PairedAuthority, "replay">,
 ): Promise<Record<string, unknown>> {
   const { value } = parseWireObject(wire);
   const canonical = canonicalAssertion(kind, wire);
@@ -252,14 +253,24 @@ export async function verifyAssertion(
   timestamps(value.issued_at as number, value.expires_at as number,
     authority.now, authority.clockSkewSeconds, 60);
   await verifyEd25519(authority.publicKey, value.signature as string, canonical);
-  if (!await authority.replay.use(authority.deviceId, authority.generation,
+  return value;
+}
+
+export async function verifyAssertion(
+  kind: "device" | "controller",
+  wire: string,
+  authority: PairedAuthority,
+): Promise<Record<string, unknown>> {
+  const value = await verifyAssertionSignature(kind, wire, authority);
+  if (!await authority.replay.use(kind, authority.deviceId, authority.generation,
     value.nonce as string, value.expires_at as number, authority.now)) fail("REPLAY");
   return value;
 }
 
-export async function verifySignedCommand(
+/** Verifies proof only. The Durable Object must atomically commit nonce + queue. */
+export async function verifySignedCommandSignature(
   wire: string,
-  authority: CommandAuthority,
+  authority: Omit<CommandAuthority, "replay">,
 ): Promise<Record<string, unknown>> {
   const { value } = parseWireObject(wire);
   const canonical = canonicalCommand(wire);
@@ -268,7 +279,15 @@ export async function verifySignedCommand(
   timestamps(value.issued_at as number, value.expires_at as number,
     authority.now, authority.clockSkewSeconds, 300);
   await verifyEd25519(authority.publicKey, value.signature as string, canonical);
-  if (!await authority.replay.use(authority.deviceId, authority.generation,
+  return value;
+}
+
+export async function verifySignedCommand(
+  wire: string,
+  authority: CommandAuthority,
+): Promise<Record<string, unknown>> {
+  const value = await verifySignedCommandSignature(wire, authority);
+  if (!await authority.replay.use("command", authority.deviceId, authority.generation,
     value.nonce as string, value.expires_at as number, authority.now)) fail("REPLAY");
   return value;
 }

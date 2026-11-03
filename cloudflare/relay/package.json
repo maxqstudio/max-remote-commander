@@ -4,6 +4,8 @@
   "version": "0.0.0-p7a",
   "type": "module",
   "scripts": {
-    "test:protocol": "node --experimental-strip-types --test test/protocol.test.mjs"
+    "test:protocol": "node --experimental-strip-types --test test/protocol.test.mjs",
+    "test:state": "node --experimental-strip-types --test test/state.test.mjs",
+    "test": "node --experimental-strip-types --test test/protocol.test.mjs test/state.test.mjs"
   }
 }

@@ -1,18 +1,24 @@
-# Cloudflare Relay — P7 implementation
+# Cloudflare Relay — P7 development
 
-P7A establishes protocol-v1 cross-language conformance before any network endpoint is implemented.
+P7A verifies the Go protocol-v1 Ed25519 signing fixtures, canonical JSON, expiry, replay, and device/session bindings using Cloudflare-compatible WebCrypto.
 
-`src/protocol.ts` verifies Ed25519 device assertions, controller assertions, and controller-signed command envelopes using Cloudflare-supported WebCrypto. It binds command authorization to a **trusted** paired-device public key and the **current** agent session ID. A caller must supply an atomic replay gate; no remote payload can assert local approval.
+P7B adds a **per-device SQLite state engine** in `src/state.ts` with transactional replay/queue commits, bounded FIFO leases, pairing generations/revocation, result durability, and fail-closed state rollback. Its SQL compatibility is currently tested using Node 24's real SQLite engine. The Cloudflare Durable Object adapter and Workerd integration tests are still pending.
 
-The verifier constructs the Go struct-field canonical order. Command arguments are taken from the raw JSON wire and compacted with Go `json.RawMessage` HTML escaping; it does not reserialize arguments through a JavaScript object.
-
-Run with Node 24:
+## Tests
 
 ```sh
 cd cloudflare/relay
-node --experimental-strip-types --test test/protocol.test.mjs
+npm test
 ```
 
-These are protocol compatibility tests only. **No deployed Cloudflare Worker, Durable Object, SQLite persistence, session issuer, WebSocket endpoint, MCP gateway, or physical E2E is claimed.** A Durable Object must supply persisted pairings, generation, atomic replay checks, short-lived session authority and result durability before these functions may authorize network requests.
+There are no npm runtime dependencies for this checkpoint. Node 24 is required.
 
-The frozen P7 sequence plan remains in `docs/sequence/plans/p7-cloudflare.plan.json`; subsequent implementation must conform to it without bypassing the Go agent's final local policy and approval checks.
+## Security boundary
+
+The protocol verifier accepts raw signed command JSON so Go's `json.RawMessage` canonicalization is preserved. Signing validation is separated from replay insertion: a Worker/Durable Object must verify a paired public key and current agent-session binding **before** passing the verified command to the state engine; replay insertion and queue persistence then commit in one SQLite transaction.
+
+`installVerifiedPairing`, `activateAuthenticatedAgentSession`, `commitVerifiedCommand`, `claimAssertionNonce`, and `revokeAuthenticatedDevice` are internal state operations, **not public endpoints**. Their caller must enforce pairing code, cryptographic assertion, active authorization, and session scope. Neither this module nor the network relay can authorize local privileged execution.
+
+The frozen P7 sequence plan is `docs/sequence/plans/p7-cloudflare.plan.json`.
+
+**NOT PROVEN:** Cloudflare Worker routing, Durable Object SQLite runtime behavior, WebSocket Hibernation, live short-lived bearer session issuance, public TLS deployment, free-tier resource budgets, MCP adapter, or physical E2E. No Cloudflare deployment is triggered by these GitHub commits.
