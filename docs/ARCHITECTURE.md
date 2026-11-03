@@ -2,7 +2,7 @@
 
 # ARCHITECTURE
 
-Current source digest: b124225c79187a68c164a34b67bc1546bac7089729f92a9def29c33b765c8c8f
+Current source digest: 1770cd644a0eae582263fabb88ab10ae555ac13065e688045e2caed746f99d2f
 
 ## Components
 
@@ -54,7 +54,7 @@ Current source digest: b124225c79187a68c164a34b67bc1546bac7089729f92a9def29c33b7
 ## Observed implementation inventory
 
 Source files: 76
-Source lines: 12668
+Source lines: 12680
 Languages: Go=69, TypeScript=7
 
 Structural facts come from the code extractor. Component meaning comes from
