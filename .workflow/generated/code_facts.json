@@ -14,10 +14,24 @@
   "modules": [
     {
       "directory": "cloudflare/relay/src",
+      "file": "cloudflare/relay/src/device_relay.ts",
+      "is_test": false,
+      "language": "TypeScript",
+      "lines": 443
+    },
+    {
+      "directory": "cloudflare/relay/src",
+      "file": "cloudflare/relay/src/index.ts",
+      "is_test": false,
+      "language": "TypeScript",
+      "lines": 38
+    },
+    {
+      "directory": "cloudflare/relay/src",
       "file": "cloudflare/relay/src/protocol.ts",
       "is_test": false,
       "language": "TypeScript",
-      "lines": 298
+      "lines": 314
     },
     {
       "directory": "cloudflare/relay/src",
@@ -32,6 +46,20 @@
       "is_test": true,
       "language": "TypeScript",
       "lines": 111
+    },
+    {
+      "directory": "cloudflare/relay/test",
+      "file": "cloudflare/relay/test/worker.test.ts",
+      "is_test": true,
+      "language": "TypeScript",
+      "lines": 193
+    },
+    {
+      "directory": "cloudflare/relay",
+      "file": "cloudflare/relay/vitest.config.ts",
+      "is_test": false,
+      "language": "TypeScript",
+      "lines": 7
     },
     {
       "directory": "cmd/max-agent",
@@ -521,17 +549,18 @@
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "ef2977f9c9728510d2cc0241bb0f39c62ee124b78afb110b7c95f706ecff00a7",
+  "source_digest": "5c119aa7477cfd3beeb5e23f77e6aebb11bdd7386bebb33feab327fcd9a2a4a8",
   "source_summary": {
-    "files": 72,
+    "files": 76,
     "languages": {
       "Go": 69,
-      "TypeScript": 3
+      "TypeScript": 7
     },
-    "lines": 11889,
-    "test_files": 1
+    "lines": 12586,
+    "test_files": 2
   },
   "tests": [
-    "cloudflare/relay/test/protocol.test.ts"
+    "cloudflare/relay/test/protocol.test.ts",
+    "cloudflare/relay/test/worker.test.ts"
   ]
 }
