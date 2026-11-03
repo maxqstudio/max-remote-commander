@@ -23,7 +23,7 @@ describe("P7B real workerd SQLite Durable Object", () => {
     const enrollment = await exports.default.fetch(
       "https://example.invalid/v1/devices/" + deviceId + "/pairing-offer",
       { method: "POST", body: "{}" });
-    expect(enrollment.status).toBe(503);
+    expect(enrollment.status).toBe(401);
   });
 
   it("trust and result survive eviction; short-lived bearer session does not", async () => {
