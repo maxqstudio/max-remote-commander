@@ -240,6 +240,22 @@ export function canonicalCommand(wire: string): string {
     compactRawJSON(raw.get("arguments")!) + "}";
 }
 
+/**
+ * Parse a bounded top-level JSON wrapper without normalizing the selected
+ * signed JSON field. Reject duplicate fields and unknown wrapper keys.
+ */
+export function extractRawObjectField(wire: string, keys: readonly string[], field: string):
+    { value: Record<string, unknown>; raw: string } {
+  const parsed = parseWireObject(wire);
+  expectedKeys(parsed.raw, keys);
+  const raw = parsed.raw.get(field);
+  if (!raw || !raw.trimStart().startsWith("{") ||
+      typeof parsed.value[field] !== "object" ||
+      parsed.value[field] === null || Array.isArray(parsed.value[field]))
+    fail("INVALID_FIELDS");
+  return { value: parsed.value, raw };
+}
+
 /** Verifies proof only. The caller must atomically persist replay and its side effect. */
 export async function verifyAssertionSignature(
   kind: "device" | "controller",

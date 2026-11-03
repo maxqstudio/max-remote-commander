@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "maxrc-p7-cloudflare-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-20",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "DEVICE_RELAY",
+        "class_name": "DeviceRelay"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "p7-sqlite-001",
+      "new_sqlite_classes": [
+        "DeviceRelay"
+      ]
+    }
+  ],
+  "workers_dev": false
+}

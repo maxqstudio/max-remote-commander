@@ -22,3 +22,27 @@ The protocol verifier accepts raw signed command JSON so Go's `json.RawMessage` 
 The frozen P7 sequence plan is `docs/sequence/plans/p7-cloudflare.plan.json`.
 
 **NOT PROVEN:** Cloudflare Worker routing, Durable Object SQLite runtime behavior, WebSocket Hibernation, live short-lived bearer session issuance, public TLS deployment, free-tier resource budgets, MCP adapter, or physical E2E. No Cloudflare deployment is triggered by these GitHub commits.
+
+## Cloudflare P7 runtime checkpoint
+
+A Worker and a real SQLite-backed per-device Durable Object are wired in:
+- Public router permits only device-scoped paths and /healthz.
+- Per-device Durable Object enforces pairing, signed device/controller assertions,
+  short-lived bearer sessions, atomic nonce + command insertion, FIFO lease,
+  bounded result submission, and controller-owned result reads.
+- Bootstrap enrolment is disabled without a >=32-character
+  PAIRING_BOOTSTRAP_SECRET Cloudflare secret. Do not configure this as a
+  repository variable or commit it; protect it as a restricted deployment
+  secret and rotate it if exposed.
+- Tests include Node protocol/SQLite vectors plus Workers runtime eviction
+  and per-device SQLite isolation. Local worker tests do not require a
+  live Cloudflare account.
+
+Run the existing source tests with npm test, and the additional runtime
+tests with npm install && npm run test:workerd. No deployment workflow
+or secret is configured.
+
+**P7 remains IN PROGRESS.** This is a source/runtime integration candidate,
+not an approved production relay. Hibernation WebSocket, long poll,
+Go transport compatibility, deployed Cloudflare staging E2E,
+Free-tier billing evidence, and exact-SHA main acceptance remain pending.

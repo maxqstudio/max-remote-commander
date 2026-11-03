@@ -6,6 +6,13 @@
   "scripts": {
     "test:protocol": "node --experimental-strip-types --test test/protocol.test.mjs",
     "test:state": "node --experimental-strip-types --test test/state.test.mjs",
-    "test": "node --experimental-strip-types --test test/protocol.test.mjs test/state.test.mjs"
+    "test": "node --experimental-strip-types --test test/protocol.test.mjs test/state.test.mjs",
+    "test:workerd": "vitest run test/worker.test.ts",
+    "build:workerd": "wrangler deploy --dry-run --outdir .wrangler/verification"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.4.7",
+    "vitest": "4.1.0",
+    "wrangler": "4.156.0"
   }
 }
