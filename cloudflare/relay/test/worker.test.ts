@@ -160,6 +160,20 @@ describe("P7A real Workerd paired command/result control flow", () => {
       controllerProof);
     expect(controllerSession.status).toBe(201);
     const controllerToken = (await controllerSession.json() as {token:string}).token;
+    // The device initiates an outbound-only authenticated stream.
+    const stream = await exports.default.fetch(
+      "https://example.invalid/v1/devices/" + device.deviceId + "/stream",
+      { headers: { Upgrade: "websocket", Authorization: "Bearer " + deviceToken } },
+    );
+    expect(stream.status).toBe(101);
+    const socket = stream.webSocket;
+    expect(socket).toBeDefined();
+    socket!.accept();
+    const pushed = new Promise<string>((resolve, reject) => {
+      socket!.addEventListener("message", event => resolve(event.data as string), { once: true });
+      socket!.addEventListener("close", () => reject(new Error("stream closed before delivery")),
+        { once: true });
+    });
     const command = await signedCommand({
       version: 1, request_id: "req-workerd-auth", device_id: device.deviceId,
       session_id: agentSessionId, issued_at: now, expires_at: now + 60,
@@ -172,11 +186,16 @@ describe("P7A real Workerd paired command/result control flow", () => {
       .toBe(202);
     expect((await call(device.deviceId, "commands", "POST", controllerToken, wrapper)).status)
       .toBe(409);
-    const delivered = await call(device.deviceId, "commands/next?wait_ms=0", "GET",
-      deviceToken);
-    expect(delivered.status).toBe(200);
-    expect((await delivered.json() as {request_id:string}).request_id)
-      .toBe("req-workerd-auth");
+    const frame = JSON.parse(await pushed) as {
+      version: number; type: string; request_id: string; payload: { request_id: string };
+    };
+    expect(frame.version).toBe(1);
+    expect(frame.type).toBe("command");
+    expect(frame.request_id).toBe("req-workerd-auth");
+    expect(frame.payload.request_id).toBe("req-workerd-auth");
+    // Head-of-line remains leased until a device result arrives.
+    expect((await call(device.deviceId, "commands/next?wait_ms=0", "GET",
+      deviceToken)).status).toBe(204);
     expect((await call(device.deviceId, "results/req-workerd-auth", "GET",
       deviceToken)).status).toBe(401);
     expect((await call(device.deviceId, "results", "POST", deviceToken, {
@@ -186,8 +205,52 @@ describe("P7A real Workerd paired command/result control flow", () => {
       controllerToken);
     expect(result.status).toBe(200);
     expect((await result.json() as {payload:{status:string}}).payload.status).toBe("completed");
+    // Eviction preserves the socket + SQLite but invalidates bearer authority.
+    const stub = env.DEVICE_RELAY.get(env.DEVICE_RELAY.idFromName(device.deviceId));
+    await evictDurableObject(stub);
+    expect((await call(device.deviceId, "commands/next", "GET", deviceToken)).status).toBe(401);
+
+    const resumedProof = await signedAssertion("device", {
+      device_id: device.deviceId, generation: 1, agent_session_id: agentSessionId,
+      issued_at: now, expires_at: now + 60, nonce: "agent-assertion-after-eviction",
+    }, device.privateKey);
+    const resumedDevice = await call(device.deviceId, "session", "POST", "", resumedProof);
+    expect(resumedDevice.status).toBe(201);
+    const resumedDeviceToken = (await resumedDevice.json() as {token:string}).token;
+    const resumedControllerProof = await signedAssertion("controller", {
+      device_id: device.deviceId, generation: 1,
+      issued_at: now, expires_at: now + 60, nonce: "controller-after-eviction",
+    }, controller.privateKey);
+    const resumedController = await call(device.deviceId, "controller-session", "POST", "",
+      resumedControllerProof);
+    expect(resumedController.status).toBe(201);
+    const resumedControllerToken = (await resumedController.json() as {token:string}).token;
+    expect((await call(device.deviceId, "commands", "POST", controllerToken,
+      { request_id: "invalid-old-token", payload: command })).status).toBe(401);
+
+    const rePushed = new Promise<string>((resolve, reject) => {
+      socket!.addEventListener("message", event => resolve(event.data as string), { once: true });
+      socket!.addEventListener("close", () => reject(new Error("hibernated socket closed")),
+        { once: true });
+    });
+    const nextCommand = await signedCommand({
+      version: 1, request_id: "req-after-hibernation", device_id: device.deviceId,
+      session_id: agentSessionId, issued_at: now, expires_at: now + 60,
+      nonce: "cmd-after-hibernation", tool: "system.health", arguments: {},
+    }, controller.privateKey);
+    expect((await call(device.deviceId, "commands", "POST", resumedControllerToken,
+      { request_id: "req-after-hibernation", payload: nextCommand })).status).toBe(202);
+    expect((JSON.parse(await rePushed) as {request_id:string}).request_id)
+      .toBe("req-after-hibernation");
+    expect((await call(device.deviceId, "results", "POST", resumedDeviceToken, {
+      request_id: "req-after-hibernation", payload: {status: "after-hibernation"},
+    })).status).toBe(202);
+    expect((await call(device.deviceId, "results/req-after-hibernation", "GET",
+      resumedControllerToken)).status).toBe(200);
+    socket!.close(1000, "done");
+
     expect((await call(device.deviceId, "pairing", "DELETE", controllerToken)).status).toBe(401);
-    expect((await call(device.deviceId, "pairing", "DELETE", deviceToken)).status).toBe(204);
+    expect((await call(device.deviceId, "pairing", "DELETE", resumedDeviceToken)).status).toBe(204);
     expect((await call(device.deviceId, "commands/next", "GET", deviceToken)).status).toBe(401);
   });
 });
