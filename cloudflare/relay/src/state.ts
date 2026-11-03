@@ -44,11 +44,13 @@ export interface StoredResult {
 }
 
 const idPattern = /^[A-Za-z0-9._:-]+$/;
-const MAX_QUEUE = 256;
+const MAX_QUEUE = 128;
 const MAX_RESULTS = 256;
 const MAX_ENVELOPE_BYTES = 65536;
 const MAX_RESULT_BYTES = 65536;
 const RESULT_TTL_SECONDS = 600;
+const MAX_SESSION_TTL_SECONDS = 900;
+const utf8Bytes = (text: string) => new TextEncoder().encode(text).byteLength;
 
 export class DurableStateError extends Error {
   readonly code: string;
@@ -77,6 +79,7 @@ function safeInt(value: number): boolean {
 export class DurableRelayState {
   private readonly storage: DurableSql;
   private activeSession: string | null = null;
+  private activeSessionExpiresAt = 0;
 
   constructor(storage: DurableSql) {
     this.storage = storage;
@@ -147,6 +150,7 @@ export class DurableRelayState {
       this.storage.sql.exec("DELETE FROM replay");
     });
     this.activeSession = null;
+    this.activeSessionExpiresAt = 0;
     return this.pairing()!;
   }
 
@@ -155,10 +159,13 @@ export class DurableRelayState {
    * claim. Invalidates ephemeral authority and prunes queued stale sessions.
    */
   activateAuthenticatedAgentSession(deviceId: string, generation: number,
-    agentSessionId: string, nonce: string, assertionExpiresAt: number, now: number): void {
+    agentSessionId: string, nonce: string, assertionExpiresAt: number,
+    now: number, sessionExpiresAt: number): void {
     checkId(agentSessionId, 128);
     checkId(nonce, 128);
-    if (!safeInt(now) || !safeInt(assertionExpiresAt) || assertionExpiresAt <= now)
+    if (!safeInt(now) || !safeInt(assertionExpiresAt) || assertionExpiresAt <= now ||
+        !safeInt(sessionExpiresAt) || sessionExpiresAt <= now ||
+        sessionExpiresAt - now > MAX_SESSION_TTL_SECONDS)
       reject("INVALID_TIME");
     this.storage.transactionSync(() => {
       this.requirePairing(deviceId, generation);
@@ -176,6 +183,7 @@ export class DurableRelayState {
       this.storage.sql.exec("DELETE FROM result WHERE expires_at <= ?", now);
     });
     this.activeSession = agentSessionId;
+    this.activeSessionExpiresAt = sessionExpiresAt;
   }
 
   /**
@@ -189,9 +197,10 @@ export class DurableRelayState {
         command.expiresAt <= now || command.expiresAt <= command.issuedAt ||
         command.expiresAt - command.issuedAt > 300 || command.issuedAt > now ||
         !Number.isSafeInteger(command.generation) || command.generation < 1 ||
-        command.envelopeJSON.length > MAX_ENVELOPE_BYTES) reject("INVALID_COMMAND");
+        utf8Bytes(command.envelopeJSON) > MAX_ENVELOPE_BYTES) reject("INVALID_COMMAND");
     if (this.activeSession === null || command.agentSessionId !== this.activeSession)
       reject("SESSION_MISMATCH");
+    if (now >= this.activeSessionExpiresAt) reject("SESSION_EXPIRED");
     let decoded: Record<string, unknown>;
     try { decoded = JSON.parse(command.envelopeJSON); }
     catch { return reject("INVALID_COMMAND"); }
@@ -245,6 +254,7 @@ export class DurableRelayState {
     now: number, leaseSeconds: number): StoredCommand | null {
     if (!safeInt(now) || !safeInt(leaseSeconds) || leaseSeconds > 60) reject("INVALID_TIME");
     if (agentSessionId !== this.activeSession) reject("SESSION_MISMATCH");
+    if (now >= this.activeSessionExpiresAt) reject("SESSION_EXPIRED");
     return this.storage.transactionSync(() => {
       this.requirePairing(deviceId, generation);
       this.storage.sql.exec("DELETE FROM queue WHERE expires_at <= ?", now);
@@ -262,8 +272,9 @@ export class DurableRelayState {
   completeResult(deviceId: string, generation: number, agentSessionId: string,
     requestId: string, payload: string, now: number): void {
     checkId(requestId, 128);
-    if (typeof payload !== "string" || payload.length > MAX_RESULT_BYTES || !safeInt(now) ||
+    if (typeof payload !== "string" || utf8Bytes(payload) > MAX_RESULT_BYTES || !safeInt(now) ||
         agentSessionId !== this.activeSession) reject("INVALID_RESULT");
+    if (now >= this.activeSessionExpiresAt) reject("SESSION_EXPIRED");
     try { JSON.parse(payload); } catch { return reject("INVALID_RESULT"); }
     this.storage.transactionSync(() => {
       this.requirePairing(deviceId, generation);
@@ -303,6 +314,7 @@ export class DurableRelayState {
       this.storage.sql.exec("DELETE FROM replay");
     });
     this.activeSession = null;
+    this.activeSessionExpiresAt = 0;
   }
 
   private requirePairing(deviceId: string, generation: number): Pairing {

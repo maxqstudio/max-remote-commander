@@ -66,7 +66,7 @@ function paired(store) {
 
 function activate(store, generationValue = 1, sessionId = fixture.session_id, nonce = "device-auth-1") {
   store.activateAuthenticatedAgentSession(deviceId, generationValue, sessionId, nonce,
-    now + 30, now);
+    now + 30, now, now + 900);
 }
 
 async function signedInput(requestId, nonce, sessionId = fixture.session_id) {
@@ -192,11 +192,11 @@ test("revocation removes device trust, old queue and result without generation r
   const second = new DurableRelayState(open());
   assert.equal(second.pairing(), null);
   assert.throws(() => second.activateAuthenticatedAgentSession(deviceId, 1,
-    fixture.session_id, "after-revoke", now + 30, now), err => code(err, "PAIRING_MISMATCH"));
+    fixture.session_id, "after-revoke", now + 30, now, now + 900), err => code(err, "PAIRING_MISMATCH"));
   assert.equal(second.resultForAuthorizedController === undefined, false);
   assert.equal(second.installVerifiedPairing(deviceId, deviceKey, controllerKey).generation, 2);
   second.activateAuthenticatedAgentSession(deviceId, 2, fixture.session_id,
-    "new-generation", now + 30, now);
+    "new-generation", now + 30, now, now + 900);
   assert.equal(second.leaseHead(deviceId, 2, fixture.session_id, now, 10), null);
   assert.throws(() => second.commitVerifiedCommand(input, now), err => code(err, "PAIRING_MISMATCH"));
 });
@@ -211,4 +211,30 @@ test("replayed device session assertion does not rotate/prune valid FIFO", async
     err => code(err, "REPLAY"));
   assert.equal(store.leaseHead(deviceId, 1, fixture.session_id, now, 10).requestId,
     "req-no-prune");
+});
+
+test("expired agent session cannot lease or accept results", async t => {
+  const store = new DurableRelayState(database(t)());
+  paired(store);
+  activate(store);
+  const input = await signedInput("req-expire-agent", "nonce-expire-agent");
+  store.commitVerifiedCommand(input, now);
+  assert.throws(() => store.leaseHead(deviceId, 1, fixture.session_id, now + 900, 10),
+    err => code(err, "SESSION_EXPIRED"));
+  assert.throws(() => store.completeResult(deviceId, 1, fixture.session_id,
+    input.requestId, '{"ok":true}', now + 900), err => code(err, "SESSION_EXPIRED"));
+});
+
+test("64KiB response limit applies to UTF-8 bytes, not UTF-16 character count", async t => {
+  const store = new DurableRelayState(database(t)());
+  paired(store);
+  activate(store);
+  const input = await signedInput("req-utf8-limit", "nonce-utf8-limit");
+  store.commitVerifiedCommand(input, now);
+  const multiBytePayload = JSON.stringify({ payload: "€".repeat(24000) });
+  assert.ok(multiBytePayload.length < 65536);
+  assert.throws(() => store.completeResult(deviceId, 1, fixture.session_id,
+    input.requestId, multiBytePayload, now), err => code(err, "INVALID_RESULT"));
+  assert.equal(store.leaseHead(deviceId, 1, fixture.session_id, now, 10).requestId,
+    input.requestId);
 });
