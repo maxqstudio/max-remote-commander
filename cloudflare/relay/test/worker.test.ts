@@ -186,7 +186,10 @@ describe("P7A real Workerd paired command/result control flow", () => {
       .toBe(202);
     expect((await call(device.deviceId, "commands", "POST", controllerToken, wrapper)).status)
       .toBe(409);
-    const frame = JSON.parse(await pushed) as {
+    console.log("WS_PROBE: first queued, waiting for initial push");
+    const frame = JSON.parse(await Promise.race([pushed,
+      new Promise<string>((_r, reject) => setTimeout(() =>
+        reject(new Error("first push not received")), 1800))])) as {
       version: number; type: string; request_id: string; payload: { request_id: string };
     };
     expect(frame.version).toBe(1);
@@ -240,7 +243,10 @@ describe("P7A real Workerd paired command/result control flow", () => {
     }, controller.privateKey);
     expect((await call(device.deviceId, "commands", "POST", resumedControllerToken,
       { request_id: "req-after-hibernation", payload: nextCommand })).status).toBe(202);
-    expect((JSON.parse(await rePushed) as {request_id:string}).request_id)
+    console.log("WS_PROBE: after eviction, waiting for reauthenticated push");
+    expect((JSON.parse(await Promise.race([rePushed,
+      new Promise<string>((_r, reject) => setTimeout(() =>
+        reject(new Error("hibernated push not received")), 1800))])) as {request_id:string}).request_id)
       .toBe("req-after-hibernation");
     expect((await call(device.deviceId, "results", "POST", resumedDeviceToken, {
       request_id: "req-after-hibernation", payload: {status: "after-hibernation"},
