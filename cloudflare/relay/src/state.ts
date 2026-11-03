@@ -213,6 +213,7 @@ export class DurableRelayState {
       if (this.activeSession !== command.agentSessionId) reject("SESSION_MISMATCH");
       this.storage.sql.exec("DELETE FROM replay WHERE expires_at <= ?", now);
       this.storage.sql.exec("DELETE FROM queue WHERE expires_at <= ?", now);
+      this.storage.sql.exec("DELETE FROM result WHERE expires_at <= ?", now);
       const count = one(this.storage.sql.exec<{n:number}>("SELECT COUNT(*) AS n FROM queue"));
       if (!count || count.n >= MAX_QUEUE) reject("QUEUE_FULL");
       const duplicate = one(this.storage.sql.exec<{nonce:string}>(
@@ -222,6 +223,12 @@ export class DurableRelayState {
       const repeatedRequest = one(this.storage.sql.exec<{request_id:string}>(
         "SELECT request_id FROM queue WHERE request_id=?", command.requestId));
       if (repeatedRequest) reject("DUPLICATE_REQUEST");
+      // Completed request IDs remain reserved for the result retention window.
+      // Otherwise a fresh nonce could requeue already-completed work and
+      // collide with the durable result's unique request_id on completion.
+      const completedRequest = one(this.storage.sql.exec<{request_id:string}>(
+        "SELECT request_id FROM result WHERE request_id=?", command.requestId));
+      if (completedRequest) reject("DUPLICATE_REQUEST");
       this.storage.sql.exec(
         "INSERT INTO replay (domain,generation,nonce,expires_at) VALUES ('command',?,?,?)",
         command.generation, command.nonce, command.expiresAt);

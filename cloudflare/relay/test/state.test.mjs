@@ -238,3 +238,28 @@ test("64KiB response limit applies to UTF-8 bytes, not UTF-16 character count", 
   assert.equal(store.leaseHead(deviceId, 1, fixture.session_id, now, 10).requestId,
     input.requestId);
 });
+
+
+test("completed request IDs remain reserved across recreation and rejected commands do not spend nonce", async t => {
+  const open = database(t);
+  const first = new DurableRelayState(open());
+  paired(first);
+  activate(first);
+  const original = await signedInput("req-completed-guard", "nonce-completed-1");
+  first.commitVerifiedCommand(original, now);
+  first.completeResult(deviceId, 1, fixture.session_id, original.requestId,
+    '{"status":"original"}', now);
+  const second = new DurableRelayState(open());
+  activate(second, 1, fixture.session_id, "device-auth-new");
+  const duplicate = await signedInput("req-completed-guard", "nonce-completed-2");
+  assert.throws(() => second.commitVerifiedCommand(duplicate, now),
+    err => code(err, "DUPLICATE_REQUEST"));
+  assert.equal(second.resultForAuthorizedController(deviceId, 1, original.requestId, now).payload,
+    '{"status":"original"}');
+  assert.equal(second.leaseHead(deviceId, 1, fixture.session_id, now, 10), null);
+
+  const sameNonceNewRequest = await signedInput("req-new-after-rejected", "nonce-completed-2");
+  second.commitVerifiedCommand(sameNonceNewRequest, now);
+  assert.equal(second.leaseHead(deviceId, 1, fixture.session_id, now, 10).requestId,
+    "req-new-after-rejected");
+});
