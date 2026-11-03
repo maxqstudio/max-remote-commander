@@ -52,7 +52,7 @@
       "file": "cloudflare/relay/test/worker.test.ts",
       "is_test": true,
       "language": "TypeScript",
-      "lines": 256
+      "lines": 262
     },
     {
       "directory": "cloudflare/relay",
@@ -549,14 +549,14 @@
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "37116e5783e05ba5d0fba6e62196d34bc487192d3cc3bf354a16831df9618935",
+  "source_digest": "1b79d6f110cbb037b5b48ae5a6cd03a12e804821d5f9310acb61afa615bbc25f",
   "source_summary": {
     "files": 76,
     "languages": {
       "Go": 69,
       "TypeScript": 7
     },
-    "lines": 12649,
+    "lines": 12655,
     "test_files": 2
   },
   "tests": [

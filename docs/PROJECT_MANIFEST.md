@@ -13,7 +13,7 @@ Repository: maxqstudio/max-remote-commander
 Active branch: work/p7-cloudflare-relay-v2
 Current authoritative SHA: external final acceptance evidence
 Last accepted SHA: 1664a1db23f26252ad11e7ce9d6507b44ca1ba11
-Current source digest: 37116e5783e05ba5d0fba6e62196d34bc487192d3cc3bf354a16831df9618935
+Current source digest: 1b79d6f110cbb037b5b48ae5a6cd03a12e804821d5f9310acb61afa615bbc25f
 
 ## Authorities
 Source authority: Canonical source history and releases
