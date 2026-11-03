@@ -1,0 +1,11 @@
+{
+  "name": "@maxq/remote-commander-cloudflare-relay",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/*.test.ts"
+  }
+}
