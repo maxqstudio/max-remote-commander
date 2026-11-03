@@ -7,7 +7,7 @@
 Phase 0 through P6 are accepted. P7 Cloudflare Relay is now CURRENT with a BEFORE sequence plan frozen at 6dee01f3c1f28db250b9ee67adf42aa2cbe714a0 before Cloudflare source implementation. No Cloudflare source, deployment, cross-language conformance, staging E2E, or Free-plan resource evidence is yet claimed.
 
 Final tested source: external final acceptance evidence.
-Current source digest: 887512c336b01ca75ea13db91765f7a3ae3504003e101cfd6bb601b39041e91c
+Current source digest: 22d34c41a25d6f7e8c262d73d6ea885d0f3602bf1c1e3168425777c52eb90118
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|

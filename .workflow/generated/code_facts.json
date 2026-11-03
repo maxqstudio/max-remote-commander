@@ -17,7 +17,14 @@
       "file": "cloudflare/relay/src/protocol.ts",
       "is_test": false,
       "language": "TypeScript",
-      "lines": 279
+      "lines": 298
+    },
+    {
+      "directory": "cloudflare/relay/src",
+      "file": "cloudflare/relay/src/state.ts",
+      "is_test": false,
+      "language": "TypeScript",
+      "lines": 314
     },
     {
       "directory": "cloudflare/relay/test",
@@ -514,14 +521,14 @@
   "python_routes": [],
   "python_symbols": [],
   "schema_version": 1,
-  "source_digest": "887512c336b01ca75ea13db91765f7a3ae3504003e101cfd6bb601b39041e91c",
+  "source_digest": "22d34c41a25d6f7e8c262d73d6ea885d0f3602bf1c1e3168425777c52eb90118",
   "source_summary": {
-    "files": 71,
+    "files": 72,
     "languages": {
       "Go": 69,
-      "TypeScript": 2
+      "TypeScript": 3
     },
-    "lines": 11537,
+    "lines": 11870,
     "test_files": 1
   },
   "tests": [

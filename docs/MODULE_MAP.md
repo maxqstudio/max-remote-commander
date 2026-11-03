@@ -3,12 +3,13 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: 887512c336b01ca75ea13db91765f7a3ae3504003e101cfd6bb601b39041e91c
+Source digest: 22d34c41a25d6f7e8c262d73d6ea885d0f3602bf1c1e3168425777c52eb90118
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
 |---|---|---:|---|---|
-| cloudflare/relay/src/protocol.ts | TypeScript | 279 | cloudflare/relay/src | NO |
+| cloudflare/relay/src/protocol.ts | TypeScript | 298 | cloudflare/relay/src | NO |
+| cloudflare/relay/src/state.ts | TypeScript | 314 | cloudflare/relay/src | NO |
 | cloudflare/relay/test/protocol.test.ts | TypeScript | 111 | cloudflare/relay/test | YES |
 | cmd/max-agent/main.go | Go | 297 | cmd/max-agent | NO |
 | cmd/max-agent/main_test.go | Go | 76 | cmd/max-agent | NO |
