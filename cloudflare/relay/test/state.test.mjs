@@ -11,6 +11,9 @@ import { canonicalCommand, verifySignedCommandSignature } from "../src/protocol.
 const vectors = JSON.parse(readFileSync(
   new URL("../../../testdata/protocol/v1/signing-vectors.json", import.meta.url), "utf8",
 ));
+const restartVectors = JSON.parse(readFileSync(
+  new URL("../../../testdata/protocol/v1/restart-semantics.json", import.meta.url), "utf8",
+));
 const fixture = vectors.command_envelope.value;
 const deviceKey = vectors.identities.device.public_key_b64url;
 const controllerKey = vectors.identities.controller.public_key_b64url;
@@ -262,4 +265,42 @@ test("completed request IDs remain reserved across recreation and rejected comma
   second.commitVerifiedCommand(sameNonceNewRequest, now);
   assert.equal(second.leaseHead(deviceId, 1, fixture.session_id, now, 10).requestId,
     "req-new-after-rejected");
+});
+
+
+test("Go protocol-v1 restart vectors stay consistent with durable SQLite queue semantics", async t => {
+  assert.equal(restartVectors.schema_version, 1);
+  for (const vector of restartVectors.cases) {
+    await t.test(vector.id, async scenario => {
+      const open = database(scenario);
+      const first = new DurableRelayState(open());
+      paired(first);
+      const originalSession = restartVectors.original_agent_session_id;
+      first.activateAuthenticatedAgentSession(deviceId, 1, originalSession,
+        "device-before-restart", now + 30, now, now + 900);
+      const requestId = "req-restart-" + vector.id;
+      first.commitVerifiedCommand(await signedInput(requestId, "nonce-restart-" + vector.id,
+        originalSession), now);
+
+      const restartNow = now + vector.advance_seconds;
+      const second = new DurableRelayState(open());
+      second.activateAuthenticatedAgentSession(deviceId, 1, vector.next_agent_session_id,
+        "device-after-restart", restartNow + 30, restartNow, restartNow + 900);
+      const next = second.leaseHead(deviceId, 1, vector.next_agent_session_id, restartNow, 10);
+      if (vector.expected_request_state === "deliverable") {
+        assert.equal(next?.requestId, requestId);
+      } else if (vector.expected_request_state === "pruned") {
+        assert.equal(next, null);
+        assert.throws(() => second.completeResult(deviceId, 1, vector.next_agent_session_id,
+          requestId, '{"ok":true}', restartNow), err => code(err, "UNKNOWN_REQUEST"));
+        const third = new DurableRelayState(open());
+        third.activateAuthenticatedAgentSession(deviceId, 1, vector.next_agent_session_id,
+          "device-third-restart", restartNow + 30, restartNow, restartNow + 900);
+        assert.equal(third.leaseHead(deviceId, 1, vector.next_agent_session_id,
+          restartNow, 10), null);
+      } else {
+        assert.fail("Unknown restart vector state: " + vector.expected_request_state);
+      }
+    });
+  }
 });
