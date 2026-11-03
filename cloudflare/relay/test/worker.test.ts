@@ -211,6 +211,12 @@ describe("P7A real Workerd paired command/result control flow", () => {
       };
     });
     console.log("WS_PROBE: after queue", JSON.stringify(wsDiagnostics));
+    console.log("WS_PROBE: client after queue state", socket!.readyState);
+    await runInDurableObject(deviceStub, async (_instance, state) => {
+      const peer = state.getWebSockets()[0];
+      console.log("WS_PROBE: server after queue state", peer.readyState);
+      peer.send("after-queue-probe");
+    });
     console.log("WS_PROBE: first queued, waiting for initial push");
     const frame = JSON.parse(await Promise.race([pushed,
       new Promise<string>((_r, reject) => setTimeout(() =>
