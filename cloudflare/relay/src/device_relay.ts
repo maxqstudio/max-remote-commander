@@ -5,7 +5,7 @@
  */
 import { DurableObject } from "cloudflare:workers";
 import { DurableRelayState, DurableStateError } from "./state";
-import { ProtocolError, verifyAssertionSignature, verifySignedCommandSignature,
+import { ProtocolError, verifyAssertionSignature, verifySignedCommandSignature, verifySignedCommand,
   extractRawObjectField } from "./protocol";
 import type { Env } from "./index";
 
@@ -222,6 +222,21 @@ export class DeviceRelay extends DurableObject<Env> {
           agentSessionId: sessionId, expiresAt,
         };
         this.#controller = null;
+        for (const socket of this.ctx.getWebSockets()) {
+          const attached = socket.deserializeAttachment() as {
+            deviceId?: string; generation?: number; agentSessionId?: string;
+          } | null;
+          if (attached?.deviceId === deviceId &&
+              attached.generation === pairing.generation &&
+              attached.agentSessionId === sessionId) {
+            socket.serializeAttachment({
+              deviceId, generation: pairing.generation,
+              agentSessionId: sessionId, expiresAt,
+            });
+          } else {
+            try { socket.close(1008, "stale session"); } catch { /* disconnected */ }
+          }
+        }
         return respond(201, {
           token: issued, expires_at: iso(expiresAt), agent_session_id: sessionId,
           generation: pairing.generation,
@@ -261,71 +276,168 @@ export class DeviceRelay extends DurableObject<Env> {
         return respond(204);
       }
 
-      const deviceAuthorized = await authenticates(request, this.#device, deviceId, pairing, now);
-      const controllerAuthorized = await authenticates(request, this.#controller, deviceId, pairing, now) &&
-        !!this.#device && this.#device.expiresAt > now &&
-        this.#controller?.agentSessionId === this.#device.agentSessionId;
-      if (request.method === "POST" && operation === "commands") {
-        if (!controllerAuthorized) return respond(401, { error: "unauthorized" });
-        const bodyWire = await readBody(request);
-        // Preserve the original signed payload bytes: JSON parse/stringify would
-        // normalize raw arguments and can invalidate Go json.RawMessage signatures.
-        const parts = extractRawObjectField(bodyWire, ["request_id", "payload"], "payload");
-        const requestId = parts.value.request_id;
-        if (typeof requestId !== "string" || !reqPattern.test(requestId))
-          return respond(400, { error: "invalid_request" });
-        const value = await verifySignedCommandSignature(parts.raw, {
-          deviceId, generation: pairing!.generation,
-          agentSessionId: this.#controller!.agentSessionId,
-          publicKey: pairing!.controllerPublicKey, now, clockSkewSeconds: 30,
-        });
-        if (value.request_id !== requestId)
-          return respond(400, { error: "request_id_mismatch" });
-        this.#store.commitVerifiedCommand({
-          requestId, deviceId, generation: pairing!.generation,
-          agentSessionId: value.session_id as string,
-          nonce: value.nonce as string, issuedAt: value.issued_at as number,
-          expiresAt: value.expires_at as number, envelopeJSON: parts.raw,
-        }, now);
-        return respond(202, { status: "queued" });
-      }
+      if (request.method === "POST" && operation === "commands")
+        return this.queueCommand(request, deviceId, now);
       if (request.method === "GET" && operation === "commands/next") {
-        if (!deviceAuthorized) return respond(401, { error: "unauthorized" });
-        // Non-blocking delivery until P7C push transport is implemented.
-        if (url.searchParams.has("wait_ms") &&
-          url.searchParams.get("wait_ms") !== "0")
+        const pairingNow = this.#store.pairing();
+        if (!await authenticates(request, this.#device, deviceId, pairingNow, now))
+          return respond(401, { error: "unauthorized" });
+        if (url.searchParams.has("wait_ms") && url.searchParams.get("wait_ms") !== "0")
           return respond(400, { error: "only_nonblocking_supported" });
-        const head = this.#store.leaseHead(deviceId, pairing!.generation,
+        const head = this.#store.leaseHead(deviceId, pairingNow!.generation,
           this.#device!.agentSessionId, now, 15);
         return head ? respond(200, {
           request_id: head.requestId, payload: JSON.parse(head.envelopeJSON),
         }) : respond(204);
       }
-      if (request.method === "POST" && operation === "results") {
-        if (!deviceAuthorized) return respond(401, { error: "unauthorized" });
-        const parts = extractRawObjectField(await readBody(request),
-          ["request_id", "payload"], "payload");
-        const requestId = parts.value.request_id;
-        if (typeof requestId !== "string" || !reqPattern.test(requestId))
-          return respond(400, { error: "invalid_request" });
-        this.#store.completeResult(deviceId, pairing!.generation,
-          this.#device!.agentSessionId, requestId, parts.raw, now);
-        return respond(202, { status: "accepted" });
-      }
+      if (request.method === "POST" && operation === "results")
+        return this.submitResult(request, deviceId, now);
       const resultMatch = /^results\/([A-Za-z0-9._:-]{1,128})$/.exec(operation);
-      if (request.method === "GET" && resultMatch) {
-        if (!controllerAuthorized) return respond(401, { error: "unauthorized" });
-        const result = this.#store.resultForAuthorizedController(deviceId,
-          pairing!.generation, resultMatch[1], now);
-        return result ? respond(200, { request_id: result.requestId,
-          payload: JSON.parse(result.payload) }) : respond(204);
-      }
-      // Hibernation WebSocket and SSE are intentionally unavailable until P7C/D.
+      if (request.method === "GET" && resultMatch)
+        return this.waitResult(request, deviceId, resultMatch[1], now);
       if (request.method === "GET" && operation === "stream")
-        return respond(501, { error: "websocket_not_implemented" });
+        return this.acceptAgentSocket(request, deviceId, now);
       return respond(404, { error: "not_found" });
     } catch (error) {
       return failure(error);
     }
+  }
+
+  private async queueCommand(request: Request, deviceId: string, now: number): Promise<Response> {
+    const pairing = this.#store.pairing();
+    if (!await authenticates(request, this.#controller, deviceId, pairing, now) ||
+        !this.#device || this.#device.expiresAt <= now ||
+        this.#controller?.agentSessionId !== this.#device.agentSessionId)
+      return respond(401, { error: "unauthorized" });
+    const parts = extractRawObjectField(await readBody(request),
+      ["request_id", "payload"], "payload");
+    const requestId = parts.value.request_id;
+    if (typeof requestId !== "string" || !reqPattern.test(requestId))
+      return respond(400, { error: "invalid_request" });
+    // The ReplayGate callback atomically claims nonce + inserts the command.
+    // This avoids spending a nonce if insertion fails after signature verification.
+    const authority = {
+      deviceId, generation: pairing!.generation,
+      agentSessionId: this.#controller.agentSessionId,
+      publicKey: pairing!.controllerPublicKey, now, clockSkewSeconds: 30,
+    };
+    const value = await verifySignedCommandSignature(parts.raw, authority);
+    if (value.request_id !== requestId) return respond(400, { error: "request_id_mismatch" });
+    await verifySignedCommand(parts.raw, {
+      ...authority,
+      replay: {
+        use: async (_domain, _deviceId, _generation, nonce, expiresAt, timestamp) => {
+          this.#store.commitVerifiedCommand({
+            requestId, deviceId, generation: pairing!.generation,
+            agentSessionId: value.session_id as string,
+            nonce, issuedAt: value.issued_at as number,
+            expiresAt, envelopeJSON: parts.raw,
+          }, timestamp);
+          return true;
+        },
+      },
+    });
+    await this.deliverHead(deviceId, now);
+    return respond(202, { status: "queued" });
+  }
+
+  private async submitResult(request: Request, deviceId: string, now: number): Promise<Response> {
+    const pairing = this.#store.pairing();
+    if (!await authenticates(request, this.#device, deviceId, pairing, now))
+      return respond(401, { error: "unauthorized" });
+    const parts = extractRawObjectField(await readBody(request),
+      ["request_id", "payload"], "payload");
+    const requestId = parts.value.request_id;
+    if (typeof requestId !== "string" || !reqPattern.test(requestId))
+      return respond(400, { error: "invalid_request" });
+    this.#store.completeResult(deviceId, pairing!.generation,
+      this.#device!.agentSessionId, requestId, parts.raw, now);
+    await this.deliverHead(deviceId, now);
+    return respond(202, { status: "accepted" });
+  }
+
+  private async waitResult(request: Request, deviceId: string,
+    requestId: string, now: number): Promise<Response> {
+    const pairing = this.#store.pairing();
+    if (!await authenticates(request, this.#controller, deviceId, pairing, now) ||
+        !this.#device || this.#device.expiresAt <= now ||
+        this.#controller?.agentSessionId !== this.#device.agentSessionId)
+      return respond(401, { error: "unauthorized" });
+    const result = this.#store.resultForAuthorizedController(deviceId,
+      pairing!.generation, requestId, now);
+    return result ? respond(200, {
+      request_id: result.requestId, payload: JSON.parse(result.payload),
+    }) : respond(204);
+  }
+
+  private async acceptAgentSocket(request: Request, deviceId: string, now: number):
+    Promise<Response> {
+    const pairing = this.#store.pairing();
+    if (!await authenticates(request, this.#device, deviceId, pairing, now))
+      return respond(401, { error: "unauthorized" });
+    if (request.headers.get("upgrade")?.toLowerCase() !== "websocket")
+      return respond(426, { error: "upgrade_required" });
+    for (const current of this.ctx.getWebSockets()) {
+      try { current.close(1000, "replaced"); } catch { /* disconnected */ }
+    }
+    const pair = new WebSocketPair();
+    const [client, server] = Object.values(pair);
+    server.serializeAttachment({
+      deviceId, generation: pairing!.generation,
+      agentSessionId: this.#device!.agentSessionId,
+      expiresAt: this.#device!.expiresAt,
+    });
+    this.ctx.acceptWebSocket(server);
+    await this.deliverHead(deviceId, now);
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  /**
+   * Deliver one FIFO head only after a durable queue commit and on an
+   * authenticated outbound agent socket. No inbound PC listener is used.
+   */
+  private async deliverHead(deviceId: string, now: number): Promise<void> {
+    const pairing = this.#store.pairing();
+    const agent = this.#device;
+    if (!pairing || !agent || agent.deviceId !== deviceId || agent.expiresAt <= now ||
+        agent.generation !== pairing.generation) return;
+    for (const socket of this.ctx.getWebSockets()) {
+      const att = socket.deserializeAttachment() as {
+        deviceId?: string; generation?: number; agentSessionId?: string; expiresAt?: number;
+      } | null;
+      if (!att || att.deviceId !== deviceId || att.generation !== pairing.generation ||
+          att.agentSessionId !== agent.agentSessionId || !att.expiresAt ||
+          att.expiresAt <= now) continue;
+      const next = this.#store.leaseHead(deviceId, pairing.generation,
+        agent.agentSessionId, now, 15);
+      if (!next) return;
+      const frame = JSON.stringify({ version: 1, type: "command",
+        request_id: next.requestId, payload: JSON.parse(next.envelopeJSON) });
+      try { socket.send(frame); }
+      catch {
+        try { socket.close(1011, "send failed"); } catch { /* disconnected */ }
+      }
+      // The alarm retries the FIFO lease if no durable result is acknowledged.
+      await this.ctx.storage.setAlarm((now + 16) * 1000);
+      return;
+    }
+  }
+
+  async alarm(): Promise<void> {
+    const pairing = this.#store.pairing();
+    if (pairing) await this.deliverHead(pairing.deviceId, Math.floor(Date.now() / 1000));
+  }
+
+  webSocketMessage(socket: WebSocket, _message: string | ArrayBuffer): void {
+    // Agent stream is one-way for command delivery. Results use authenticated HTTPS.
+    socket.close(1008, "unexpected agent frame");
+  }
+
+  webSocketClose(socket: WebSocket, code: number, reason: string): void {
+    try { socket.close(code, reason); } catch { /* closed */ }
+  }
+
+  webSocketError(socket: WebSocket): void {
+    try { socket.close(1011, "connection error"); } catch { /* closed */ }
   }
 }

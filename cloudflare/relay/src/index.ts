@@ -30,7 +30,9 @@ export async function fetch(request: Request, env: Env): Promise<Response> {
       return secureHeaders(Response.json({ error: "unavailable" }, { status: 503 }));
     // Namespace lookup is deterministic per full device ID, never a client-provided DO ID.
     const stub = env.DEVICE_RELAY.get(env.DEVICE_RELAY.idFromName(match[1]));
-    return secureHeaders(await stub.fetch(request));
+    const response = await stub.fetch(request);
+    if (response.status === 101) return response;
+    return secureHeaders(response);
   }
 
 export default { fetch };
