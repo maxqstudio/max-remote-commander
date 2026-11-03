@@ -22,8 +22,10 @@ export interface VerifyContext {
 type Fields = Record<string, unknown>;
 
 export class ProtocolError extends Error {
-  constructor(public readonly code: string) {
+  readonly code: string;
+  constructor(code: string) {
     super(code);
+    this.code = code;
     this.name = "ProtocolError";
   }
 }
