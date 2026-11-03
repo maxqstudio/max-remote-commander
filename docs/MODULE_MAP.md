@@ -3,17 +3,17 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: 537ddc0205d7a2e90426c4f4d9de42d6a2e202ccfe0144cd6e2e8869de293d97
+Source digest: 63335d4eeddf77f91d705dfc9178bd76b2f75d5e58be3d4c245ce94d6aab09ba
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
 |---|---|---:|---|---|
-| cloudflare/relay/src/device_relay.ts | TypeScript | 448 | cloudflare/relay/src | NO |
+| cloudflare/relay/src/device_relay.ts | TypeScript | 445 | cloudflare/relay/src | NO |
 | cloudflare/relay/src/index.ts | TypeScript | 38 | cloudflare/relay/src | NO |
 | cloudflare/relay/src/protocol.ts | TypeScript | 314 | cloudflare/relay/src | NO |
 | cloudflare/relay/src/state.ts | TypeScript | 333 | cloudflare/relay/src | NO |
 | cloudflare/relay/test/protocol.test.ts | TypeScript | 111 | cloudflare/relay/test | YES |
-| cloudflare/relay/test/worker.test.ts | TypeScript | 293 | cloudflare/relay/test | YES |
+| cloudflare/relay/test/worker.test.ts | TypeScript | 261 | cloudflare/relay/test | YES |
 | cloudflare/relay/vitest.config.ts | TypeScript | 7 | cloudflare/relay | NO |
 | cmd/max-agent/main.go | Go | 297 | cmd/max-agent | NO |
 | cmd/max-agent/main_test.go | Go | 76 | cmd/max-agent | NO |

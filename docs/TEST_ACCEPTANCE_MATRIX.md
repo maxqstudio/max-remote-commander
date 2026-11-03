@@ -7,7 +7,7 @@
 Phase 0 through P6 are accepted on main. P7A/P7B source candidate d075aebb38c25695c27896979ce96f90fe3e7e7c passed 6/6 GitHub Actions jobs on run 41637462721; 20/20 Node 24 tests verified Go protocol-v1 signing fixture compatibility and SQLite transactional state behavior. This is source/unit evidence only; Cloudflare Durable Object Workerd runtime, Worker pairing/controller/session HTTP routing, Hibernation WebSocket, staging deployment, free-tier resource measurements, MCP, and physical E2E remain NOT_PROVEN.
 
 Final tested source: external final acceptance evidence.
-Current source digest: 537ddc0205d7a2e90426c4f4d9de42d6a2e202ccfe0144cd6e2e8869de293d97
+Current source digest: 63335d4eeddf77f91d705dfc9178bd76b2f75d5e58be3d4c245ce94d6aab09ba
 
 | Requirement | Contract | Evidence | Status |
 |---|---|---|---|
