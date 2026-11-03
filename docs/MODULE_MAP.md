@@ -3,7 +3,7 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: e8b60f8d85cfb7f4b76907ade66ee4b316c3c34c3889b4c9c0399c058b68f1dc
+Source digest: b124225c79187a68c164a34b67bc1546bac7089729f92a9def29c33b765c8c8f
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
@@ -13,7 +13,7 @@ Generated/refreshed: current compiler run
 | cloudflare/relay/src/protocol.ts | TypeScript | 314 | cloudflare/relay/src | NO |
 | cloudflare/relay/src/state.ts | TypeScript | 333 | cloudflare/relay/src | NO |
 | cloudflare/relay/test/protocol.test.ts | TypeScript | 111 | cloudflare/relay/test | YES |
-| cloudflare/relay/test/worker.test.ts | TypeScript | 274 | cloudflare/relay/test | YES |
+| cloudflare/relay/test/worker.test.ts | TypeScript | 275 | cloudflare/relay/test | YES |
 | cloudflare/relay/vitest.config.ts | TypeScript | 7 | cloudflare/relay | NO |
 | cmd/max-agent/main.go | Go | 297 | cmd/max-agent | NO |
 | cmd/max-agent/main_test.go | Go | 76 | cmd/max-agent | NO |
