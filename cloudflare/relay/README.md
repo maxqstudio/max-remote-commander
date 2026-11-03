@@ -46,3 +46,9 @@ or secret is configured.
 not an approved production relay. Hibernation WebSocket, long poll,
 Go transport compatibility, deployed Cloudflare staging E2E,
 Free-tier billing evidence, and exact-SHA main acceptance remain pending.
+
+
+The Vitest runner uses `wrangler.test.jsonc` and a clearly fake CI-only bootstrap
+secret. The deployable `wrangler.jsonc` contains **no** bootstrap value, so
+public pairing stays disabled unless a real secret is securely provisioned.
+Do not deploy `wrangler.test.jsonc`.

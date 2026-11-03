@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { env, exports } from "cloudflare:workers";
 import { runInDurableObject, evictDurableObject } from "cloudflare:test";
 import { DurableRelayState } from "../src/state";
+import { canonicalAssertion, canonicalCommand } from "../src/protocol";
 
 const deviceId = "dev_" + "A".repeat(43);
 const deviceKey = "A".repeat(43);
@@ -65,5 +66,128 @@ describe("P7B real workerd SQLite Durable Object", () => {
     await runInDurableObject(second, async (_instance, state) => {
       expect(new DurableRelayState(state.storage).pairing()).toBeNull();
     });
+  });
+});
+
+
+function base64url(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+async function sha256(input: Uint8Array | string): Promise<Uint8Array> {
+  return new Uint8Array(await crypto.subtle.digest("SHA-256",
+    typeof input === "string" ? new TextEncoder().encode(input) : input));
+}
+async function newIdentity() {
+  const pair = await crypto.subtle.generateKey("Ed25519", true, ["sign", "verify"]);
+  const publicBytes = new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey));
+  return {
+    privateKey: pair.privateKey, publicKey: base64url(publicBytes),
+    deviceId: "dev_" + base64url(await sha256(publicBytes)),
+  };
+}
+async function signedAssertion(kind: "device" | "controller",
+  data: Record<string, unknown>, privateKey: CryptoKey) {
+  const payload = { ...data, signature: "" };
+  const canonical = canonicalAssertion(kind, JSON.stringify(payload));
+  payload.signature = base64url(new Uint8Array(await crypto.subtle.sign(
+    "Ed25519", privateKey, new TextEncoder().encode(canonical))));
+  return payload;
+}
+async function signedCommand(data: Record<string, unknown>, privateKey: CryptoKey) {
+  const payload = { ...data, signature: "" };
+  const canonical = canonicalCommand(JSON.stringify(payload));
+  payload.signature = base64url(new Uint8Array(await crypto.subtle.sign(
+    "Ed25519", privateKey, new TextEncoder().encode(canonical))));
+  return payload;
+}
+async function call(deviceId: string, path: string, method = "GET", token = "",
+  payload?: Record<string, unknown>): Promise<Response> {
+  return exports.default.fetch("https://example.invalid/v1/devices/" + deviceId + "/" + path, {
+    method,
+    headers: {
+      ...(token ? { Authorization: "Bearer " + token } : {}),
+      ...(payload ? { "Content-Type": "application/json" } : {}),
+    },
+    ...(payload ? { body: JSON.stringify(payload) } : {}),
+  });
+}
+
+describe("P7A real Workerd paired command/result control flow", () => {
+  it("authenticates paired identities, verifies signed commands, blocks replay, and revokes", async () => {
+    const device = await newIdentity();
+    const controller = await newIdentity();
+    const code = "WORKERD-TEST-PAIRING-2026";
+    const codeHash = base64url(await sha256(code));
+
+    const offered = await call(device.deviceId, "pairing-offer", "POST",
+      "ci-fixture-nonproduction-bootstrap-token-64-bytes-1234567890123456", {
+        code_hash: codeHash, device_public_key: device.publicKey, ttl_seconds: 300,
+      });
+    expect(offered.status).toBe(201);
+    const receipt = await offered.json() as {receipt_token: string};
+    expect(receipt.receipt_token.length).toBe(43);
+    expect((await call(device.deviceId, "pairing/status", "GET", receipt.receipt_token)).status)
+      .toBe(204);
+    const wrongCode = await call(device.deviceId, "pairing/redeem", "POST", "", {
+      code: code + "-wrong", controller_public_key: controller.publicKey,
+    });
+    expect(wrongCode.status).toBe(401);
+    const redeemed = await call(device.deviceId, "pairing/redeem", "POST", "", {
+      code, controller_public_key: controller.publicKey,
+    });
+    expect(redeemed.status).toBe(201);
+    expect((await redeemed.json() as {generation:number}).generation).toBe(1);
+    expect((await call(device.deviceId, "pairing/status", "GET", receipt.receipt_token)).status)
+      .toBe(200);
+    const now = Math.floor(Date.now() / 1000);
+    const agentSessionId = "workerd-agent-session";
+    const deviceProof = await signedAssertion("device", {
+      device_id: device.deviceId, generation: 1, agent_session_id: agentSessionId,
+      issued_at: now, expires_at: now + 60, nonce: "agent-assertion-1",
+    }, device.privateKey);
+    const deviceSession = await call(device.deviceId, "session", "POST", "", deviceProof);
+    expect(deviceSession.status).toBe(201);
+    const deviceToken = (await deviceSession.json() as {token:string}).token;
+    expect((await call(device.deviceId, "session", "POST", "", deviceProof)).status).toBe(409);
+
+    const controllerProof = await signedAssertion("controller", {
+      device_id: device.deviceId, generation: 1,
+      issued_at: now, expires_at: now + 60, nonce: "controller-assertion-1",
+    }, controller.privateKey);
+    const controllerSession = await call(device.deviceId, "controller-session", "POST", "",
+      controllerProof);
+    expect(controllerSession.status).toBe(201);
+    const controllerToken = (await controllerSession.json() as {token:string}).token;
+    const command = await signedCommand({
+      version: 1, request_id: "req-workerd-auth", device_id: device.deviceId,
+      session_id: agentSessionId, issued_at: now, expires_at: now + 60,
+      nonce: "cmd-workerd-nonce", tool: "system.health", arguments: {},
+    }, controller.privateKey);
+    const wrapper = {request_id: "req-workerd-auth", payload: command};
+    expect((await call(device.deviceId, "commands", "POST", deviceToken, wrapper)).status)
+      .toBe(401);
+    expect((await call(device.deviceId, "commands", "POST", controllerToken, wrapper)).status)
+      .toBe(202);
+    expect((await call(device.deviceId, "commands", "POST", controllerToken, wrapper)).status)
+      .toBe(409);
+    const delivered = await call(device.deviceId, "commands/next?wait_ms=0", "GET",
+      deviceToken);
+    expect(delivered.status).toBe(200);
+    expect((await delivered.json() as {request_id:string}).request_id)
+      .toBe("req-workerd-auth");
+    expect((await call(device.deviceId, "results/req-workerd-auth", "GET",
+      deviceToken)).status).toBe(401);
+    expect((await call(device.deviceId, "results", "POST", deviceToken, {
+      request_id: "req-workerd-auth", payload: { status: "completed" },
+    })).status).toBe(202);
+    const result = await call(device.deviceId, "results/req-workerd-auth", "GET",
+      controllerToken);
+    expect(result.status).toBe(200);
+    expect((await result.json() as {payload:{status:string}}).payload.status).toBe("completed");
+    expect((await call(device.deviceId, "pairing", "DELETE", controllerToken)).status).toBe(401);
+    expect((await call(device.deviceId, "pairing", "DELETE", deviceToken)).status).toBe(204);
+    expect((await call(device.deviceId, "commands/next", "GET", deviceToken)).status).toBe(401);
   });
 });
