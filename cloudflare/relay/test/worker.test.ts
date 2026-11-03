@@ -161,7 +161,8 @@ describe("P7A real Workerd paired command/result control flow", () => {
     expect(controllerSession.status).toBe(201);
     const controllerToken = (await controllerSession.json() as {token:string}).token;
     // The device initiates an outbound-only authenticated stream.
-    const stream = await exports.default.fetch(
+    const deviceStub = env.DEVICE_RELAY.get(env.DEVICE_RELAY.idFromName(device.deviceId));
+    const stream = await deviceStub.fetch(
       "https://example.invalid/v1/devices/" + device.deviceId + "/stream",
       { headers: { Upgrade: "websocket", Authorization: "Bearer " + deviceToken } },
     );
