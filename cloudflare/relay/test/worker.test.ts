@@ -170,6 +170,18 @@ describe("P7A real Workerd paired command/result control flow", () => {
     const socket = stream.webSocket;
     expect(socket).toBeDefined();
     socket!.accept();
+    console.log("WS_PROBE: accepted client side state", socket!.readyState);
+    const handshakeMessage = new Promise<string>(resolve => {
+      socket!.addEventListener("message", event => resolve(String(event.data)), { once: true });
+    });
+    await runInDurableObject(deviceStub, async (_instance, state) => {
+      console.log("WS_PROBE: server socket count", state.getWebSockets().length);
+      state.getWebSockets()[0].send("probe");
+    });
+    console.log("WS_PROBE: probe sent, awaiting", socket!.readyState);
+    const probeData = await handshakeMessage;
+    console.log("WS_PROBE: received handshake probe", probeData);
+    expect(probeData).toBe("probe");
     const pushed = new Promise<string>((resolve, reject) => {
       socket!.addEventListener("message", event => resolve(event.data as string), { once: true });
       socket!.addEventListener("close", () => reject(new Error("stream closed before delivery")),
