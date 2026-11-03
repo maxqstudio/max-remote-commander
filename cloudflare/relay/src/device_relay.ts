@@ -277,7 +277,7 @@ export class DeviceRelay extends DurableObject<Env> {
       }
 
       if (request.method === "POST" && operation === "commands")
-        return this.queueCommand(request, deviceId, now);
+        return await this.queueCommand(request, deviceId, now);
       if (request.method === "GET" && operation === "commands/next") {
         const pairingNow = this.#store.pairing();
         if (!await authenticates(request, this.#device, deviceId, pairingNow, now))
@@ -291,12 +291,12 @@ export class DeviceRelay extends DurableObject<Env> {
         }) : respond(204);
       }
       if (request.method === "POST" && operation === "results")
-        return this.submitResult(request, deviceId, now);
+        return await this.submitResult(request, deviceId, now);
       const resultMatch = /^results\/([A-Za-z0-9._:-]{1,128})$/.exec(operation);
       if (request.method === "GET" && resultMatch)
-        return this.waitResult(request, deviceId, resultMatch[1], now);
+        return await this.waitResult(request, deviceId, resultMatch[1], now);
       if (request.method === "GET" && operation === "stream")
-        return this.acceptAgentSocket(request, deviceId, now);
+        return await this.acceptAgentSocket(request, deviceId, now);
       return respond(404, { error: "not_found" });
     } catch (error) {
       return failure(error);
