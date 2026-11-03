@@ -18,7 +18,7 @@ Branch: work/p7-cloudflare-relay-v2
 Authoritative SHA: external final acceptance evidence
 Last accepted SHA: 1664a1db23f26252ad11e7ce9d6507b44ca1ba11
 Current candidate SHA: external final acceptance evidence
-Current source digest: 1770cd644a0eae582263fabb88ab10ae555ac13065e688045e2caed746f99d2f
+Current source digest: 962d3e31c76ed138190f25771daae8e26e8be82d86028005181fbfe29f842eb6
 
 ## Runtime
 Environment: see SOURCE_AUTHORITY_MAP.md and RUNBOOK.md

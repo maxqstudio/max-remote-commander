@@ -3,12 +3,12 @@
 # MODULE MAP
 
 Authority SHA: external final acceptance evidence
-Source digest: 1770cd644a0eae582263fabb88ab10ae555ac13065e688045e2caed746f99d2f
+Source digest: 962d3e31c76ed138190f25771daae8e26e8be82d86028005181fbfe29f842eb6
 Generated/refreshed: current compiler run
 
 | Module / File | Language | Lines | Directory | Test file |
 |---|---|---:|---|---|
-| cloudflare/relay/src/device_relay.ts | TypeScript | 443 | cloudflare/relay/src | NO |
+| cloudflare/relay/src/device_relay.ts | TypeScript | 448 | cloudflare/relay/src | NO |
 | cloudflare/relay/src/index.ts | TypeScript | 38 | cloudflare/relay/src | NO |
 | cloudflare/relay/src/protocol.ts | TypeScript | 314 | cloudflare/relay/src | NO |
 | cloudflare/relay/src/state.ts | TypeScript | 333 | cloudflare/relay/src | NO |
