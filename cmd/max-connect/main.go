@@ -150,7 +150,7 @@ func buildForOS(goos string, arguments []string) (invocation, error) {
 	}
 	args = append(args, "-p", strconv.Itoa(*port), "-l", *user, "--", *host)
 	if mode == "check" {
-		args = append(args, "true") // Fixed no-op to verify SSH authentication.
+		args = append(args, "exit", "0") // Fixed no-op on POSIX shells and Windows PowerShell/CMD.
 	}
 	return invocation{program: "ssh", args: args}, nil
 }

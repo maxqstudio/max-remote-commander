@@ -40,7 +40,7 @@ func TestFilesAndCheckUseExistingKeys(t *testing.T) {
 		t.Fatalf("unexpected sftp: %+v", files)
 	}
 	check := buildArgs(t, "linux", append([]string{"check"}, common...)...)
-	if check.program != "ssh" || check.args[len(check.args)-1] != "true" || !strings.Contains(strings.Join(check.args, " "), "BatchMode=yes") {
+	if check.program != "ssh" || check.args[len(check.args)-1] != "0" || check.args[len(check.args)-2] != "exit" || !strings.Contains(strings.Join(check.args, " "), "BatchMode=yes") {
 		t.Fatalf("unexpected check: %+v", check)
 	}
 }

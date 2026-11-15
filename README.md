@@ -51,7 +51,7 @@ max-connect files --host dev.lan --user developer
 max-connect desktop --host dev.lan
 ```
 
-For non-default SSH ports or keys, add `--port 2222 --identity /path/to/key --known-hosts /path/to/known_hosts` after the mode. `check` performs a non-interactive SSH authentication check with a fixed `true` command; it does not verify that the remote computer is suitable for a build.
+For non-default SSH ports or keys, add `--port 2222 --identity /path/to/key --known-hosts /path/to/known_hosts` after the mode. `check` performs a non-interactive SSH authentication check with a fixed `exit 0` command; it does not verify that the remote computer is suitable for a build.
 
 **Host trust:** SSH/SFTP uses `StrictHostKeyChecking=yes` and disables per-user SSH config. Verify the host fingerprint through a trusted separate channel and enroll it using an ordinary SSH client before first use; unknown or changed keys are rejected. Never blindly trust `ssh-keyscan` output from an untrusted network.
 
