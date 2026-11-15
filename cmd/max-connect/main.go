@@ -81,7 +81,9 @@ func buildForOS(goos string, arguments []string) (invocation, error) {
 	if !validHost(*host) {
 		return invocation{}, errors.New("--host must be a valid IP address or DNS hostname")
 	}
-	if *port == 0 {
+	portExplicit := false
+	flags.Visit(func(f *flag.Flag) { if f.Name == "port" { portExplicit = true } })
+	if !portExplicit {
 		if mode == "desktop" {
 			*port = 3389
 		} else {

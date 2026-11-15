@@ -68,6 +68,7 @@ func TestRejectUnsafeInputs(t *testing.T) {
 		{"terminal", "--host", "u@host", "--user", "dev"},
 		{"terminal", "--host", "good.host", "--user", "-oProxyCommand=evil"},
 		{"terminal", "--host", "good.host", "--user", "dev", "--port", "65536"},
+		{"terminal", "--host", "good.host", "--user", "dev", "--port", "0"},
 		{"terminal", "--host", "good.host", "--user", "dev", "--port", "-1"},
 		{"terminal", "--host", "good.host", "--user", "dev", "id"},
 		{"terminal", "--host", "good.host", "--user", "dev", "--identity", "/missing/key"},
