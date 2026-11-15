@@ -27,7 +27,7 @@ jobs:
       - name: Vet
         run: go vet ./...
       - name: Build binaries
-        run: go build ./cmd/max-agent ./cmd/max-relay ./cmd/max-chat
+        run: go build ./cmd/max-agent ./cmd/max-relay ./cmd/max-chat ./cmd/max-connect
 
   race:
     name: Race and security regression
@@ -110,3 +110,41 @@ jobs:
         run: |
           git diff --exit-code
           test -z "$(git status --porcelain --untracked-files=all --ignored=no)"
+
+  ssh-loopback:
+    name: SSH/SFTP loopback smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Start isolated SSH server
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openssh-server
+          ssh-keygen -q -t ed25519 -N "" -f "$RUNNER_TEMP/ci_ed25519"
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+          cat "$RUNNER_TEMP/ci_ed25519.pub" >> "$HOME/.ssh/authorized_keys"
+          chmod 600 "$HOME/.ssh/authorized_keys"
+          sudo mkdir -p /run/sshd
+          sudo /usr/sbin/sshd -p 2222 -o ListenAddress=127.0.0.1 -o PasswordAuthentication=no -o PubkeyAuthentication=yes -o PermitRootLogin=no -o UsePAM=no
+          ssh-keyscan -p 2222 127.0.0.1 > "$RUNNER_TEMP/ci_known_hosts" 2>/dev/null
+          test -s "$RUNNER_TEMP/ci_known_hosts"
+      - name: Verify SSH, SFTP and reject an unknown host key
+        shell: bash
+        run: |
+          set -euo pipefail
+          go build -o "$RUNNER_TEMP/max-connect" ./cmd/max-connect
+          common=(--host 127.0.0.1 --user "$(id -un)" --port 2222 --identity "$RUNNER_TEMP/ci_ed25519" --known-hosts "$RUNNER_TEMP/ci_known_hosts")
+          "$RUNNER_TEMP/max-connect" check "${common[@]}"
+          printf 'pwd\nbye\n' | "$RUNNER_TEMP/max-connect" files "${common[@]}"
+          : > "$RUNNER_TEMP/empty_known_hosts"
+          if "$RUNNER_TEMP/max-connect" check --host 127.0.0.1 --user "$(id -un)" --port 2222 --identity "$RUNNER_TEMP/ci_ed25519" --known-hosts "$RUNNER_TEMP/empty_known_hosts"; then
+            echo "FAIL: unknown host key was accepted"
+            exit 1
+          fi

@@ -36,3 +36,23 @@ Governance uses the STRICT profile and exact pinned Skill_Workflow authority rec
 
 - Saweria: https://saweria.co/maxq
 - PayPal: https://paypal.me/JacksonJackson1501
+
+
+## Experimental human-operated remote access (issue #2)
+
+The `max-connect` CLI is a **separate human-operated LAN/VPN client**, not an LLM tool or a session over MAX Remote Commander's relay. It requires a user-provisioned SSH/SFTP server or compatible Windows RDP host. It does not install those services, configure a VPN, or expose remote ports.
+
+```bash
+go build ./cmd/max-connect
+max-connect check --host dev.lan --user developer
+max-connect terminal --host dev.lan --user developer
+max-connect files --host dev.lan --user developer
+# On Windows only, with a supported RDP host:
+max-connect desktop --host dev.lan
+```
+
+For non-default SSH ports or keys, add `--port 2222 --identity /path/to/key --known-hosts /path/to/known_hosts` after the mode. `check` performs a non-interactive SSH authentication check with a fixed `exit 0` command; it does not verify that the remote computer is suitable for a build.
+
+**Host trust:** SSH/SFTP uses `StrictHostKeyChecking=yes` and disables per-user SSH config. Verify the host fingerprint through a trusted separate channel and enroll it using an ordinary SSH client before first use; unknown or changed keys are rejected. Never blindly trust `ssh-keyscan` output from an untrusted network.
+
+**Limitations:** Windows desktop mode launches `mstsc.exe`, not an embedded desktop stream. Windows Home is not a built-in RDP server. Other desktop clients and Android UI are deferred. RDP authentication/certificate validation belongs to the native OS client. This is an experimental CLI, **not** a production-ready remote-access application. The P7 WebSocket blocker remains independent and unresolved.

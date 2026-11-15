@@ -13,7 +13,8 @@
       "local policy enforcement",
       "auditable remote tool calls",
       "provider-neutral LLM integration",
-      "outbound WebSocket command delivery with bounded reconnect and long-poll fallback"
+      "outbound WebSocket command delivery with bounded reconnect and long-poll fallback",
+      "Optional human-operated SSH/SFTP and Windows RDP access over user-provisioned LAN/VPN without granting shell access to LLM tools"
     ]
   },
   "technology": {
@@ -51,6 +52,11 @@
       "name": "max-chat",
       "path": "cmd/max-chat/main.go",
       "purpose": "Paired terminal chat/controller client using provider-neutral tool calls"
+    },
+    {
+      "name": "max-connect",
+      "path": "cmd/max-connect/main.go",
+      "purpose": "Human-operated SSH/SFTP client and Windows native RDP launcher over a trusted LAN/VPN; separate from LLM command relay"
     }
   ],
   "constraints": [
@@ -66,6 +72,7 @@
     "P6 result submission remains HTTPS so durable result acknowledgement semantics stay unchanged",
     ".workflow/roadmap.json is the roadmap authority; docs/ROADMAP.md is generated and must not be maintained independently",
     "phase transitions must update state.json and roadmap.json together and ROADMAP_SYNC must pass",
-    "project-local Skill_Workflow tools are pinned to 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 except the documented Go-aware sequence extractor extension"
+    "project-local Skill_Workflow tools are pinned to 024e2ea458b25ad9dfb401d3fdeaa994a4cbe1b8 except the documented Go-aware sequence extractor extension",
+    "Human-operated SSH/SFTP/RDP connections are independent of protocol-v1 signed LLM commands, use OS credentials and trusted LAN/VPN, and do not expose public host ports by default"
   ]
 }
