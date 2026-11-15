@@ -188,6 +188,18 @@
         "unexpired device controller and command replay nonces"
       ],
       "depends_on": []
+    },
+    {
+      "id": "interactive_client",
+      "name": "Human Interactive Access Client",
+      "purpose": "Launches standard OS SSH/SFTP or Windows RDP clients for a human over trusted LAN/VPN, independently of the LLM command authorization",
+      "owns": [
+        "validated destination and username arguments",
+        "strict SSH known-host verification",
+        "OS-provided credential handling",
+        "explicit local process launch"
+      ],
+      "depends_on": []
     }
   ],
   "data_flows": [
@@ -299,6 +311,10 @@
     {
       "name": "Relay durable state",
       "contract": "When MAXRC_STATE_FILE and MAXRC_STATE_KEY are configured together, restart-critical relay state is stored as an AES-256-GCM encrypted bounded versioned snapshot. MAXRC_STATE_KEY is an external 32-byte runtime secret and is not written into the snapshot. Device/controller sessions, command leases, pairing offers, and pairing receipts remain ephemeral."
+    },
+    {
+      "name": "Human interactive sessions",
+      "contract": "max-connect is not a paired controller or agent tool and does not traverse the command relay; system SSH/SFTP/RDP authentication and host trust apply, with no added LLM remote-shell capability."
     }
   ]
 }
